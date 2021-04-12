@@ -1,5 +1,6 @@
 <UI>
-    <Frame name="HslSquareButton" mixin="HslSquareButtonMixin" virtual="true">
+	<!-- general square button -->
+    <Frame name="HslSquareButton" mixin="HslSquareButtonMixin" virtual="true" enableMouse="true">
         <Size x="60" y="60"/>
         <Layers>
             <Layer level="BORDER">
@@ -10,7 +11,7 @@
                     </Anchors>
                 </Texture>
             </Layer>
-            <Layer level="BACKGROUND">
+            <Layer level="HIGHLIGHT">
                 <Texture parentKey="Highlight" atlas="communities-create-avatar-border-hover" useAtlasSize="false" hidden="true">
                     <Size x="60" y="60"/>
                     <Anchors>
@@ -35,6 +36,7 @@
         </Scripts>
     </Frame>
 
+	<!-- a simple frame with a background texture and a font string -->
 	<Frame name="HslTexturedTextbox" mixin="HslTexturedTextboxMixin" virtual="true">
 		<Size x="100" y="25"/>
 		<Layers>
@@ -52,11 +54,15 @@
 		</Layers>
 	</Frame>
 
-	<Frame name="HslDeckListviewItem" mixin="HslDeckListviewItemMixin" virtual="true">
+	<!-- the deck list view item -->
+	<Frame name="HslDeckListviewItem" mixin="HslDeckListviewItemMixin" virtual="true" enableMouse="true">
 		<Size x="200" y="28"/>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="Background" atlas="PetList-ButtonBackground" useAtlasSize="false" setAllPoints="true"/>
+			</Layer>
+			<Layer level="BORDER">
+				<Texture parentKey="Background" atlas="ScenarioTrackerToast-FinalFiligree" useAtlasSize="false" setAllPoints="true"/>
 			</Layer>
 			<Layer level="OVERLAY">
 				<FontString parentKey="Text" inherits="QuestFontHighlight">
@@ -68,46 +74,145 @@
 				</FontString>
 			</Layer>
 		</Layers>
+		<Frames>
+			<Frame parentKey="deleteDeck" mixin="HslDeleteDeckMixin" enableMouse="true">
+				<Size x="18" y="18"/>
+				<Anchors>
+					<Anchor point="RIGHT" x="-10" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<!-- <Texture atlas="transmog-icon-remove" setAllPoints="true" useAtlasSize="false"/> -->
+						<!-- <Texture atlas="communities-chat-icon-minus" setAllPoints="true" useAtlasSize="false"/> -->
+						<Texture atlas="BattleBar-SwapPetFrame-DeadIcon" setAllPoints="true" useAtlasSize="false"/>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnMouseDown method="OnMouseDown"/>
+				</Scripts>
+			</Frame>
+		</Frames>
 	</Frame>
 
-
-	<Frame name="HearthstoneLiteItemInfoFrame" virtual="true" mixin="HearthstoneLiteItemInfoFrameMixin" hyperlinksEnabled="true">
-		<Size x="190" y="36"/>
+	<!-- basic card template -->
+	<Frame name="HslCard" mixin="HslCardMixin" virtual="true">
+		<Size x="140" y="210"/>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture parentKey="Background" atlas="pvpqueue-button-casual-down" setAllPoints="true"/>
+				<Texture atlas="shop-games-legiondeluxe-card" setAllPoints="true" useAtlasSize="false"/>
 			</Layer>
-			<Layer level="ARTWORK">
-				<Texture parentKey="Icon">
-					<Size x="32" y="32"/>
+			<Layer level="BORDER">
+				<Texture atlas="ChromieTime-Button-Frame" textureSubLevel="-1" useAtlasSize="false">
+					<Size x="120" y="90"/>
 					<Anchors>
-						<Anchor point="LEFT" x="2" y="0"/>
+						<Anchor point="BOTTOM" x="0" y="10"/>
 					</Anchors>
 				</Texture>
-                <FontString parentKey="Name" inherits="GameFontNormalSmall" justifyH="LEFT">
-					<Size x="110" y="28"/>
-                	<Anchors>
-                		<Anchor point="LEFT" x="36" y="0"/>
-                	</Anchors>
-                </FontString>
-                <FontString parentKey="Count" inherits="GameFontNormalLarge" justifyH="RIGHT">
-					<Size x="40" y="24"/>
+				<Texture parentKey="art" textureSubLevel="-1">
+					<Size x="130" y="90"/>
+					<Anchors>
+						<Anchor point="TOP" x="0" y="-10"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture atlas="ChallengeMode-KeystoneSlotFrame" useAtlasSize="false">
+					<Size x="50" y="50"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-12" y="12"/>
+					</Anchors>
+				</Texture>
+				<Texture atlas="weeklyrewards-orb-dialog" useAtlasSize="false">
+					<Size x="45" y="45"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-8" y="12"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="elite" atlas="GarrMission_EncounterBar-Elite" useAtlasSize="true" hidden="true">
+					<Anchors>
+						<Anchor point="TOPRIGHT" x="12" y="10"/>
+					</Anchors>
+				</Texture>
+				<!-- health bottom right -->
+				<Texture atlas="ChallengeMode-SpikeyStar" textureSubLevel="-1" useAtlasSize="false">
+					<Size x="50" y="50"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" x="12" y="-12"/>
+					</Anchors>
+				</Texture>
+				<Texture atlas="CircleMask" useAtlasSize="false" textureSubLevel="2">
+					<Color r="0.9" g="0.1" b="0.1" a="0.8"/>
+					<Size x="23" y="23"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
+					</Anchors>
+				</Texture>
+				<!-- power bottom left -->
+				<Texture atlas="ChallengeMode-SpikeyStar" useAtlasSize="false">
+					<Size x="50" y="50"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" x="-12" y="-12"/>
+					</Anchors>
+				</Texture>
+				<Texture atlas="CircleMask" useAtlasSize="false">
+					<Color r="0.8" g="0.8" b="0.1" a="0.95"/>
+					<Size x="23" y="23"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" x="2" y="2"/>
+					</Anchors>
+				</Texture>
+				<!-- name banner -->
+				<Texture atlas="GarrMission_RewardsBanner-Desaturate" textureSubLevel="1" useAtlasSize="false">
+					<Size x="140" y="55"/>
+					<Anchors>
+						<Anchor point="CENTER" x="0" y="-5"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString parentKey="cost" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
+					<Size x="25" y="25"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="0" y="0"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="power" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
+					<Size x="25" y="25"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" x="0" y="0"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="health" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
+					<Size x="25" y="25"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="name" inherits="NumberFont_Outline_Large" text="Flame Dragon">
+					<Anchors>
+						<Anchor point="CENTER" x="0" y="-2"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="info" inherits="GameFontNormalSmall">
+					<Size x="110" y="70"/>
 					<Color r="1" g="1" b="1"/>
-                	<Anchors>
-                		<Anchor point="RIGHT" x="-4" y="0"/>
-                	</Anchors>
-                </FontString>
+					<Anchors>
+						<Anchor point="BOTTOM" x="0" y="20"/>
+					</Anchors>
+				</FontString>
 			</Layer>
 		</Layers>
-        <Scripts>
-            <OnEnter method="OnEnter"/>
-            <OnLeave method="OnLeave"/>
-            <OnHyperlinkClick method="OnHyperlinkClick"/>
-        </Scripts>
+
+		<Scripts>
+			<OnShow method="OnShow"/>
+		</Scripts>
 	</Frame>
 
 
-	<Frame name="HearthstoneLiteDropdown" mixin="HearthstoneLiteDropdownMixin" virtual="true" enableMouse="true">
+
+
+	<!-- dropdown menu, we use this to avoid tainting the blizz menus -->
+	<Frame name="HslDropdown" mixin="HslDropdownMixin" virtual="true" enableMouse="true">
 		<Size x="108" y="30"/>
         <Anchors>
             <Anchor point="CENTER" x="0" y="0"/>
@@ -133,8 +238,8 @@
 					</Anchors>
 				</Texture>
             </Layer>
-			<Layer level="ARTWORK">
-				<FontString parentKey="Text" inherits="GameFontNormalSmall" text="testing">
+			<Layer level="OVERLAY">
+				<FontString parentKey="Text" inherits="GameFontNormalSmall" text="">
 					<Color r="1" g="1" b="1"/>
 					<!-- <Size x="" y=""/> -->
 					<Anchors>
@@ -144,7 +249,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame parentKey="Button" mixin="HearthstoneLiteDropdownButtonMixin" enableMouse="true">
+			<Frame parentKey="Button" mixin="HslDropdownButtonMixin" enableMouse="true">
 				<Size x="27" y="26"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-4" y="-2"/>
@@ -180,7 +285,7 @@
 					<OnMouseUp method="OnMouseUp"/>
 				</Scripts>
 			</Frame>
-			<Frame parentKey="Flyout" mixin="HearthstoneLiteDropdownFlyoutMixin" hidden="true">
+			<Frame parentKey="Flyout" mixin="HslDropdownFlyoutMixin" hidden="true">
 				<Size x="100" y="275"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="2" y="-28"/>
@@ -206,21 +311,8 @@
 		</Scripts>
 	</Frame>
 
-
-	<Frame name="HearthstoneLiteDropDownFrame" mixin="HearthstoneLiteDropDownFrameMixin" virtual="true">
-        <Size x="100" y="275"/>
-        <Anchors>
-            <Anchor point="CENTER" x="0" y="0"/>
-        </Anchors>
-        <Layers>
-            <Layer level="BORDER">
-                <Texture parentKey="Background" atlas="auctionhouse-background-summarylist" useAtlasSize="false" setAllPoints="true"/>
-            </Layer>
-        </Layers>
-    </Frame>
-
-
-	<Frame name="HearthstoneLiteDropDownButton" mixin="HearthstoneLiteDropDownFlyoutButtonMixin" virtual="true" enableMouse="true">
+	<!-- dropdown menu button -->
+	<Frame name="HslDropDownButton" mixin="HslDropDownFlyoutButtonMixin" virtual="true" enableMouse="true">
         <Size x="50" y="22"/>
         <Anchors>
             <Anchor point="CENTER" x="0" y="0"/>

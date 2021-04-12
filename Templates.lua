@@ -73,65 +73,95 @@ function HslDeckListviewItemMixin:SetText(text)
     self.Text:SetText(text)
 end
 
+function HslDeckListviewItemMixin:SetClassID(id)
+    self.classID = id;
+end
 
-HearthstoneLiteItemInfoFrameMixin = {}
+function HslDeckListviewItemMixin:SetDeckID(id)
+    self.deckID = id;
+end
 
-function HearthstoneLiteItemInfoFrameMixin:SetItem(item)
-    if item then
-        self.Icon:SetTexture(item.icon)
-        self.Name:SetText(item.link)
-        self.Count:SetText(item.count and item.count or 0)
-        self.item = item
-    else
-        self.Icon:SetTexture(nil)
-        self.Name:SetText(nil)
-        self.Count:SetText("")
-        self.item = nil
+
+HslDeleteDeckMixin = {}
+
+function HslDeleteDeckMixin:OnMouseDown()
+    local classID = self:GetParent().classID;
+    local deckID = self:GetParent().deckID;
+    if classID and deckID then
+        local key = nil;
+        for k, v in ipairs(HSL.decks[classID]) do
+            if tonumber(v.ID) == tonumber(deckID) then
+                key = k;
+            end
+        end
+        if key then
+            table.remove(HSL.decks[classID], key)
+        end
     end
-end
-
-function HearthstoneLiteItemInfoFrameMixin:OnEnter()
-    if self.item and self.item.link:find("|H") then
-        GameTooltip:SetOwner(self, 'ANCHOR_LEFT')
-        GameTooltip:SetHyperlink(self.item.link)
-    end
-end
-
-function HearthstoneLiteItemInfoFrameMixin:OnLeave()
-    GameTooltip:Hide()
-	GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-end
-
-function HearthstoneLiteItemInfoFrameMixin:OnHyperlinkClick()
-
+    self:GetParent().callback(classID);
 end
 
 
+HslCardMixin = {}
 
-HearthstoneLiteDropDownFrameMixin = {}
+function HslCardMixin:OnShow()
+    -- quick font size hack
+    local fontName, _, fontFlags = self.cost:GetFont()
+    self.cost:SetFont(fontName, 20, fontFlags)
+    self.power:SetFont(fontName, 20, fontFlags)
+    self.health:SetFont(fontName, 20, fontFlags)
+    self.name:SetFont(fontName, 14, fontFlags)
+
+    self.art:SetTexture("interface/encounterjournal/ui-ej-boss-wrathion.blp")
+
+    self.info:SetText("Flame Dragon breathes fire in a frontal cone disorientating enemies for 1 round")
+end
+
+function HslCardMixin:SetArtByFileName(fileName)
+    self.art:SetTexture(fileName)
+end
+
+function HslCardMixin:SetArtByFileID(fileID)
+    self.art:SetTexture(fileID)
+end
+
+function HslCardMixin:LoadCard(card)
+    self.art:SetTexture(card.art)
+    self.cost:SetText(card.cost)
+    self.power:SetText(card.power)
+    self.health:SetText(card.health)
+    self.name:SetText(card.name)
+    self.info:SetText(card.info)
+
+    self.elite:SetShown(card.elite)
+
+    self:Show()
+end
 
 
 
--- this is the dropdown button mixin, all that needs to happen is set the text and call any func if passed
-HearthstoneLiteDropDownFlyoutButtonMixin = {}
 
-function HearthstoneLiteDropDownFlyoutButtonMixin:OnEnter()
+
+--- this is the dropdown button mixin, all that needs to happen is set the text and call any func if passed
+HslDropDownFlyoutButtonMixin = {}
+
+function HslDropDownFlyoutButtonMixin:OnEnter()
     self.Highlight:Show()
 end
 
-function HearthstoneLiteDropDownFlyoutButtonMixin:OnLeave()
+function HslDropDownFlyoutButtonMixin:OnLeave()
     self.Highlight:Hide()
 end
 
-function HearthstoneLiteDropDownFlyoutButtonMixin:SetText(text)
+function HslDropDownFlyoutButtonMixin:SetText(text)
     self.Text:SetText(text)
 end
 
-function HearthstoneLiteDropDownFlyoutButtonMixin:GetText(text)
+function HslDropDownFlyoutButtonMixin:GetText(text)
     return self.Text:GetText()
 end
 
-function HearthstoneLiteDropDownFlyoutButtonMixin:OnMouseDown()
+function HslDropDownFlyoutButtonMixin:OnMouseDown()
     if self.func then
         self:func()
     end
@@ -142,14 +172,22 @@ function HearthstoneLiteDropDownFlyoutButtonMixin:OnMouseDown()
 end
 
 
--- if we need to get the flyout although its a child so can be accessed via dropdown.Flyout
-HearthstoneLiteDropdownMixin = {}
+--- the dropdown widget mixin
+HslDropdownMixin = {}
 
-function HearthstoneLiteDropdownMixin:GetFlyout()
+function HslDropdownMixin:GetFlyout()
     return self.Flyout
 end
 
-function HearthstoneLiteDropdownMixin:OnShow()
+function HslDropdownMixin:SetText(text)
+    self.Text:SetText(text)
+end
+
+function HslDropdownMixin:GetText()
+    return self.Text:GetText()
+end
+
+function HslDropdownMixin:OnShow()
     local width = self:GetWidth()
     if width > 90 then
         self.BackgroundMiddle:SetWidth(width - 88)
@@ -158,18 +196,18 @@ end
 
 
 
+--- this is the button that opens/closes the dropdown
+HslDropdownButtonMixin = {}
 
-HearthstoneLiteDropdownButtonMixin = {}
-
-function HearthstoneLiteDropdownButtonMixin:OnEnter()
+function HslDropdownButtonMixin:OnEnter()
     self.ButtonHighlight:Show()
 end
 
-function HearthstoneLiteDropdownButtonMixin:OnLeave()
+function HslDropdownButtonMixin:OnLeave()
     self.ButtonHighlight:Hide()
 end
 
-function HearthstoneLiteDropdownButtonMixin:OnMouseDown()
+function HslDropdownButtonMixin:OnMouseDown()
 
     PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 
@@ -184,7 +222,7 @@ function HearthstoneLiteDropdownButtonMixin:OnMouseDown()
     end
 end
 
-function HearthstoneLiteDropdownButtonMixin:OnMouseUp()
+function HslDropdownButtonMixin:OnMouseUp()
     self.ButtonDown:Hide()
     self.ButtonUp:Show()
 end
@@ -192,9 +230,9 @@ end
 
 
 
-HearthstoneLiteDropdownFlyoutMixin = {}
+HslDropdownFlyoutMixin = {}
 
-function HearthstoneLiteDropdownFlyoutMixin:OnLeave()
+function HslDropdownFlyoutMixin:OnLeave()
     self.delay = C_Timer.NewTicker(3, function()
         if not self:IsMouseOver() then
             self:Hide()
@@ -202,7 +240,7 @@ function HearthstoneLiteDropdownFlyoutMixin:OnLeave()
     end)
 end
 
-function HearthstoneLiteDropdownFlyoutMixin:OnShow()
+function HslDropdownFlyoutMixin:OnShow()
 
     self:SetFrameStrata("DIALOG")
 
@@ -228,11 +266,12 @@ function HearthstoneLiteDropdownFlyoutMixin:OnShow()
         for i = 1, #self.buttons do
             self.buttons[i]:SetText("")
             self.buttons[i].func = nil
+            self.buttons[i]:SetWidth(100)
             self.buttons[i]:Hide()
         end
         for buttonIndex, info in ipairs(self:GetParent().menu) do
             if not self.buttons[buttonIndex] then
-                self.buttons[buttonIndex] = CreateFrame("FRAME", "HearthstoneLiteMailSummaryInboxDropdownFlyoutButton"..buttonIndex, self, "HearthstoneLiteDropDownButton")
+                self.buttons[buttonIndex] = CreateFrame("FRAME", "HslDropdownFlyoutButton"..buttonIndex, self, "HslDropDownButton")
                 self.buttons[buttonIndex]:SetPoint("TOP", 0, (buttonIndex * -22) + 22)
             end
             self.buttons[buttonIndex]:SetText(info.text)

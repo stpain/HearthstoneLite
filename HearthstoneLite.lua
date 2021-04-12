@@ -26,7 +26,11 @@ local function deckListview_Update(classID)
             if itemIndex <= #items then
                 local item = items[itemIndex]
                 button:SetText(item.Name)
+                button:SetClassID(classID)
+                button:SetDeckID(item.ID)
                 button:Show()
+
+                button.callback = deckListview_Update;
             else
                 button:Hide()
             end
@@ -52,13 +56,15 @@ local function classButton_Clicked(button)
                 HearthstoneLite.MenuPanel.listviewHeader.newDeck.className = className;
                 HearthstoneLite.MenuPanel.listviewHeader.newDeck.classIcon = button.Background:GetAtlas();
 
-                HearthstoneLite.ContentPanel:SetBackground_Atlas("Artifacts-Shaman-BG")
+                --HearthstoneLite.ContentPanel:SetBackground_Atlas("Artifacts-Shaman-BG")
 
                 deckListview_Update(classID)
             end
         end
     end
 end
+
+
 
 HearthstoneLiteMixin = {}
 
@@ -72,66 +78,18 @@ HearthstoneLiteMenuPanelMixin = {}
 
 function HearthstoneLiteMenuPanelMixin:OnLoad()
 
-    self.druid:SetBackground_Atlas("Artifacts-Druid-FinalIcon")
-    self.druid.func = function()
-        classButton_Clicked(self.druid)
-    end
+    -- font size hack
+    local fontName, _, fontFlags = self.selectClass:GetFont()
+    self.selectClass:SetFont(fontName, 26, fontFlags)
+    self.selectClass:SetText(L["SelectDeck"])
 
-    self.hunter:SetBackground_Atlas("Artifacts-Hunter-FinalIcon")
-    self.hunter.func = function()
-        classButton_Clicked(self.hunter)
+    for i = 1, GetNumClasses() do
+        local className, classFile, classID = GetClassInfo(i)
+        self[classFile:lower()]:SetBackground_Atlas(string.format("classicon-%s", classFile:lower()))
+        self[classFile:lower()].func = function()
+            classButton_Clicked(self[classFile:lower()])
+        end
     end
-
-    self.mage:SetBackground_Atlas("Artifacts-MageArcane-FinalIcon")
-    self.mage.func = function()
-        classButton_Clicked(self.mage)
-    end
-
-    self.shaman:SetBackground_Atlas("Artifacts-Shaman-FinalIcon")
-    self.shaman.func = function()
-        classButton_Clicked(self.shaman)
-    end
-
-    self.rogue:SetBackground_Atlas("Artifacts-Rogue-FinalIcon")
-    self.rogue.func = function()
-        classButton_Clicked(self.rogue)
-    end
-
-    self.warrior:SetBackground_Atlas("Artifacts-Warrior-FinalIcon")
-    self.warrior.func = function()
-        classButton_Clicked(self.warrior)
-    end
-
-    self.priest:SetBackground_Atlas("Artifacts-Priest-FinalIcon")
-    self.priest.func = function()
-        classButton_Clicked(self.priest)
-    end
-
-    self.monk:SetBackground_Atlas("Artifacts-Monk-FinalIcon")
-    self.monk.func = function()
-        classButton_Clicked(self.monk)
-    end
-
-    self.deathknight:SetBackground_Atlas("Artifacts-DeathKnightFrost-FinalIcon")
-    self.deathknight.func = function()
-        classButton_Clicked(self.deathknight)
-    end
-
-    self.warlock:SetBackground_Atlas("Artifacts-Warlock-FinalIcon")
-    self.warlock.func = function()
-        classButton_Clicked(self.warlock)
-    end
-
-    self.paladin:SetBackground_Atlas("Artifacts-Paladin-FinalIcon")
-    self.paladin.func = function()
-        classButton_Clicked(self.paladin)
-    end
-
-    self.demonhunter:SetBackground_Atlas("Artifacts-DemonHunter-FinalIcon")
-    self.demonhunter.func = function()
-        classButton_Clicked(self.demonhunter)
-    end
-
 
     self.listviewHeader:SetSize(240, 40)
 
@@ -158,4 +116,74 @@ HearthstoneLiteContentPanelMixin = {}
 
 function HearthstoneLiteContentPanelMixin:SetBackground_Atlas(atlas)
     self.Background:SetAtlas(atlas)
+end
+
+
+
+HearthstoneCardViewerMixin = {}
+HearthstoneCardViewerMixin.page = 1;
+HearthstoneCardViewerMixin.cards = nil;
+
+function HearthstoneCardViewerMixin:OnLoad()
+    -- flip the next page arrow 180
+    self.nextPage.Background:SetRotation(3.14)
+    self.nextPage.Highlight:SetRotation(3.14)
+
+    -- font size hack
+    local fontName, _, fontFlags = self.pageNumber:GetFont()
+    self.pageNumber:SetFont(fontName, 32, fontFlags)
+
+    self.classDropdown:SetText(L["SelectClass"])
+    self.classDropdown.menu = {}
+    for i = 1, GetNumClasses() do
+        local className, classFile, classID = GetClassInfo(i)
+        table.insert(self.classDropdown.menu,{
+            text = className;
+            func = function()
+                self.classDropdown:SetText(className)
+            end,
+        });
+    end
+    table.insert(self.classDropdown.menu,{
+        text = L["Neutral"];
+        func = function()
+            self.classDropdown:SetText(L["Neutral"])
+            self:LoadCards("generic")
+        end,
+    });
+end
+
+function HearthstoneCardViewerMixin:NextPage()
+    self.page = self.page + 1;
+    self.pageNumber:SetText(self.page);
+end
+
+function HearthstoneCardViewerMixin:PrevPage()
+    if self.page == 1 then
+        return
+    end
+    self.page = self.page - 1;
+    self.pageNumber:SetText(self.page);
+end
+
+function HearthstoneCardViewerMixin:HideCards()
+    for i = 1, 8 do
+        self["card"..i]:Hide()
+    end
+end
+
+function HearthstoneCardViewerMixin:LoadCards(id)
+    if not hsl.cards then
+        return
+    end
+    if hsl.cards[id] then
+        self.page = 1;
+        self.pageNumber:SetText(self.page);
+
+        for i = 1, 8 do
+            if hsl.cards[id][i] then
+                self["card"..i]:LoadCard(hsl.cards[id][i])
+            end
+        end
+    end
 end

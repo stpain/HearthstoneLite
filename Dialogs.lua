@@ -34,6 +34,7 @@ StaticPopupDialogs['HslNewDeck'] = {
             HSL.decks[info.ClassID] = {};
         end
         table.insert(HSL.decks[info.ClassID], {
+            ID = time(),
             Name = self.editBox:GetText(),
             Cards = {},
         })
