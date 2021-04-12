@@ -1,0 +1,226 @@
+
+
+<UI xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI-Retail.xsd">
+    <Frame name="HearthstoneLite" mixin="HearthstoneLiteMixin" parent="UIParent" inherits="PortraitFrameTemplate" enableMouse="true" movable="true" resizable="true">
+        <Size x="1000" y="600"/>
+        <Anchors>
+            <Anchor point="CENTER" x="0" y="0"/>
+        </Anchors>
+
+        <Frames>
+            <Frame parentKey="MenuPanel" mixin="HearthstoneLiteMenuPanelMixin">
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="0" y="-22"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" x="260" y="3"/>
+                </Anchors>
+
+                <Layers>
+                    <Layer level="Background">
+                        <Texture atlas="questlogbackground" textureSubLevel="-1" setAllPoints="true"/>
+                    </Layer>
+                    <Layer level="Artwork">
+                        <Texture atlas="Talent-TopLeftCurlies" useAtlasSize="true">
+                            <Anchors>
+                                <Anchor point="TOPLEFT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture atlas="Talent-TopRightCurlies" useAtlasSize="true">
+                            <Anchors>
+                                <Anchor point="TOPRIGHT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture atlas="Talent-BottomLeftCurlies" useAtlasSize="true">
+                            <Anchors>
+                                <Anchor point="BOTTOMLEFT"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture atlas="Talent-BottomRightCurlies" useAtlasSize="true">
+                            <Anchors>
+                                <Anchor point="BOTTOMRIGHT"/>
+                            </Anchors>
+                        </Texture>
+                    </Layer>
+                </Layers>
+
+                <Frames>
+                    <Frame parentKey="druid" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="10" y="-40"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="DRUID" type="string"/>
+                        </KeyValues>
+                    </Frame>
+                    <Frame parentKey="hunter" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="70" y="-40"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="HUNTER" type="string"/>
+                        </KeyValues>
+                    </Frame>
+                    <Frame parentKey="mage" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="130" y="-40"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="MAGE" type="string"/>
+                        </KeyValues>
+                    </Frame>
+                    <Frame parentKey="shaman" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="190" y="-40"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="SHAMAN" type="string"/>
+                        </KeyValues>
+                    </Frame>
+                    
+                    <Frame parentKey="rogue" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="10" y="-100"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="ROGUE" type="string"/>
+                        </KeyValues>
+                    </Frame>
+                    <Frame parentKey="warrior" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="70" y="-100"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="WARRIOR" type="string"/>
+                        </KeyValues>
+                    </Frame>
+                    <Frame parentKey="priest" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="130" y="-100"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="PRIEST" type="string"/>
+                        </KeyValues>
+                    </Frame>
+                    <Frame parentKey="monk" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="190" y="-100"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="MONK" type="string"/>
+                        </KeyValues>
+                    </Frame>
+
+                    <Frame parentKey="deathknight" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="10" y="-160"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="DEATHKNIGHT" type="string"/>
+                        </KeyValues>
+                    </Frame>
+                    <Frame parentKey="warlock" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="70" y="-160"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="WARLOCK" type="string"/>
+                        </KeyValues>
+                    </Frame>
+                    <Frame parentKey="paladin" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="130" y="-160"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="PALADIN" type="string"/>
+                        </KeyValues>
+                    </Frame>
+                    <Frame parentKey="demonhunter" inherits="HslSquareButton">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="190" y="-160"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="className" value="DEMONHUNTER" type="string"/>
+                        </KeyValues>
+                    </Frame>
+
+
+                    <Frame parentKey="listviewHeader" inherits="HslTexturedTextbox" enableMouse="true">
+                        <Anchors>
+                            <Anchor point="TOP" x="0" y="-230"/>
+                        </Anchors>
+                        <Frames>
+                            <Frame parentKey="newDeck" mixin="HearthstoneLiteNewDeckMixin" enableMouse="true">
+                                <KeyValues>
+                                    <KeyValue key="classID" value="0" type="number"/>
+                                    <KeyValue key="className" value="" type="string"/>
+                                    <KeyValue key="classIcon" value="" type="string"/>
+                                </KeyValues>
+                                <Size x="20" y="20"/>
+                                <Anchors>
+                                    <Anchor point="RIGHT" x="-10" y="3"/>
+                                </Anchors>
+                                <Layers>
+                                    <Layer level="Artwork">
+                                        <Texture atlas="bags-icon-addslots" textureSubLevel="-1" setAllPoints="true"/>
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnMouseDown method="OnMouseDown"/>
+                                </Scripts>
+                            </Frame>
+                        </Frames>
+                    </Frame>
+
+                    <ScrollFrame parentKey="listview" inherits="HybridScrollFrameTemplate">
+                        <Size x="240" y="300"/>
+                        <Anchors>
+                            <Anchor point="TOP" x="0" y="-270"/>
+                        </Anchors>
+                        <Frames>
+                            <Slider name="$parentScrollBar" inherits="HybridScrollBarTemplate">
+                                <Anchors>
+                                    <Anchor point="TOPRIGHT" x="-18" y="0"/>
+                                    <Anchor point="BOTTOMRIGHT" x="-18" y="0"/>
+                                </Anchors>
+                            </Slider>
+                        </Frames>
+                    </ScrollFrame>
+
+
+                </Frames>
+
+                <Scripts>
+                    <OnLoad method="OnLoad"/>
+                    <OnShow method="OnShow"/>
+                </Scripts>
+            </Frame>
+
+            <Frame parentKey="ContentPanel" mixin="HearthstoneLiteContentPanelMixin">
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="255" y="-20"/>
+                    <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+                </Anchors>
+                <Layers>
+                    <Layer level="Background">
+                        <Texture parentKey="Background" atlas="store-card-splash1-nobanner" textureSubLevel="-1" setAllPoints="true"/>
+                    </Layer>
+                </Layers>
+                
+
+            </Frame>
+
+        </Frames>
+
+        <Scripts>
+            <OnShow method="OnShow"/>
+            <OnLoad>
+                self:RegisterForDrag("LeftButton")
+            </OnLoad>
+            <OnDragStart>
+                self:StartMoving()
+            </OnDragStart>
+            <OnDragStop>
+                self:StopMovingOrSizing()
+            </OnDragStop>
+        </Scripts>
+    </Frame>
+</UI>
