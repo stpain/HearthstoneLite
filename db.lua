@@ -16,6 +16,7 @@ generic[1] = {
     deathrattle = false,
     cost = 3,
     elite = false,
+    spec = "GarrMission_ClassIcon-Warlock-Destruction",
 }
 generic[2] = {
     art = 522207,
@@ -27,6 +28,7 @@ generic[2] = {
     deathrattle = false,
     cost = 3,
     elite = false,
+    spec = "GarrMission_ClassIcon-Warlock-Destruction",
 }
 generic[3] = {
     art = 522206,
@@ -38,6 +40,7 @@ generic[3] = {
     deathrattle = false,
     cost = 3,
     elite = false,
+    spec = "GarrMission_ClassIcon-Mage-Arcane",
 }
 generic[4] = {
     art = 522243,
@@ -49,6 +52,7 @@ generic[4] = {
     deathrattle = false,
     cost = 3,
     elite = false,
+    spec = "GarrMission_ClassIcon-Warlock-Affliction",
 }
 generic[5] = {
     art = 522257,
@@ -60,6 +64,7 @@ generic[5] = {
     deathrattle = false,
     cost = 3,
     elite = false,
+    spec = "GarrMission_ClassIcon-Warlock-Destruction",
 }
 generic[6] = {
     art = 522207,
@@ -71,6 +76,7 @@ generic[6] = {
     deathrattle = false,
     cost = 3,
     elite = false,
+    spec = "GarrMission_ClassIcon-Warlock-Destruction",
 }
 generic[7] = {
     art = 522261,
@@ -82,6 +88,7 @@ generic[7] = {
     deathrattle = false,
     cost = 3,
     elite = true,
+    spec = "GarrMission_ClassIcon-Warlock-Destruction",
 }
 generic[8] = {
     art = 536053,
@@ -93,6 +100,19 @@ generic[8] = {
     deathrattle = false,
     cost = 3,
     elite = false,
+    spec = "GarrMission_ClassIcon-Warlock-Destruction",
+}
+generic[9] = {
+    art = 536054,
+    name = "Unknown",
+    health = 4,
+    power = 5,
+    info = "",
+    battlecry = false,
+    deathrattle = false,
+    cost = 3,
+    elite = false,
+    spec = "GarrMission_ClassIcon-Warlock-Destruction",
 }
 
 hsl.cards.generic = generic;

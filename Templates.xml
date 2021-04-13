@@ -56,20 +56,19 @@
 
 	<!-- the deck list view item -->
 	<Frame name="HslDeckListviewItem" mixin="HslDeckListviewItemMixin" virtual="true" enableMouse="true">
-		<Size x="200" y="28"/>
+		<Size x="200" y="40"/>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="Background" atlas="PetList-ButtonBackground" useAtlasSize="false" setAllPoints="true"/>
 			</Layer>
-			<Layer level="BORDER">
-				<Texture parentKey="Background" atlas="ScenarioTrackerToast-FinalFiligree" useAtlasSize="false" setAllPoints="true"/>
+			<Layer level="HIGHLIGHT">
+				<Texture parentKey="Background" atlas="PetList-ButtonHighlight" useAtlasSize="false" setAllPoints="true"/>
 			</Layer>
 			<Layer level="OVERLAY">
 				<FontString parentKey="Text" inherits="QuestFontHighlight">
 					<Anchors>
 						<Anchor point="CENTER" x="0" y="0"/>
 					</Anchors>
-					<!-- <Color r="0.121" g="0.054" b="0.007"/> -->
 					<Color r="1" g="1" b="1"/>
 				</FontString>
 			</Layer>
@@ -82,8 +81,6 @@
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
-						<!-- <Texture atlas="transmog-icon-remove" setAllPoints="true" useAtlasSize="false"/> -->
-						<!-- <Texture atlas="communities-chat-icon-minus" setAllPoints="true" useAtlasSize="false"/> -->
 						<Texture atlas="BattleBar-SwapPetFrame-DeadIcon" setAllPoints="true" useAtlasSize="false"/>
 					</Layer>
 				</Layers>
@@ -92,6 +89,45 @@
 				</Scripts>
 			</Frame>
 		</Frames>
+	</Frame>
+
+	<!-- card listview item -->
+		<Frame name="HslCardListviewItem" mixin="HslCardListviewItemMixin" virtual="true" enableMouse="true">
+		<Size x="200" y="36"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="Background" atlas="PetList-ButtonBackground" useAtlasSize="false" setAllPoints="true"/>
+			</Layer>
+			<Layer level="HIGHLIGHT">
+				<Texture parentKey="Highlight" atlas="PetList-ButtonHighlight" useAtlasSize="false" setAllPoints="true"/>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture parentKey="CostIcon" file="interface/icons/inv_elemental_mote_mana.blp" mask="Interface/ChatFrame/UI-ChatIcon-HotS" textureSubLevel="3">
+					<Size x="30" y="30"/>					
+					<Anchors>
+						<Anchor point="LEFT" x="3" y="0"/>
+					</Anchors>
+				</Texture>
+				<FontString parentKey="Cost" inherits="NumberFont_Outline_Large">
+					<Anchors>
+						<Anchor point="CENTER" relativePoint="CENTER" relativeKey="$parent.CostIcon" x="0" y="0"/>
+					</Anchors>
+					<Color r="1" g="1" b="1"/>
+				</FontString>
+				<Texture parentKey="Icon"  useAtlasSize="false">
+					<Size x="30" y="30"/>					
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" x="-3" y="2"/>
+					</Anchors>
+				</Texture>
+				<FontString parentKey="Name" inherits="QuestFontHighlight">
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.CostIcon" x="5" y="0"/>
+					</Anchors>
+					<Color r="1" g="1" b="1"/>
+				</FontString>
+			</Layer>
+		</Layers>
 	</Frame>
 
 	<!-- basic card template -->
@@ -114,53 +150,58 @@
 						<Anchor point="TOP" x="0" y="-10"/>
 					</Anchors>
 				</Texture>
+
+				<!-- added here due to layering with textureSubLevel doing nothing ? -->
+				<Texture file="interface/common/portrait-ring-withbg.blp" textureSubLevel="1">
+					<Size x="60" y="60"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-16" y="16"/>
+					</Anchors>
+				</Texture>
+				<Texture file="interface/common/portrait-ring-withbg.blp" textureSubLevel="1">
+					<Size x="60" y="60"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" x="16" y="-16"/>
+					</Anchors>
+				</Texture>
+				<Texture file="interface/common/portrait-ring-withbg.blp" textureSubLevel="1">
+					<Size x="60" y="60"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" x="-16" y="-16"/>
+					</Anchors>
+				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
-				<Texture atlas="ChallengeMode-KeystoneSlotFrame" useAtlasSize="false">
-					<Size x="50" y="50"/>
+				<!-- mana icon top left -->
+				<Texture file="interface/icons/inv_elemental_mote_mana.blp" mask="Interface/ChatFrame/UI-ChatIcon-HotS" textureSubLevel="3">
+					<Size x="31" y="31"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" x="-12" y="12"/>
+						<Anchor point="TOPLEFT" x="-2" y="2"/>
 					</Anchors>
 				</Texture>
-				<Texture atlas="weeklyrewards-orb-dialog" useAtlasSize="false">
-					<Size x="45" y="45"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="-8" y="12"/>
-					</Anchors>
-				</Texture>
+
 				<Texture parentKey="elite" atlas="GarrMission_EncounterBar-Elite" useAtlasSize="true" hidden="true">
 					<Anchors>
 						<Anchor point="TOPRIGHT" x="12" y="10"/>
 					</Anchors>
 				</Texture>
+
 				<!-- health bottom right -->
-				<Texture atlas="ChallengeMode-SpikeyStar" textureSubLevel="-1" useAtlasSize="false">
-					<Size x="50" y="50"/>
+				<Texture file="interface/icons/spell_holy_sealofsacrifice.blp" mask="Interface/ChatFrame/UI-ChatIcon-HotS" textureSubLevel="3">
+					<Size x="32" y="32"/>
 					<Anchors>
-						<Anchor point="BOTTOMRIGHT" x="12" y="-12"/>
+						<Anchor point="BOTTOMRIGHT" x="2" y="-2"/>
 					</Anchors>
 				</Texture>
-				<Texture atlas="CircleMask" useAtlasSize="false" textureSubLevel="2">
-					<Color r="0.9" g="0.1" b="0.1" a="0.8"/>
-					<Size x="23" y="23"/>
-					<Anchors>
-						<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
-					</Anchors>
-				</Texture>
+
 				<!-- power bottom left -->
-				<Texture atlas="ChallengeMode-SpikeyStar" useAtlasSize="false">
-					<Size x="50" y="50"/>
+				<Texture file="interface/icons/inv_sword_04.blp" mask="Interface/ChatFrame/UI-ChatIcon-HotS" textureSubLevel="3">
+					<Size x="32" y="32"/>
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="-12" y="-12"/>
+						<Anchor point="BOTTOMLEFT" x="-2" y="-2"/>
 					</Anchors>
 				</Texture>
-				<Texture atlas="CircleMask" useAtlasSize="false">
-					<Color r="0.8" g="0.8" b="0.1" a="0.95"/>
-					<Size x="23" y="23"/>
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="2" y="2"/>
-					</Anchors>
-				</Texture>
+
 				<!-- name banner -->
 				<Texture atlas="GarrMission_RewardsBanner-Desaturate" textureSubLevel="1" useAtlasSize="false">
 					<Size x="140" y="55"/>

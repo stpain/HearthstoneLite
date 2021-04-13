@@ -102,6 +102,23 @@ function HslDeleteDeckMixin:OnMouseDown()
 end
 
 
+HslCardListviewItemMixin = {}
+
+function HslCardListviewItemMixin:SetCard(card)
+    -- quick font size hack
+    local fontName, _, fontFlags = self.Name:GetFont()
+    self.Name:SetFont(fontName, 14, fontFlags)
+    local fontName, _, fontFlags = self.Cost:GetFont()
+    self.Cost:SetFont(fontName, 16, fontFlags)
+    self.Cost:SetText(card.cost)
+    self.Name:SetText(card.name)
+    self.Icon:SetAtlas(card.spec)
+end
+
+
+
+
+
 HslCardMixin = {}
 
 function HslCardMixin:OnShow()
@@ -112,9 +129,8 @@ function HslCardMixin:OnShow()
     self.health:SetFont(fontName, 20, fontFlags)
     self.name:SetFont(fontName, 14, fontFlags)
 
-    self.art:SetTexture("interface/encounterjournal/ui-ej-boss-wrathion.blp")
+    --self.powerIcon:SetMask("Interface/ChatFrame/UI-ChatIcon-HotS" )
 
-    self.info:SetText("Flame Dragon breathes fire in a frontal cone disorientating enemies for 1 round")
 end
 
 function HslCardMixin:SetArtByFileName(fileName)
@@ -136,6 +152,19 @@ function HslCardMixin:LoadCard(card)
     self.elite:SetShown(card.elite)
 
     self:Show()
+end
+
+function HslCardMixin:ClearCard()
+    self.art:SetTexture(nil)
+    self.cost:SetText(nil)
+    self.power:SetText(nil)
+    self.health:SetText(nil)
+    self.name:SetText(nil)
+    self.info:SetText(nil)
+
+    self.elite:SetShown(false)
+
+    self:Hide()
 end
 
 

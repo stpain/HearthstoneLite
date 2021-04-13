@@ -4,7 +4,8 @@ local addonName, hsl = ...
 
 local L = hsl.locales
 
-local function deckListview_Update(classID)
+
+local function menuPanelDeckListview_Update(classID)
     if not HSL then
         return
     end
@@ -12,8 +13,8 @@ local function deckListview_Update(classID)
         return
     end
 
-    local buttons = HybridScrollFrame_GetButtons(HearthstoneLite.MenuPanel.listview);
-    local offset = HybridScrollFrame_GetOffset(HearthstoneLite.MenuPanel.listview);
+    local buttons = HybridScrollFrame_GetButtons(HearthstoneLite.menuPanel.listview);
+    local offset = HybridScrollFrame_GetOffset(HearthstoneLite.menuPanel.listview);
 
     if HSL.decks[classID] then
 
@@ -30,13 +31,13 @@ local function deckListview_Update(classID)
                 button:SetDeckID(item.ID)
                 button:Show()
 
-                button.callback = deckListview_Update;
+                button.callback = menuPanelDeckListview_Update; -- dirty hack, when the delete button is pressed we call this function via Getparent()
             else
                 button:Hide()
             end
         end
 
-        HybridScrollFrame_Update(HearthstoneLite.MenuPanel.listview, #HSL.decks[classID] * 30, HearthstoneLite.MenuPanel.listview:GetHeight())
+        HybridScrollFrame_Update(HearthstoneLite.menuPanel.listview, #HSL.decks[classID] * 40, HearthstoneLite.menuPanel.listview:GetHeight())
 
     else
         for buttonIndex = 1, #buttons do
@@ -46,19 +47,58 @@ local function deckListview_Update(classID)
     end
 end
 
+local function deckViewerListview_Update(deck)
+    if not deck then
+        return
+    end
+    if not HSL then
+        return
+    end
+    if not HSL.decks then
+        return
+    end
+
+    local buttons = HybridScrollFrame_GetButtons(HearthstoneLite.deckViewer.listview);
+    local offset = HybridScrollFrame_GetOffset(HearthstoneLite.deckViewer.listview);
+
+    for buttonIndex = 1, #buttons do
+        local button = buttons[buttonIndex]
+        button:Hide()
+    end
+
+    local items = deck;
+
+    for buttonIndex = 1, #buttons do
+        local button = buttons[buttonIndex]
+        local itemIndex = buttonIndex + offset
+
+        if itemIndex <= #items then
+            local item = items[itemIndex]
+            button:SetCard(item)
+            button:Show()
+
+            --button.callback = deckViewerListview_Update;
+        else
+            button:Hide()
+        end
+    end
+
+    HybridScrollFrame_Update(HearthstoneLite.deckViewer.listview, #deck * 36, HearthstoneLite.deckViewer.listview:GetHeight())
+end
+
 local function classButton_Clicked(button)
     if button then
         for i = 1, GetNumClasses() do
             local className, classFile, classID = GetClassInfo(i)
             if button.className == classFile then
-                HearthstoneLite.MenuPanel.listviewHeader:SetText("|cffffffff"..className, 20);
-                HearthstoneLite.MenuPanel.listviewHeader.newDeck.classID = classID;
-                HearthstoneLite.MenuPanel.listviewHeader.newDeck.className = className;
-                HearthstoneLite.MenuPanel.listviewHeader.newDeck.classIcon = button.Background:GetAtlas();
+                HearthstoneLite.menuPanel.listviewHeader:SetText("|cffffffff"..className, 20);
+                HearthstoneLite.menuPanel.listviewHeader.newDeck.classID = classID;
+                HearthstoneLite.menuPanel.listviewHeader.newDeck.className = className;
+                HearthstoneLite.menuPanel.listviewHeader.newDeck.classIcon = button.Background:GetAtlas();
 
-                --HearthstoneLite.ContentPanel:SetBackground_Atlas("Artifacts-Shaman-BG")
+                --HearthstoneLite.contentPanel:SetBackground_Atlas("Artifacts-Shaman-BG")
 
-                deckListview_Update(classID)
+                menuPanelDeckListview_Update(classID)
             end
         end
     end
@@ -70,7 +110,7 @@ HearthstoneLiteMixin = {}
 
 function HearthstoneLiteMixin:OnShow()
     self:SetPortraitToUnit('player')
-    HearthstoneLitePortrait:SetParent(self.MenuPanel)
+    HearthstoneLitePortrait:SetParent(self.menuPanel)
 end
 
 
@@ -107,7 +147,7 @@ HearthstoneLiteNewDeckMixin = {}
 
 function HearthstoneLiteNewDeckMixin:OnMouseDown()
     if self.classID > 0 then
-        StaticPopup_Show("HslNewDeck", self.className, nil, {ClassID = self.classID, Icon = self.classIcon, callback = deckListview_Update})
+        StaticPopup_Show("HslNewDeck", self.className, nil, {ClassID = self.classID, Icon = self.classIcon, callback = menuPanelDeckListview_Update})
     end
 end
 
@@ -133,7 +173,7 @@ function HearthstoneCardViewerMixin:OnLoad()
     local fontName, _, fontFlags = self.pageNumber:GetFont()
     self.pageNumber:SetFont(fontName, 32, fontFlags)
 
-    self.classDropdown:SetText(L["SelectClass"])
+    self.classDropdown:SetText(L["SelectDeck"])
     self.classDropdown.menu = {}
     for i = 1, GetNumClasses() do
         local className, classFile, classID = GetClassInfo(i)
@@ -148,7 +188,7 @@ function HearthstoneCardViewerMixin:OnLoad()
         text = L["Neutral"];
         func = function()
             self.classDropdown:SetText(L["Neutral"])
-            self:LoadCards("generic")
+            self:LoadCards()
         end,
     });
 end
@@ -156,6 +196,18 @@ end
 function HearthstoneCardViewerMixin:NextPage()
     self.page = self.page + 1;
     self.pageNumber:SetText(self.page);
+
+    local cardIndex = 1;
+    if self.deck then
+        for i = ((8 * self.page) - 7), (8 * self.page) do
+            if self.deck[i] then
+                self["card"..cardIndex]:LoadCard(self.deck[i])
+            else
+                self["card"..cardIndex]:ClearCard()
+            end
+            cardIndex = cardIndex + 1;
+        end
+    end
 end
 
 function HearthstoneCardViewerMixin:PrevPage()
@@ -164,6 +216,18 @@ function HearthstoneCardViewerMixin:PrevPage()
     end
     self.page = self.page - 1;
     self.pageNumber:SetText(self.page);
+
+    local cardIndex = 1;
+    if self.deck then
+        for i = ((8 * self.page) - 7), (8 * self.page) do
+            if self.deck[i] then
+                self["card"..cardIndex]:LoadCard(self.deck[i])
+            else
+                self["card"..cardIndex]:ClearCard()
+            end
+            cardIndex = cardIndex + 1;
+        end
+    end
 end
 
 function HearthstoneCardViewerMixin:HideCards()
@@ -172,18 +236,34 @@ function HearthstoneCardViewerMixin:HideCards()
     end
 end
 
-function HearthstoneCardViewerMixin:LoadCards(id)
+function HearthstoneCardViewerMixin:LoadCards(deck)
     if not hsl.cards then
         return
     end
-    if hsl.cards[id] then
+    if not deck then
+        deck = hsl.cards.generic
+    end
+    if deck then
+        self.deck = deck
         self.page = 1;
         self.pageNumber:SetText(self.page);
 
         for i = 1, 8 do
-            if hsl.cards[id][i] then
-                self["card"..i]:LoadCard(hsl.cards[id][i])
+            if self.deck[i] then
+                self["card"..i]:LoadCard(self.deck[i])
             end
         end
     end
+
+    deckViewerListview_Update(deck)
+end
+
+
+DeckViewerMixin = {}
+
+function DeckViewerMixin:OnLoad()
+
+
+    HybridScrollFrame_CreateButtons(self.listview, "HslCardListviewItem", -5, 0, "TOP", "TOP", 0, -1, "TOP", "BOTTOM")
+    HybridScrollFrame_SetDoNotHideScrollBar(self.listview, true)
 end
