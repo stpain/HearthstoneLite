@@ -43,19 +43,27 @@
 			<Layer level="BACKGROUND">
 				<Texture parentKey="Background" atlas="titleprestige-title-bg" useAtlasSize="false" setAllPoints="true"/>
 			</Layer>
+			<Layer level="BORDER">
+				<Texture parentKey="Icon" useAtlasSize="false" setAllPoints="true">
+					<Size x="25" y="25"/>
+					<Anchors>
+						<Anchor point="LEFT" x="2" y="2"/>
+					</Anchors>
+				</Texture>
+			</Layer>
 			<Layer level="OVERLAY">
 				<FontString parentKey="Text" inherits="QuestFontHighlight">
 					<Anchors>
 						<Anchor point="CENTER" x="0" y="3"/>
 					</Anchors>
-					<Color r="0.121" g="0.054" b="0.007"/>
+					<Color r="1" g="1" b="1"/>
 				</FontString>
 			</Layer>
 		</Layers>
 	</Frame>
 
 	<!-- the deck list view item -->
-	<Frame name="HslDeckListviewItem" mixin="HslDeckListviewItemMixin" virtual="true" enableMouse="true">
+	<Frame name="HslDeckListviewItem" mixin="HslMenuPanelDeckListviewItemMixin" virtual="true" enableMouse="true" hidden="true">
 		<Size x="200" y="40"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -89,10 +97,13 @@
 				</Scripts>
 			</Frame>
 		</Frames>
+		<Scripts>
+			<OnMouseDown method="OnMouseDown"/>
+		</Scripts>
 	</Frame>
 
-	<!-- card listview item -->
-		<Frame name="HslCardListviewItem" mixin="HslCardListviewItemMixin" virtual="true" enableMouse="true">
+	<!-- card listview item, used in the popout deck builder listview -->
+	<Frame name="HslCardListviewItem" mixin="HslCardListviewItemMixin" virtual="true" enableMouse="true" hidden="true">
 		<Size x="200" y="36"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -114,10 +125,10 @@
 					</Anchors>
 					<Color r="1" g="1" b="1"/>
 				</FontString>
-				<Texture parentKey="Icon"  useAtlasSize="false">
-					<Size x="30" y="30"/>					
+				<Texture parentKey="Icon" >
+					<Size x="43" y="30"/>					
 					<Anchors>
-						<Anchor point="BOTTOMRIGHT" x="-3" y="2"/>
+						<Anchor point="RIGHT" x="-1" y="0"/>
 					</Anchors>
 				</Texture>
 				<FontString parentKey="Name" inherits="QuestFontHighlight">
@@ -128,117 +139,69 @@
 				</FontString>
 			</Layer>
 		</Layers>
+		<Scripts>
+			<OnMouseDown method="OnMouseDown"/>
+		</Scripts>
 	</Frame>
 
 	<!-- basic card template -->
-	<Frame name="HslCard" mixin="HslCardMixin" virtual="true">
-		<Size x="140" y="210"/>
+	<Frame name="HslCard" mixin="HslCardMixin" virtual="true" enableMouse="true">
+		<Size x="162" y="210"/>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture atlas="shop-games-legiondeluxe-card" setAllPoints="true" useAtlasSize="false"/>
+				<Texture parentKey="cardTemplate" setAllPoints="true" file="Interface/Addons/HearthstoneLite/CardTemplates/druid_2048">
+					<TexCoords left="0.009" right="0.133" top="0.001" bottom="0.175" />
+				</Texture>
+			</Layer>
+			<Layer level="BACKGROUND" textureSubLevel="-1">
+				<Texture>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="15" y="-15"/>
+						<Anchor point="BOTTOMRIGHT" x="-15" y="15"/>
+					</Anchors>
+					<Color r="0" g="0" b="0" a="0.6" />
+				</Texture>
 			</Layer>
 			<Layer level="BORDER">
-				<Texture atlas="ChromieTime-Button-Frame" textureSubLevel="-1" useAtlasSize="false">
-					<Size x="120" y="90"/>
-					<Anchors>
-						<Anchor point="BOTTOM" x="0" y="10"/>
-					</Anchors>
-				</Texture>
 				<Texture parentKey="art" textureSubLevel="-1">
 					<Size x="130" y="90"/>
 					<Anchors>
-						<Anchor point="TOP" x="0" y="-10"/>
-					</Anchors>
-				</Texture>
-
-				<!-- added here due to layering with textureSubLevel doing nothing ? -->
-				<Texture file="interface/common/portrait-ring-withbg.blp" textureSubLevel="1">
-					<Size x="60" y="60"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="-16" y="16"/>
-					</Anchors>
-				</Texture>
-				<Texture file="interface/common/portrait-ring-withbg.blp" textureSubLevel="1">
-					<Size x="60" y="60"/>
-					<Anchors>
-						<Anchor point="BOTTOMRIGHT" x="16" y="-16"/>
-					</Anchors>
-				</Texture>
-				<Texture file="interface/common/portrait-ring-withbg.blp" textureSubLevel="1">
-					<Size x="60" y="60"/>
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="-16" y="-16"/>
+						<Anchor point="TOP" x="10" y="-10"/>
 					</Anchors>
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
-				<!-- mana icon top left -->
-				<Texture file="interface/icons/inv_elemental_mote_mana.blp" mask="Interface/ChatFrame/UI-ChatIcon-HotS" textureSubLevel="3">
-					<Size x="31" y="31"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="-2" y="2"/>
-					</Anchors>
-				</Texture>
-
-				<Texture parentKey="elite" atlas="GarrMission_EncounterBar-Elite" useAtlasSize="true" hidden="true">
-					<Anchors>
-						<Anchor point="TOPRIGHT" x="12" y="10"/>
-					</Anchors>
-				</Texture>
-
-				<!-- health bottom right -->
-				<Texture file="interface/icons/spell_holy_sealofsacrifice.blp" mask="Interface/ChatFrame/UI-ChatIcon-HotS" textureSubLevel="3">
-					<Size x="32" y="32"/>
-					<Anchors>
-						<Anchor point="BOTTOMRIGHT" x="2" y="-2"/>
-					</Anchors>
-				</Texture>
-
-				<!-- power bottom left -->
-				<Texture file="interface/icons/inv_sword_04.blp" mask="Interface/ChatFrame/UI-ChatIcon-HotS" textureSubLevel="3">
-					<Size x="32" y="32"/>
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="-2" y="-2"/>
-					</Anchors>
-				</Texture>
-
-				<!-- name banner -->
-				<Texture atlas="GarrMission_RewardsBanner-Desaturate" textureSubLevel="1" useAtlasSize="false">
-					<Size x="140" y="55"/>
-					<Anchors>
-						<Anchor point="CENTER" x="0" y="-5"/>
-					</Anchors>
-				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">
 				<FontString parentKey="cost" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="25" y="25"/>
+					<Size x="30" y="30"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" x="0" y="0"/>
+						<Anchor point="TOPLEFT" x="10" y="-9"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="power" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="25" y="25"/>
+					<Size x="30" y="30"/>
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="0" y="0"/>
+						<Anchor point="BOTTOMLEFT" x="12" y="4"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="health" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="25" y="25"/>
+					<Size x="30" y="30"/>
 					<Anchors>
-						<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+						<Anchor point="BOTTOMRIGHT" x="2" y="2"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="name" inherits="NumberFont_Outline_Large" text="Flame Dragon">
 					<Anchors>
-						<Anchor point="CENTER" x="0" y="-2"/>
+						<Anchor point="CENTER" x="4" y="-4"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="info" inherits="GameFontNormalSmall">
-					<Size x="110" y="70"/>
-					<Color r="1" g="1" b="1"/>
+					<Shadow x="0" y="0"/>
+					<Size x="125" y="55"/>
+					<Color r="0.121" g="0.054" b="0.007"/>
 					<Anchors>
-						<Anchor point="BOTTOM" x="0" y="20"/>
+						<Anchor point="BOTTOM" x="5" y="20"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -246,6 +209,7 @@
 
 		<Scripts>
 			<OnShow method="OnShow"/>
+			<OnMouseDown method="OnMouseDown"/>
 		</Scripts>
 	</Frame>
 

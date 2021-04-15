@@ -6,11 +6,16 @@ local L = {}
 
 L["HearthstoneLite"] = "Hearthstone Lite"
 L["Create"] = "Create"
+L["Delete"] = "Delete"
 L["Cancel"] = "Cancel"
 L["NewDeck"] = "Create new deck for"
+L["DeleteDeck"] = "Do you want to delete"
 L["SelectClass"] = "Select Class"
+L["SelectHero"] = "Select Hero"
 L["SelectDeck"] = "Select Deck"
 L["Neutral"] = "Neutral"
+L["ShowClassCards"] = "Show class cards"
+L["ShowNeutralCards"] = "Show neutral cards"
 
 -- class and spec
 L['DEATHKNIGHT'] = 'Death Knight'

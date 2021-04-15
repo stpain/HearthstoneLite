@@ -34,11 +34,38 @@ StaticPopupDialogs['HslNewDeck'] = {
             HSL.decks[info.ClassID] = {};
         end
         table.insert(HSL.decks[info.ClassID], {
-            ID = time(),
-            Name = self.editBox:GetText(),
-            Cards = {},
+            id = time(),
+            name = self.editBox:GetText(),
+            cards = {},
         })
         info.callback(info.ClassID)
+    end,
+    OnCancel = function(self)
+
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = false,
+    preferredIndex = 3,
+    showAlert = 1,
+}
+
+StaticPopupDialogs['HslDeleteDeck'] = {
+    text = L["DeleteDeck"].." %s",
+    button1 = L["Delete"],
+    button2 = L['Cancel'],
+    OnAccept = function(self, info)
+        if not HSL then
+            HSL = {};
+        end
+        if not HSL.decks then
+            HSL.decks = {};
+        end
+        if HSL.decks[info.classID] then
+            table.remove(HSL.decks[info.classID], info.deckIndex)
+            info.deleteDeck(info.classID)
+            info.updateDeckViewer({}) -- pass in an empty table to cause the popout deck viewer to clear itself
+        end
     end,
     OnCancel = function(self)
 

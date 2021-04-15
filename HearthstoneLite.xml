@@ -1,8 +1,8 @@
 
 
 <UI xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI-Retail.xsd">
-    <Frame name="HearthstoneLite" mixin="HearthstoneLiteMixin" parent="UIParent" inherits="PortraitFrameTemplate" enableMouse="true" movable="true" resizable="true">
-        <Size x="1000" y="600"/>
+    <Frame name="HearthstoneLite" mixin="HearthstoneLiteMixin" parent="UIParent" inherits="PortraitFrameTemplate" enableMouse="true" movable="true">
+        <Size x="1050" y="600"/>
         <Anchors>
             <Anchor point="CENTER" x="0" y="0"/>
         </Anchors>
@@ -55,6 +55,7 @@
                             <Anchor point="TOPLEFT" x="10" y="-40"/>
                         </Anchors>
                         <KeyValues>
+                            <KeyValue key="tooltipText" value="DRUID" type="string"/>
                             <KeyValue key="className" value="DRUID" type="string"/>
                         </KeyValues>
                     </Frame>
@@ -63,6 +64,7 @@
                             <Anchor point="TOPLEFT" x="70" y="-40"/>
                         </Anchors>
                         <KeyValues>
+                            <KeyValue key="tooltipText" value="HUNTER" type="string"/>
                             <KeyValue key="className" value="HUNTER" type="string"/>
                         </KeyValues>
                     </Frame>
@@ -71,6 +73,7 @@
                             <Anchor point="TOPLEFT" x="130" y="-40"/>
                         </Anchors>
                         <KeyValues>
+                            <KeyValue key="tooltipText" value="MAGE" type="string"/>
                             <KeyValue key="className" value="MAGE" type="string"/>
                         </KeyValues>
                     </Frame>
@@ -79,6 +82,7 @@
                             <Anchor point="TOPLEFT" x="190" y="-40"/>
                         </Anchors>
                         <KeyValues>
+                            <KeyValue key="tooltipText" value="SHAMAN" type="string"/>
                             <KeyValue key="className" value="SHAMAN" type="string"/>
                         </KeyValues>
                     </Frame>
@@ -88,6 +92,7 @@
                             <Anchor point="TOPLEFT" x="10" y="-100"/>
                         </Anchors>
                         <KeyValues>
+                            <KeyValue key="tooltipText" value="ROGUE" type="string"/>
                             <KeyValue key="className" value="ROGUE" type="string"/>
                         </KeyValues>
                     </Frame>
@@ -96,6 +101,7 @@
                             <Anchor point="TOPLEFT" x="70" y="-100"/>
                         </Anchors>
                         <KeyValues>
+                            <KeyValue key="tooltipText" value="WARRIOR" type="string"/>
                             <KeyValue key="className" value="WARRIOR" type="string"/>
                         </KeyValues>
                     </Frame>
@@ -104,15 +110,17 @@
                             <Anchor point="TOPLEFT" x="130" y="-100"/>
                         </Anchors>
                         <KeyValues>
+                            <KeyValue key="tooltipText" value="PRIEST" type="string"/>
                             <KeyValue key="className" value="PRIEST" type="string"/>
                         </KeyValues>
                     </Frame>
-                    <Frame parentKey="monk" inherits="HslSquareButton">
+                    <Frame parentKey="paladin" inherits="HslSquareButton">
                         <Anchors>
                             <Anchor point="TOPLEFT" x="190" y="-100"/>
                         </Anchors>
                         <KeyValues>
-                            <KeyValue key="className" value="MONK" type="string"/>
+                            <KeyValue key="tooltipText" value="PALADIN" type="string"/>
+                            <KeyValue key="className" value="PALADIN" type="string"/>
                         </KeyValues>
                     </Frame>
 
@@ -121,6 +129,7 @@
                             <Anchor point="TOPLEFT" x="10" y="-160"/>
                         </Anchors>
                         <KeyValues>
+                            <KeyValue key="tooltipText" value="DEATHKNIGHT" type="string"/>
                             <KeyValue key="className" value="DEATHKNIGHT" type="string"/>
                         </KeyValues>
                     </Frame>
@@ -129,25 +138,27 @@
                             <Anchor point="TOPLEFT" x="70" y="-160"/>
                         </Anchors>
                         <KeyValues>
-                            <KeyValue key="className" value="WARLOCK" type="string"/>
+                            <KeyValue key="tooltipText" value="WARLOCK" type="string"/>
+                            <KeyValue key="tclassname" value="WARLOCK" type="string"/>
                         </KeyValues>
                     </Frame>
-                    <Frame parentKey="paladin" inherits="HslSquareButton">
+
+                    <!-- <Frame parentKey="monk" inherits="HslSquareButton">
                         <Anchors>
-                            <Anchor point="TOPLEFT" x="130" y="-160"/>
+                            <Anchor point="TOPLEFT" x="190" y="-100"/>
                         </Anchors>
                         <KeyValues>
-                            <KeyValue key="className" value="PALADIN" type="string"/>
+                            <KeyValue key="className" value="MONK" type="string"/>
                         </KeyValues>
-                    </Frame>
-                    <Frame parentKey="demonhunter" inherits="HslSquareButton">
+                    </Frame> -->
+                    <!-- <Frame parentKey="demonhunter" inherits="HslSquareButton">
                         <Anchors>
                             <Anchor point="TOPLEFT" x="190" y="-160"/>
                         </Anchors>
                         <KeyValues>
                             <KeyValue key="className" value="DEMONHUNTER" type="string"/>
                         </KeyValues>
-                    </Frame>
+                    </Frame> -->
 
 
                     <Frame parentKey="listviewHeader" inherits="HslTexturedTextbox" enableMouse="true">
@@ -207,14 +218,31 @@
                     <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
                 </Anchors>
                 <Layers>
-                    <Layer level="BACKGROUND">
+                    <Layer level="BACKGROUND" textureSubLevel="-1">
                         <!-- <Texture parentKey="Background" atlas="store-card-splash1-nobanner" textureSubLevel="-1" setAllPoints="true"/> -->
-                        <Texture parentKey="Background" atlas="shop-card-full-15thAnniversary" textureSubLevel="-1" setAllPoints="true"/>
+                        <!-- <Texture parentKey="Background" atlas="shop-card-full-15thAnniversary" textureSubLevel="-1" setAllPoints="true"/> -->
+                        <Texture parentKey="Background" atlas="UI-Frame-Neutral-BackgroundTile" tile="true" setAllPoints="true"/>
+                    </Layer>
+                    <Layer level="BACKGROUND"> 
+                        <Texture parentKey="LeftEdge" atlas="!Garr_WoodFrameTile-Left" tile="true">
+                            <Size x="25" />
+                            <Anchors>
+                                <Anchor point="TOPLEFT" x="0" y="0"/>
+                                <Anchor point="BOTTOMLEFT" x="0" y="0"/>
+                            </Anchors>
+                        </Texture>
+                        <Texture parentKey="RightEdge" atlas="!Garr_WoodFrameTile-Left" tile="true">
+                            <Size x="25" />
+                            <Anchors>
+                                <Anchor point="TOPRIGHT" x="5" y="0"/>
+                                <Anchor point="BOTTOMRIGHT" x="5" y="0"/>
+                            </Anchors>
+                        </Texture>
                     </Layer>
                 </Layers>
 
                 <Frames>
-                    <Frame parentKey="cardViewer" mixin="HearthstoneCardViewerMixin" hidden="false">
+                    <Frame parentKey="cardViewer" mixin="HearthstoneCardViewerMixin" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT" x="0" y="0"/>
                             <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
@@ -240,49 +268,68 @@
                         </Layers>
 
                         <Frames>
-                            <Frame parentKey="card1" inherits="HslCard">
+                            <!-- class/neutral toggle buttons -->
+                            <Frame parentKey="showClass" inherits="HslSquareButton" frameStrata="TOOLTIP">
+                                <Anchors>
+                                    <Anchor point="BOTTOMLEFT" x="200" y="15"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="ShowClassCards" type="string"/>
+                                </KeyValues>
+                            </Frame>
+                            <Frame parentKey="showNeutral" inherits="HslSquareButton" frameStrata="TOOLTIP">
+                                <Anchors>
+                                    <Anchor point="BOTTOMLEFT" x="245" y="15"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="ShowNeutralCards" type="string"/>
+                                </KeyValues>
+                            </Frame>
+                            
+                            <!-- cards -->
+                            <Frame parentKey="card1" inherits="HslCard" hidden="true">
                                 <Anchors>
                                     <Anchor point="CENTER" x="-270" y="155"/>
                                 </Anchors>
                             </Frame>
-                            <Frame parentKey="card2" inherits="HslCard">
+                            <Frame parentKey="card2" inherits="HslCard" hidden="true">
                                 <Anchors>
                                     <Anchor point="CENTER" x="-90" y="155"/>
                                 </Anchors>
                             </Frame>
-                            <Frame parentKey="card3" inherits="HslCard">
+                            <Frame parentKey="card3" inherits="HslCard" hidden="true">
                                 <Anchors>
                                     <Anchor point="CENTER" x="90" y="155"/>
                                 </Anchors>
                             </Frame>
-                            <Frame parentKey="card4" inherits="HslCard">
+                            <Frame parentKey="card4" inherits="HslCard" hidden="true">
                                 <Anchors>
                                     <Anchor point="CENTER" x="270" y="155"/>
                                 </Anchors>
                             </Frame>
 
-                            <Frame parentKey="card5" inherits="HslCard">
+                            <Frame parentKey="card5" inherits="HslCard" hidden="true">
                                 <Anchors>
-                                    <Anchor point="CENTER" x="-270" y="-115"/>
+                                    <Anchor point="CENTER" x="-270" y="-100"/>
                                 </Anchors>
                             </Frame>
-                            <Frame parentKey="card6" inherits="HslCard">
+                            <Frame parentKey="card6" inherits="HslCard" hidden="true">
                                 <Anchors>
-                                    <Anchor point="CENTER" x="90" y="-115"/>
+                                    <Anchor point="CENTER" x="90" y="-100"/>
                                 </Anchors>
                             </Frame>
-                            <Frame parentKey="card7" inherits="HslCard">
+                            <Frame parentKey="card7" inherits="HslCard" hidden="true">
                                 <Anchors>
-                                    <Anchor point="CENTER" x="-90" y="-115"/>
+                                    <Anchor point="CENTER" x="-90" y="-100"/>
                                 </Anchors>
                             </Frame>
-                            <Frame parentKey="card8" inherits="HslCard">
+                            <Frame parentKey="card8" inherits="HslCard" hidden="true">
                                 <Anchors>
-                                    <Anchor point="CENTER" x="270" y="-115"/>
+                                    <Anchor point="CENTER" x="270" y="-100"/>
                                 </Anchors>
                             </Frame>
 
-                            <Frame parentKey="classDropdown" inherits="HslDropdown">
+                            <Frame parentKey="classDropdown" inherits="HslDropdown" hidden="true">
                                 <Size x="130" y="30"/>
                                 <Anchors>
                                     <Anchor point="BOTTOMLEFT" x="150" y="22"/>
@@ -339,7 +386,7 @@
 
             </Frame>
 
-            <Frame parentKey="deckViewer" mixin="DeckViewerMixin" inherits="UIPanelDialogTemplate" virtual="true">
+            <Frame parentKey="deckViewer" mixin="HearthstoneDeckViewerMixin" inherits="UIPanelDialogTemplate" virtual="true" hidden="true">
                 <Anchors>
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="HearthstoneLite" x="-5" y="4"/>
                     <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="HearthstoneLite" x="240" y="-5"/>
@@ -384,6 +431,7 @@
 
         <Scripts>
             <OnShow method="OnShow"/>
+            <OnLoad method="OnLoad"/>
             <OnLoad>
                 self:RegisterForDrag("LeftButton")
             </OnLoad>
