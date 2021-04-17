@@ -9,7 +9,13 @@
 
         <Frames>
 
-            <Frame parentKey="hearthstoneButton" mixin="HearthstoneButtonMixin" enableMouse="true" frameStrata="TOOLTIP">
+            <Frame parentKey="menuHelptip" hidden="true" inherits="HslHelpTipTemplate_BottomArrow">
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="-80" y="90"/>
+                </Anchors>
+            </Frame>
+
+            <Frame parentKey="hearthstoneButton" mixin="HearthstoneButtonMixin" enableMouse="true" frameStrata="HIGH">
                 <Size x="60.9" y="60.9"/>
                 <Anchors>
                     <Anchor point="TOPLEFT" x="-6" y="8"/>
@@ -19,7 +25,12 @@
                         <Texture file="Interface\Addons\HearthstoneLite\Media\icon" setAllPoints="true"/>
                     </Layer>
                     <Layer level="HIGHLIGHT">
-                        <Texture atlas="common-roundhighlight" setAllPoints="true"/>
+                        <Texture atlas="Azerite-Trait-RingGlow">
+                            <Size x="95.9" y="95.9"/>
+                            <Anchors>
+                                <Anchor point="CENTER" x="0" y="0"/>
+                            </Anchors>
+                        </Texture>
                     </Layer>
                 </Layers>
                 <Scripts>
@@ -28,6 +39,26 @@
                     <OnLeave method="OnLeave"/>
                 </Scripts>
             </Frame>
+
+            <Button parentKey="toggleHelptipsButton" mixin="ToggleHelptipMixin" enableMouse="true" frameStrata="HIGH" inherits="MainHelpPlateButton">
+                <!-- <Size x="20" y="20"/> -->
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="38" y="18"/> 
+                </Anchors>
+                <Layers>
+                    <Layer level="HIGHLIGHT">
+                        <Texture atlas="bags-roundhighlight">
+                            <Size x="20" y="20"/>
+                            <Anchors>
+                                <Anchor point="CENTER" x="0" y="0"/>
+                            </Anchors>
+                        </Texture>
+                    </Layer>
+                </Layers>
+                <Scripts>
+                    <OnMouseDown method="OnMouseDown"/>
+                </Scripts>
+            </Button>
 
 
             <Frame parentKey="home" parentArray="frames" mixin="HomeMixin">
@@ -87,16 +118,26 @@
                         </Anchors>
                         <Layers>
                             <Layer level="OVERLAY">
-                                <!-- <FontString parentKey="Text" inherits="QuestFontHighlight">
-                                    <Anchors>
-                                        <Anchor point="CENTER"/>
-                                    </Anchors>
-                                </FontString> -->
                             </Layer>
                         </Layers>
                         <Scripts>
                             <OnClick>
-                                self:GetParent():DeckBuilder_OnClick()
+                                self:GetParent():MenuButton_OnClick("deckBuilder")
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                    <Button parentKey="settings" inherits="UIPanelGoldButtonTemplate">
+                        <Size x="275" y="55"/>
+                        <Anchors>
+                            <Anchor point="CENTER" x="0" y="-60"/>
+                        </Anchors>
+                        <Layers>
+                            <Layer level="OVERLAY">
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnClick>
+                                self:GetParent():MenuButton_OnClick("settings")
                             </OnClick>
                         </Scripts>
                     </Button>
@@ -114,6 +155,14 @@
                     <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
                 </Anchors>
                 <Frames>
+
+                    <Frame parentKey="selectHeroHelptip" hidden="true" inherits="HslHelpTipTemplate_BottomArrow">
+                        <Anchors>
+                            <Anchor point="LEFT" x="120" y="90"/>
+                        </Anchors>
+                    </Frame>
+
+
                     <Frame parentKey="menuPanel" mixin="HslDeckBuilderMenuPanelMixin">
                         <Anchors>
                             <Anchor point="TOPLEFT" x="0" y="-22"/>
@@ -354,6 +403,19 @@
                         </Layers>
 
                         <Frames>
+
+                            <Frame parentKey="deckEditingHelptip" hidden="true" inherits="HslHelpTipTemplate_BottomArrow">
+                                <Anchors>
+                                    <Anchor point="TOP" x="0" y="60"/>
+                                </Anchors>
+                            </Frame>
+
+                            <Frame parentKey="cardToggleHelptip" hidden="true" inherits="HslHelpTipTemplate_BottomArrow">
+                                <Anchors>
+                                    <Anchor point="BOTTOM" x="-150" y="75"/>
+                                </Anchors>
+                            </Frame>
+
                             <!-- class/neutral toggle buttons -->
                             <Frame parentKey="showClass" inherits="HslSquareButton" frameStrata="TOOLTIP">
                                 <Anchors>
@@ -487,8 +549,14 @@
                         </Layers>
 
                         <Frames>
+                            <Frame parentKey="deckEditingHelptip_Popout" hidden="true" inherits="HslHelpTipTemplate_BottomArrow">
+                                <Anchors>
+                                    <Anchor point="TOP" x="0" y="60"/>
+                                </Anchors>
+                            </Frame>
+
                             <ScrollFrame parentKey="listview" inherits="HybridScrollFrameTemplate">
-                                <Size x="240" y="500"/>
+                                <Size x="240" y="400"/>
                                 <Anchors>
                                     <Anchor point="TOP" x="-7" y="-26"/>
                                 </Anchors>
@@ -513,6 +581,34 @@
                 </Scripts>
             </Frame>
 
+            <Frame parentKey="settings" parentArray="frames" mixin="SettingsMixin" hidden="true">
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="0" y="0"/>
+                    <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+                </Anchors>
+                <Frames>
+                    <Button parentKey="resetSavedVar" inherits="UIPanelGoldButtonTemplate">
+                        <Size x="255" y="35"/>
+                        <Anchors>
+                            <Anchor point="CENTER"/>
+                        </Anchors>
+                        <Layers>
+                            <Layer level="OVERLAY">
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnClick>
+                                HSL = nil;
+                                HSL = {};
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                </Frames>
+
+                <Scripts>
+                    <OnShow method="OnShow"/>
+                </Scripts>
+            </Frame>
 
         </Frames>
 

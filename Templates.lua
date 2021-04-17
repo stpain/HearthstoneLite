@@ -546,3 +546,11 @@ function HslDropdownFlyoutMixin:OnShow()
     end
 
 end
+
+
+
+HelpTipMixin = {}
+
+function HelpTipMixin:OnShow()
+
+end

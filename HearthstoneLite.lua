@@ -6,12 +6,25 @@ local L = hsl.locales
 
 local randomSeed = time()
 
+local showHelptips = false;
+local helptips = {}
+
 local function fontSizeHack(obj, size)
     -- font size hack
     local fontName, _, fontFlags = obj:GetFont()
     obj:SetFont(fontName, size, fontFlags)
 end
 
+local function navigateTo(frame)
+    for k, frame in ipairs(HearthstoneLite.frames) do
+        frame:Hide()
+    end
+    HearthstoneLite[frame]:Show()
+
+    for k, frame in ipairs(helptips) do
+        frame:SetShown(showHelptips)
+    end
+end
 
 local function lootOpened()
     print('looting for hearthstone')
@@ -138,6 +151,9 @@ local function classButton_Clicked(button)
                     class = "DeathKnight";
                 end
 
+                DeckBuilderMixin.selectedClassID = classID;
+                DeckBuilderMixin.selectedClassName = className;
+
                 HearthstoneLite.deckBuilder.menuPanel.listviewHeader:SetIcon_Atlas(string.format("GarrMission_ClassIcon-%s", class))
 
                 menuPanelDeckListview_Update(classID)
@@ -158,15 +174,15 @@ function HearthstoneLiteMixin:OnShow()
     -- HearthstoneLitePortrait:SetTexture([[Interface\Addons\HearthstoneLite\Media\icon]])
     -- HearthstoneLitePortrait:SetParent(self)
 
+    self.menuHelptip.Text:SetText(L["MenuHelptip"])
+    table.insert(helptips, self.menuHelptip)
+
 end
 
 HearthstoneButtonMixin = {}
 
 function HearthstoneButtonMixin:OnMouseDown()
-    for k, frame in ipairs(HearthstoneLite.frames) do
-        frame:Hide()
-    end
-    HearthstoneLite.home:Show()
+    navigateTo("home")
 end
 
 function HearthstoneButtonMixin:OnEnter()
@@ -179,6 +195,19 @@ function HearthstoneButtonMixin:OnLeave()
     GameTooltip:Hide()
 end
 
+
+ToggleHelptipMixin = {}
+
+function ToggleHelptipMixin:OnMouseDown()
+    showHelptips = not showHelptips;
+    for k, frame in ipairs(helptips) do
+        frame:SetShown(showHelptips)
+    end
+end
+
+
+
+
 HomeMixin = {}
 
 function HomeMixin:OnShow()
@@ -187,19 +216,55 @@ function HomeMixin:OnShow()
     self.deckBuilder.Text:SetPoint("TOP", 0, -10)
     self.deckBuilder:SetText(L["DeckBuilder"])
 
+    fontSizeHack(self.settings.Text, 22)
+    self.settings.Text:SetPoint("TOP", 0, -10)
+    self.settings:SetText(L["Settings"])
+
 end
 
-function HomeMixin:DeckBuilder_OnClick()
-    HearthstoneLite.home:Hide()
-    HearthstoneLite.deckBuilder:Show()
+function HomeMixin:MenuButton_OnClick(frame)
+    navigateTo(frame)
 end
+
+
+
+SettingsMixin = {}
+
+function SettingsMixin:OnShow()
+    self.resetSavedVar.Text:SetText('Reset saved var')
+    self.resetSavedVar.Text:SetPoint("TOP", 0, -10)
+end
+
 
 
 DeckBuilderMixin = {}
+DeckBuilderMixin.selectedClassID = nil;
+DeckBuilderMixin.selectedClassName = nil;
 
 function DeckBuilderMixin:OnShow()
-    -- HearthstoneLitePortrait:SetParent(HearthstoneLite.home)
-    -- HearthstoneLitePortrait:SetDrawLayer("HIGHLIGHT")
+
+    self.selectHeroHelptip.Text:SetText(L["SelectHeroHelptip"])
+    self.selectHeroHelptip:Show()
+    table.insert(helptips, self.selectHeroHelptip)
+
+    self.cardViewer.deckEditingHelptip.Text:SetText(L["DeckEditingHelptip"])
+    self.cardViewer.deckEditingHelptip:Show()
+    table.insert(helptips, self.cardViewer.deckEditingHelptip)
+
+    self.deckViewer.deckEditingHelptip_Popout.Text:SetText(L["DeckEditingHelptipPopout"])
+    self.deckViewer.deckEditingHelptip_Popout:Show()
+    table.insert(helptips, self.deckViewer.deckEditingHelptip_Popout)
+
+    self.cardViewer.cardToggleHelptip.Text:SetText(L["ClassToggleHelptip"])
+    self.cardViewer.cardToggleHelptip:SetSize(200, 40)
+    self.cardViewer.cardToggleHelptip:Show()
+    table.insert(helptips, self.cardViewer.cardToggleHelptip)
+
+    menuPanelDeckListview_Update(nil)
+
+    HearthstoneLite.deckBuilder.cardViewer:HideCards()
+    HearthstoneLite.deckBuilder.deckViewer:Hide()
+
 end
 
 
@@ -218,6 +283,8 @@ function HslDeckBuilderMenuPanelMixin:OnLoad()
             self[classFile:lower()]:SetBackground_Atlas(string.format("classicon-%s", classFile:lower()))
             self[classFile:lower()].func = function()
                 classButton_Clicked(self[classFile:lower()])
+                DeckBuilderMixin.selectedClassID = nil;
+                DeckBuilderMixin.selectedClassName = nil;
             end
         end
     end
@@ -234,6 +301,9 @@ function HslDeckBuilderMenuPanelMixin:OnShow()
 
 end
 
+-- TODO:
+-- this is using an old system to hold the class ID
+-- update this to just use the DeckBuilderMixin
 HslNewDeckMixin = {}
 
 function HslNewDeckMixin:OnMouseDown()
@@ -326,7 +396,9 @@ end
 
 function HearthstoneCardViewerMixin:HideCards()
     for i = 1, 8 do
-        self["card"..i]:Hide()
+        if self["card"..i] then
+            self["card"..i]:Hide()
+        end
     end
 end
 

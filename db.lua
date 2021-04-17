@@ -4,15 +4,36 @@ local _, hsl = ...
 
 hsl.db = {}
 
+hsl.db.abilities = {}
+
+local abilities = {
+    ["attacksingle"] = function(sender, target)
+        target.health = target.health - sender.power;
+    end,
+    ["attackall"] = function(sender, targets)
+        for _, card in ipairs(targets) do
+            card.health = card.health - sender.power;
+        end
+    end,
+    ["healsingle"] = function(sender, target)
+        target.health = target.health + sender.power;
+    end,
+    ["healall"] = function(sender, targets)
+        for _, card in ipairs(targets) do
+            card.health = card.health + sender.power;
+        end
+    end,
+}
+
 
 
 hsl.db.cards = {}
+-- neutral card backgrounds are determined by the backgroundPath
+-- all other cards use the background value as an identifier for the card in the file topleft=1
 
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 -- generic cards
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
-
---neutral card backgrounds are determined by the backgroundPath
 local generic = {}
 generic[1] = {
     art = 522189,                       -- the artwork of the card that appears in the upper section inset
@@ -34,7 +55,7 @@ generic[2] = {
     health = 4,
     power = 5,
     info = "",
-    ability = false,
+    ability = abilities.attackall,
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -144,8 +165,6 @@ generic[9] = {
 hsl.db.cards.generic = generic;
 
 
--- all other cards use the background value as an identifier for the card in the file topleft=1
-
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 -- druid
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
@@ -167,6 +186,7 @@ druid[1] = {
 
 hsl.db.cards.druid = druid;
 
+
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 -- hunter
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
@@ -187,3 +207,179 @@ hunter[1] = {
 }
 
 hsl.db.cards.hunter = hunter;
+
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- rogue
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local rogue = {}
+rogue[1] = {
+    art = 536054,
+    name = "Blood hunter",
+    health = 4,
+    power = 5,
+    info = "",
+    ability = false,
+    battlecry = false,
+    deathrattle = false,
+    cost = 3,
+    backgroundPath = "rogue",
+    background = 9,
+    atlas = "CREATURE",
+}
+
+hsl.db.cards.rogue = rogue;
+
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- shaman
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local shaman = {}
+shaman[1] = {
+    art = 536054,
+    name = "Blood hunter",
+    health = 4,
+    power = 5,
+    info = "",
+    ability = false,
+    battlecry = false,
+    deathrattle = false,
+    cost = 3,
+    backgroundPath = "shaman",
+    background = 9,
+    atlas = "CREATURE",
+}
+
+hsl.db.cards.shaman = shaman;
+
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- mage
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local mage = {}
+mage[1] = {
+    art = 536054,
+    name = "Blood hunter",
+    health = 4,
+    power = 5,
+    info = "",
+    ability = false,
+    battlecry = false,
+    deathrattle = false,
+    cost = 3,
+    backgroundPath = "mage",
+    background = 9,
+    atlas = "CREATURE",
+}
+
+hsl.db.cards.mage = mage;
+
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- priest
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local priest = {}
+priest[1] = {
+    art = 536054,
+    name = "Blood hunter",
+    health = 4,
+    power = 5,
+    info = "",
+    ability = false,
+    battlecry = false,
+    deathrattle = false,
+    cost = 3,
+    backgroundPath = "priest",
+    background = 9,
+    atlas = "CREATURE",
+}
+
+hsl.db.cards.priest = priest;
+
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- paladin
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local paladin = {}
+paladin[1] = {
+    art = 536054,
+    name = "Blood hunter",
+    health = 4,
+    power = 5,
+    info = "",
+    ability = false,
+    battlecry = false,
+    deathrattle = false,
+    cost = 3,
+    backgroundPath = "paladin",
+    background = 9,
+    atlas = "CREATURE",
+}
+
+hsl.db.cards.paladin = paladin;
+
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- warlock
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local warlock = {}
+warlock[1] = {
+    art = 536054,
+    name = "Blood hunter",
+    health = 4,
+    power = 5,
+    info = "",
+    ability = false,
+    battlecry = false,
+    deathrattle = false,
+    cost = 3,
+    backgroundPath = "warlock",
+    background = 9,
+    atlas = "CREATURE",
+}
+
+hsl.db.cards.warlock = warlock;
+
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- warrior
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local warrior = {}
+warrior[1] = {
+    art = 536054,
+    name = "Blood hunter",
+    health = 4,
+    power = 5,
+    info = "",
+    ability = false,
+    battlecry = false,
+    deathrattle = false,
+    cost = 3,
+    backgroundPath = "warrior",
+    background = 9,
+    atlas = "CREATURE",
+}
+
+hsl.db.cards.warrior = warrior;
+
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- deathknight
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local deathknight = {}
+deathknight[1] = {
+    art = 536054,
+    name = "Blood hunter",
+    health = 4,
+    power = 5,
+    info = "",
+    ability = false,
+    battlecry = false,
+    deathrattle = false,
+    cost = 3,
+    backgroundPath = "deathknight",
+    background = 9,
+    atlas = "CREATURE",
+}
+
+hsl.db.cards.deathknight = deathknight;
