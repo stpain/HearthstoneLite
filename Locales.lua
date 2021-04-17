@@ -8,6 +8,7 @@ L["HearthstoneLite"] = "Hearthstone Lite"
 L["Create"] = "Create"
 L["Delete"] = "Delete"
 L["Cancel"] = "Cancel"
+L["DeckBuilder"] = "Build a deck"
 L["NewDeck"] = "Create new deck for"
 L["DeleteDeck"] = "Do you want to delete"
 L["SelectClass"] = "Select Class"
@@ -16,6 +17,7 @@ L["SelectDeck"] = "Select Deck"
 L["Neutral"] = "Neutral"
 L["ShowClassCards"] = "Show class cards"
 L["ShowNeutralCards"] = "Show neutral cards"
+L["Menu"] = "Menu"
 
 -- class and spec
 L['DEATHKNIGHT'] = 'Death Knight'

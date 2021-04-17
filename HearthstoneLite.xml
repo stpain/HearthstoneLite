@@ -8,247 +8,341 @@
         </Anchors>
 
         <Frames>
-            <Frame parentKey="menuPanel" mixin="HearthstoneLiteMenuPanelMixin">
+
+            <Frame parentKey="hearthstoneButton" mixin="HearthstoneButtonMixin" enableMouse="true" frameStrata="TOOLTIP">
+                <Size x="60.9" y="60.9"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="-6" y="8"/>
+                </Anchors>
+                <Layers>
+                    <Layer level="BACKGROUND" textureSubLevel="-1">
+                        <Texture file="Interface\Addons\HearthstoneLite\Media\icon" setAllPoints="true"/>
+                    </Layer>
+                    <Layer level="HIGHLIGHT">
+                        <Texture atlas="common-roundhighlight" setAllPoints="true"/>
+                    </Layer>
+                </Layers>
+                <Scripts>
+                    <OnMouseDown method="OnMouseDown"/>
+                    <OnEnter method="OnEnter"/>
+                    <OnLeave method="OnLeave"/>
+                </Scripts>
+            </Frame>
+
+
+            <Frame parentKey="home" parentArray="frames" mixin="HomeMixin">
                 <Anchors>
                     <Anchor point="TOPLEFT" x="0" y="-22"/>
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" x="260" y="3"/>
+                    <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
                 </Anchors>
 
                 <Layers>
                     <Layer level="BACKGROUND">
-                        <Texture atlas="questlogbackground" textureSubLevel="-1" setAllPoints="true"/>
+                        <Texture atlas="UI-Frame-Neutral-BackgroundTile" tile="true" />
                     </Layer>
-                    <Layer level="ARTWORK">
-                        <Texture atlas="Talent-TopLeftCurlies" useAtlasSize="true">
+                    <Layer level="BACKGROUND" textureSubLevel="1">
+                        <Texture atlas="UI-Frame-Mechagon-CardParchmentWider" tile="true">
                             <Anchors>
-                                <Anchor point="TOPLEFT"/>
-                            </Anchors>
-                        </Texture>
-                        <Texture atlas="Talent-TopRightCurlies" useAtlasSize="true">
-                            <Anchors>
-                                <Anchor point="TOPRIGHT"/>
-                            </Anchors>
-                        </Texture>
-                        <Texture atlas="Talent-BottomLeftCurlies" useAtlasSize="true">
-                            <Anchors>
-                                <Anchor point="BOTTOMLEFT"/>
-                            </Anchors>
-                        </Texture>
-                        <Texture atlas="Talent-BottomRightCurlies" useAtlasSize="true">
-                            <Anchors>
-                                <Anchor point="BOTTOMRIGHT"/>
+                                <Anchor point="TOP" x="0" y="0"/>
+                                <Anchor point="BOTTOM" x="0" y="0"/>
+                                <Anchor point="LEFT" x="235" y="0"/>
+                                <Anchor point="RIGHT" x="-235" y="0"/>
                             </Anchors>
                         </Texture>
                     </Layer>
-                    <Layer level="OVERLAY">
-                        <FontString parentKey="selectClass" inherits="NumberFont_Outline_Large">
+                    <Layer level="BACKGROUND" textureSubLevel="2">
+                        <Texture atlas="heartofazeroth-orb-ring" useAtlasSize="false">
                             <Anchors>
-                                <Anchor point="TOP" x="0" y="-10"/>
+                                <Anchor point="TOP" x="0" y="0"/>
+                                <Anchor point="BOTTOM" x="0" y="0"/>
+                                <Anchor point="LEFT" x="235" y="0"/>
+                                <Anchor point="RIGHT" x="-235" y="0"/>
                             </Anchors>
-                        </FontString>
+                        </Texture>
                     </Layer>
-                </Layers>
-
-                <Frames>
-                    <Frame parentKey="druid" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="10" y="-40"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="tooltipText" value="DRUID" type="string"/>
-                            <KeyValue key="className" value="DRUID" type="string"/>
-                        </KeyValues>
-                    </Frame>
-                    <Frame parentKey="hunter" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="70" y="-40"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="tooltipText" value="HUNTER" type="string"/>
-                            <KeyValue key="className" value="HUNTER" type="string"/>
-                        </KeyValues>
-                    </Frame>
-                    <Frame parentKey="mage" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="130" y="-40"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="tooltipText" value="MAGE" type="string"/>
-                            <KeyValue key="className" value="MAGE" type="string"/>
-                        </KeyValues>
-                    </Frame>
-                    <Frame parentKey="shaman" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="190" y="-40"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="tooltipText" value="SHAMAN" type="string"/>
-                            <KeyValue key="className" value="SHAMAN" type="string"/>
-                        </KeyValues>
-                    </Frame>
-                    
-                    <Frame parentKey="rogue" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="10" y="-100"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="tooltipText" value="ROGUE" type="string"/>
-                            <KeyValue key="className" value="ROGUE" type="string"/>
-                        </KeyValues>
-                    </Frame>
-                    <Frame parentKey="warrior" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="70" y="-100"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="tooltipText" value="WARRIOR" type="string"/>
-                            <KeyValue key="className" value="WARRIOR" type="string"/>
-                        </KeyValues>
-                    </Frame>
-                    <Frame parentKey="priest" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="130" y="-100"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="tooltipText" value="PRIEST" type="string"/>
-                            <KeyValue key="className" value="PRIEST" type="string"/>
-                        </KeyValues>
-                    </Frame>
-                    <Frame parentKey="paladin" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="190" y="-100"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="tooltipText" value="PALADIN" type="string"/>
-                            <KeyValue key="className" value="PALADIN" type="string"/>
-                        </KeyValues>
-                    </Frame>
-
-                    <Frame parentKey="deathknight" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="10" y="-160"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="tooltipText" value="DEATHKNIGHT" type="string"/>
-                            <KeyValue key="className" value="DEATHKNIGHT" type="string"/>
-                        </KeyValues>
-                    </Frame>
-                    <Frame parentKey="warlock" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="70" y="-160"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="tooltipText" value="WARLOCK" type="string"/>
-                            <KeyValue key="tclassname" value="WARLOCK" type="string"/>
-                        </KeyValues>
-                    </Frame>
-
-                    <!-- <Frame parentKey="monk" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="190" y="-100"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="className" value="MONK" type="string"/>
-                        </KeyValues>
-                    </Frame> -->
-                    <!-- <Frame parentKey="demonhunter" inherits="HslSquareButton">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" x="190" y="-160"/>
-                        </Anchors>
-                        <KeyValues>
-                            <KeyValue key="className" value="DEMONHUNTER" type="string"/>
-                        </KeyValues>
-                    </Frame> -->
-
-
-                    <Frame parentKey="listviewHeader" inherits="HslTexturedTextbox" enableMouse="true">
-                        <Anchors>
-                            <Anchor point="TOP" x="0" y="-230"/>
-                        </Anchors>
-                        <Frames>
-                            <Frame parentKey="newDeck" mixin="HearthstoneLiteNewDeckMixin" enableMouse="true">
-                                <KeyValues>
-                                    <KeyValue key="classID" value="0" type="number"/>
-                                    <KeyValue key="className" value="" type="string"/>
-                                    <!-- <KeyValue key="classIcon" value="" type="string"/> -->
-                                </KeyValues>
-                                <Size x="20" y="20"/>
-                                <Anchors>
-                                    <Anchor point="RIGHT" x="-10" y="3"/>
-                                </Anchors>
-                                <Layers>
-                                    <Layer level="ARTWORK">
-                                        <Texture atlas="bags-icon-addslots" textureSubLevel="-1" setAllPoints="true"/>
-                                    </Layer>
-                                </Layers>
-                                <Scripts>
-                                    <OnMouseDown method="OnMouseDown"/>
-                                </Scripts>
-                            </Frame>
-                        </Frames>
-                    </Frame>
-
-                    <ScrollFrame parentKey="listview" inherits="HybridScrollFrameTemplate">
-                        <Size x="240" y="300"/>
-                        <Anchors>
-                            <Anchor point="TOP" x="0" y="-270"/>
-                        </Anchors>
-                        <Frames>
-                            <Slider name="$parentScrollBar" inherits="HybridScrollBarTemplate">
-                                <Anchors>
-                                    <Anchor point="TOPRIGHT" x="-18" y="0"/>
-                                    <Anchor point="BOTTOMRIGHT" x="-18" y="0"/>
-                                </Anchors>
-                            </Slider>
-                        </Frames>
-                    </ScrollFrame>
-
-
-                </Frames>
-
-                <Scripts>
-                    <OnLoad method="OnLoad"/>
-                    <OnShow method="OnShow"/>
-                </Scripts>
-            </Frame>
-
-            <Frame parentKey="contentPanel" mixin="HearthstoneLiteContentPanelMixin">
-                <Anchors>
-                    <Anchor point="TOPLEFT" x="255" y="-20"/>
-                    <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
-                </Anchors>
-                <Layers>
-                    <Layer level="BACKGROUND" textureSubLevel="-1">
-                        <!-- <Texture parentKey="Background" atlas="store-card-splash1-nobanner" textureSubLevel="-1" setAllPoints="true"/> -->
-                        <!-- <Texture parentKey="Background" atlas="shop-card-full-15thAnniversary" textureSubLevel="-1" setAllPoints="true"/> -->
-                        <Texture parentKey="Background" atlas="UI-Frame-Neutral-BackgroundTile" tile="true" setAllPoints="true"/>
-                    </Layer>
-                    <Layer level="BACKGROUND"> 
+                    <Layer level="BACKGROUND" textureSubLevel="3">
                         <Texture parentKey="LeftEdge" atlas="!Garr_WoodFrameTile-Left" tile="true">
                             <Size x="25" />
                             <Anchors>
-                                <Anchor point="TOPLEFT" x="0" y="0"/>
-                                <Anchor point="BOTTOMLEFT" x="0" y="0"/>
+                                <Anchor point="TOPLEFT" x="235" y="0"/>
+                                <Anchor point="BOTTOMLEFT" x="235" y="0"/>
                             </Anchors>
                         </Texture>
                         <Texture parentKey="RightEdge" atlas="!Garr_WoodFrameTile-Left" tile="true">
+                            <TexCoords left="1" right="0" top="1" bottom="0" />
                             <Size x="25" />
                             <Anchors>
-                                <Anchor point="TOPRIGHT" x="5" y="0"/>
-                                <Anchor point="BOTTOMRIGHT" x="5" y="0"/>
+                                <Anchor point="TOPRIGHT" x="-235" y="0"/>
+                                <Anchor point="BOTTOMRIGHT" x="-235" y="0"/>
                             </Anchors>
                         </Texture>
                     </Layer>
                 </Layers>
 
                 <Frames>
+                    <Button parentKey="deckBuilder" inherits="UIPanelGoldButtonTemplate">
+                        <Size x="275" y="55"/>
+                        <Anchors>
+                            <Anchor point="CENTER"/>
+                        </Anchors>
+                        <Layers>
+                            <Layer level="OVERLAY">
+                                <!-- <FontString parentKey="Text" inherits="QuestFontHighlight">
+                                    <Anchors>
+                                        <Anchor point="CENTER"/>
+                                    </Anchors>
+                                </FontString> -->
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnClick>
+                                self:GetParent():DeckBuilder_OnClick()
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                </Frames>
+
+                <Scripts>
+                    <OnShow method="OnShow"/>
+                </Scripts>
+
+            </Frame>
+
+            <Frame parentKey="deckBuilder" parentArray="frames"  mixin="DeckBuilderMixin" hidden="true">
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="0" y="0"/>
+                    <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+                </Anchors>
+                <Frames>
+                    <Frame parentKey="menuPanel" mixin="HslDeckBuilderMenuPanelMixin">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="0" y="-22"/>
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" x="260" y="3"/>
+                        </Anchors>
+
+                        <Layers>
+                            <Layer level="BACKGROUND">
+                                <Texture atlas="questlogbackground" textureSubLevel="-1" setAllPoints="true"/>
+                            </Layer>
+                            <Layer level="ARTWORK">
+                                <Texture atlas="Talent-TopLeftCurlies" useAtlasSize="true">
+                                    <Anchors>
+                                        <Anchor point="TOPLEFT"/>
+                                    </Anchors>
+                                </Texture>
+                                <Texture atlas="Talent-TopRightCurlies" useAtlasSize="true">
+                                    <Anchors>
+                                        <Anchor point="TOPRIGHT"/>
+                                    </Anchors>
+                                </Texture>
+                                <Texture atlas="Talent-BottomLeftCurlies" useAtlasSize="true">
+                                    <Anchors>
+                                        <Anchor point="BOTTOMLEFT"/>
+                                    </Anchors>
+                                </Texture>
+                                <Texture atlas="Talent-BottomRightCurlies" useAtlasSize="true">
+                                    <Anchors>
+                                        <Anchor point="BOTTOMRIGHT"/>
+                                    </Anchors>
+                                </Texture>
+                            </Layer>
+                            <Layer level="OVERLAY">
+                                <FontString parentKey="selectClass" inherits="NumberFont_Outline_Large">
+                                    <Anchors>
+                                        <Anchor point="TOP" x="0" y="-10"/>
+                                    </Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+
+                        <Frames>
+                            <Frame parentKey="druid" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="10" y="-40"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="DRUID" type="string"/>
+                                    <KeyValue key="className" value="DRUID" type="string"/>
+                                </KeyValues>
+                            </Frame>
+                            <Frame parentKey="hunter" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="70" y="-40"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="HUNTER" type="string"/>
+                                    <KeyValue key="className" value="HUNTER" type="string"/>
+                                </KeyValues>
+                            </Frame>
+                            <Frame parentKey="mage" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="130" y="-40"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="MAGE" type="string"/>
+                                    <KeyValue key="className" value="MAGE" type="string"/>
+                                </KeyValues>
+                            </Frame>
+                            <Frame parentKey="shaman" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="190" y="-40"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="SHAMAN" type="string"/>
+                                    <KeyValue key="className" value="SHAMAN" type="string"/>
+                                </KeyValues>
+                            </Frame>
+                            
+                            <Frame parentKey="rogue" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="10" y="-100"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="ROGUE" type="string"/>
+                                    <KeyValue key="className" value="ROGUE" type="string"/>
+                                </KeyValues>
+                            </Frame>
+                            <Frame parentKey="warrior" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="70" y="-100"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="WARRIOR" type="string"/>
+                                    <KeyValue key="className" value="WARRIOR" type="string"/>
+                                </KeyValues>
+                            </Frame>
+                            <Frame parentKey="priest" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="130" y="-100"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="PRIEST" type="string"/>
+                                    <KeyValue key="className" value="PRIEST" type="string"/>
+                                </KeyValues>
+                            </Frame>
+                            <Frame parentKey="paladin" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="190" y="-100"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="PALADIN" type="string"/>
+                                    <KeyValue key="className" value="PALADIN" type="string"/>
+                                </KeyValues>
+                            </Frame>
+
+                            <Frame parentKey="deathknight" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="10" y="-160"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="DEATHKNIGHT" type="string"/>
+                                    <KeyValue key="className" value="DEATHKNIGHT" type="string"/>
+                                </KeyValues>
+                            </Frame>
+                            <Frame parentKey="warlock" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="70" y="-160"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="tooltipText" value="WARLOCK" type="string"/>
+                                    <KeyValue key="className" value="WARLOCK" type="string"/>
+                                </KeyValues>
+                            </Frame>
+
+                            <!-- <Frame parentKey="monk" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="190" y="-100"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="className" value="MONK" type="string"/>
+                                </KeyValues>
+                            </Frame> -->
+                            <!-- <Frame parentKey="demonhunter" inherits="HslSquareButton">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" x="190" y="-160"/>
+                                </Anchors>
+                                <KeyValues>
+                                    <KeyValue key="className" value="DEMONHUNTER" type="string"/>
+                                </KeyValues>
+                            </Frame> -->
+
+
+                            <Frame parentKey="listviewHeader" inherits="HslTexturedTextbox" enableMouse="true">
+                                <Anchors>
+                                    <Anchor point="TOP" x="0" y="-230"/>
+                                </Anchors>
+                                <Frames>
+                                    <Frame parentKey="newDeck" mixin="HslNewDeckMixin" enableMouse="true">
+                                        <KeyValues>
+                                            <KeyValue key="classID" value="0" type="number"/>
+                                            <KeyValue key="className" value="" type="string"/>
+                                            <!-- <KeyValue key="classIcon" value="" type="string"/> -->
+                                        </KeyValues>
+                                        <Size x="20" y="20"/>
+                                        <Anchors>
+                                            <Anchor point="RIGHT" x="-10" y="3"/>
+                                        </Anchors>
+                                        <Layers>
+                                            <Layer level="ARTWORK">
+                                                <Texture atlas="bags-icon-addslots" textureSubLevel="-1" setAllPoints="true"/>
+                                            </Layer>
+                                        </Layers>
+                                        <Scripts>
+                                            <OnMouseDown method="OnMouseDown"/>
+                                        </Scripts>
+                                    </Frame>
+                                </Frames>
+                            </Frame>
+
+                            <ScrollFrame parentKey="listview" inherits="HybridScrollFrameTemplate">
+                                <Size x="240" y="300"/>
+                                <Anchors>
+                                    <Anchor point="TOP" x="0" y="-270"/>
+                                </Anchors>
+                                <Frames>
+                                    <Slider name="$parentScrollBar" inherits="HybridScrollBarTemplate">
+                                        <Anchors>
+                                            <Anchor point="TOPRIGHT" x="-18" y="0"/>
+                                            <Anchor point="BOTTOMRIGHT" x="-18" y="0"/>
+                                        </Anchors>
+                                    </Slider>
+                                </Frames>
+                            </ScrollFrame>
+
+
+                        </Frames>
+
+                        <Scripts>
+                            <OnLoad method="OnLoad"/>
+                            <OnShow method="OnShow"/>
+                        </Scripts>
+                    </Frame>
                     <Frame parentKey="cardViewer" mixin="HearthstoneCardViewerMixin" hidden="true">
                         <Anchors>
-                            <Anchor point="TOPLEFT" x="0" y="0"/>
+                            <Anchor point="TOPLEFT" x="255" y="-20"/>
                             <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
                         </Anchors>
 
                         <Layers>
+                            <Layer level="BACKGROUND" textureSubLevel="-1">
+                                <Texture parentKey="Background" atlas="UI-Frame-Neutral-BackgroundTile" tile="true" setAllPoints="true"/>
+                            </Layer>
+                            <Layer level="BACKGROUND"> 
+                                <Texture parentKey="LeftEdge" atlas="!Garr_WoodFrameTile-Left" tile="true">
+                                    <Size x="25" />
+                                    <Anchors>
+                                        <Anchor point="TOPLEFT" x="0" y="0"/>
+                                        <Anchor point="BOTTOMLEFT" x="0" y="0"/>
+                                    </Anchors>
+                                </Texture>
+                                <Texture parentKey="RightEdge" atlas="!Garr_WoodFrameTile-Left" tile="true">
+                                    <Size x="25" />
+                                    <Anchors>
+                                        <Anchor point="TOPRIGHT" x="5" y="0"/>
+                                        <Anchor point="BOTTOMRIGHT" x="5" y="0"/>
+                                    </Anchors>
+                                </Texture>
+                            </Layer>
                             <Layer level="OVERLAY">
                                 <FontString parentKey="pageNumber" inherits="NumberFont_Outline_Large" text="1">
                                     <Size x="60" y="30"/>
@@ -256,14 +350,6 @@
                                         <Anchor point="BOTTOM" x="0" y="20"/>
                                     </Anchors>
                                 </FontString>
-                            </Layer>
-                            <Layer level="BACKGROUND">
-                                <!-- <Texture atlas="charactercreate-customize-dropdownbox-open" textureSubLevel="-5">
-                                    <Size x="180" y="60"/>
-                                    <Anchors>
-                                        <Anchor point="TOP" x="-200" y="65"/>
-                                    </Anchors>
-                                </Texture> -->
                             </Layer>
                         </Layers>
 
@@ -381,51 +467,52 @@
                             <OnLoad method="OnLoad"/>
                         </Scripts>
                     </Frame>
-                </Frames>
-                
-
-            </Frame>
-
-            <Frame parentKey="deckViewer" mixin="HearthstoneDeckViewerMixin" inherits="UIPanelDialogTemplate" virtual="true" hidden="true">
-                <Anchors>
-                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="HearthstoneLite" x="-5" y="4"/>
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="HearthstoneLite" x="240" y="-5"/>
-                </Anchors>
-                <!-- noquestsbackground -->
-                <!-- tradeskill-background-recipe-unlearned -->
-                <!-- GarrMission_ClassIcon-Karazhan -->
-                <Layers>
-                    <Layer level="BORDER">
-                        <Texture atlas="tradeskill-background-recipe-unlearned">
-                            <Anchors>
-                                <Anchor point="TOPLEFT" x="6" y="-4"/>
-                                <Anchor point="BOTTOMRIGHT" x="-4" y="6"/>
-                            </Anchors>
-                        </Texture>
-                    </Layer>
-                </Layers>
-
-                <Frames>
-                    <ScrollFrame parentKey="listview" inherits="HybridScrollFrameTemplate">
-                        <Size x="240" y="500"/>
+                    <Frame parentKey="deckViewer" mixin="HearthstoneDeckViewerMixin" inherits="UIPanelDialogTemplate" virtual="true" hidden="true">
                         <Anchors>
-                            <Anchor point="TOP" x="-7" y="-26"/>
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="HearthstoneLite" x="-5" y="4"/>
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="HearthstoneLite" x="240" y="-5"/>
                         </Anchors>
-                        <Frames>
-                            <Slider name="$parentScrollBar" inherits="HybridScrollBarTemplate">
-                                <Anchors>
-                                    <Anchor point="TOPRIGHT" x="-18" y="0"/>
-                                    <Anchor point="BOTTOMRIGHT" x="-18" y="0"/>
-                                </Anchors>
-                            </Slider>
-                        </Frames>
-                    </ScrollFrame>
-                </Frames>
+                        <!-- noquestsbackground -->
+                        <!-- tradeskill-background-recipe-unlearned -->
+                        <!-- GarrMission_ClassIcon-Karazhan -->
+                        <Layers>
+                            <Layer level="BORDER">
+                                <Texture atlas="tradeskill-background-recipe-unlearned">
+                                    <Anchors>
+                                        <Anchor point="TOPLEFT" x="6" y="-4"/>
+                                        <Anchor point="BOTTOMRIGHT" x="-4" y="6"/>
+                                    </Anchors>
+                                </Texture>
+                            </Layer>
+                        </Layers>
 
+                        <Frames>
+                            <ScrollFrame parentKey="listview" inherits="HybridScrollFrameTemplate">
+                                <Size x="240" y="500"/>
+                                <Anchors>
+                                    <Anchor point="TOP" x="-7" y="-26"/>
+                                </Anchors>
+                                <Frames>
+                                    <Slider name="$parentScrollBar" inherits="HybridScrollBarTemplate">
+                                        <Anchors>
+                                            <Anchor point="TOPRIGHT" x="-18" y="0"/>
+                                            <Anchor point="BOTTOMRIGHT" x="-18" y="0"/>
+                                        </Anchors>
+                                    </Slider>
+                                </Frames>
+                            </ScrollFrame>
+                        </Frames>
+
+                        <Scripts>
+                            <OnLoad method="OnLoad"/>
+                        </Scripts>
+                    </Frame>
+                </Frames>
                 <Scripts>
-                    <OnLoad method="OnLoad"/>
+                    <OnShow method="OnShow"/>
                 </Scripts>
             </Frame>
+
 
         </Frames>
 

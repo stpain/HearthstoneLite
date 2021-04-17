@@ -4,9 +4,19 @@ local addonName, hsl = ...
 
 local L = hsl.locales
 
+local randomSeed = time()
+
+local function fontSizeHack(obj, size)
+    -- font size hack
+    local fontName, _, fontFlags = obj:GetFont()
+    obj:SetFont(fontName, size, fontFlags)
+end
+
 
 local function lootOpened()
-
+    print('looting for hearthstone')
+    local rnd = math.floor(random()*10)
+    print(rnd)
 end
 
 
@@ -25,8 +35,8 @@ local function deckViewerListview_Update(deck)
 
     HearthstoneDeckViewerMixin.deck = deck;
 
-    local buttons = HybridScrollFrame_GetButtons(HearthstoneLite.deckViewer.listview);
-    local offset = HybridScrollFrame_GetOffset(HearthstoneLite.deckViewer.listview);
+    local buttons = HybridScrollFrame_GetButtons(HearthstoneLite.deckBuilder.deckViewer.listview);
+    local offset = HybridScrollFrame_GetOffset(HearthstoneLite.deckBuilder.deckViewer.listview);
 
     for buttonIndex = 1, #buttons do
         local button = buttons[buttonIndex]
@@ -53,7 +63,7 @@ local function deckViewerListview_Update(deck)
         end
     end
 
-    HybridScrollFrame_Update(HearthstoneLite.deckViewer.listview, #deck * 36, HearthstoneLite.deckViewer.listview:GetHeight())
+    HybridScrollFrame_Update(HearthstoneLite.deckBuilder.deckViewer.listview, #deck * 36, HearthstoneLite.deckBuilder.deckViewer.listview:GetHeight())
 end
 
 
@@ -67,8 +77,8 @@ local function menuPanelDeckListview_Update(classID)
         return
     end
 
-    local buttons = HybridScrollFrame_GetButtons(HearthstoneLite.menuPanel.listview);
-    local offset = HybridScrollFrame_GetOffset(HearthstoneLite.menuPanel.listview);
+    local buttons = HybridScrollFrame_GetButtons(HearthstoneLite.deckBuilder.menuPanel.listview);
+    local offset = HybridScrollFrame_GetOffset(HearthstoneLite.deckBuilder.menuPanel.listview);
 
     for buttonIndex = 1, #buttons do
         local button = buttons[buttonIndex]
@@ -98,7 +108,7 @@ local function menuPanelDeckListview_Update(classID)
             end
         end
 
-        HybridScrollFrame_Update(HearthstoneLite.menuPanel.listview, #HSL.decks[classID] * 40, HearthstoneLite.menuPanel.listview:GetHeight())
+        HybridScrollFrame_Update(HearthstoneLite.deckBuilder.menuPanel.listview, #HSL.decks[classID] * 40, HearthstoneLite.deckBuilder.menuPanel.listview:GetHeight())
 
     else
         for buttonIndex = 1, #buttons do
@@ -118,19 +128,17 @@ local function classButton_Clicked(button)
         for i = 1, GetNumClasses() do
             local className, classFile, classID = GetClassInfo(i)
             if button.className == classFile then
-                --HearthstoneLite.menuPanel.listviewHeader:SetText(className, 20);
-                HearthstoneLite.menuPanel.listviewHeader.newDeck.classID = classID;
-                HearthstoneLite.menuPanel.listviewHeader.newDeck.className = className;
-                HearthstoneLite.menuPanel.listviewHeader.newDeck.classIcon = button.Background:GetAtlas();
+                --HearthstoneLite.deckBuilder.menuPanel.listviewHeader:SetText(className, 20);
+                HearthstoneLite.deckBuilder.menuPanel.listviewHeader.newDeck.classID = classID;
+                HearthstoneLite.deckBuilder.menuPanel.listviewHeader.newDeck.className = className;
+                --HearthstoneLite.deckBuilder.menuPanel.listviewHeader.newDeck.classIcon = button.Background:GetAtlas();
 
                 local class = classFile:sub(1,1):upper()..classFile:sub(2):lower()
                 if class == "Deathknight" then
                     class = "DeathKnight";
                 end
 
-                HearthstoneLite.menuPanel.listviewHeader:SetIcon_Atlas(string.format("GarrMission_ClassIcon-%s", class))
-
-                --HearthstoneLite.contentPanel:SetBackground_Atlas("Artifacts-Shaman-BG")
+                HearthstoneLite.deckBuilder.menuPanel.listviewHeader:SetIcon_Atlas(string.format("GarrMission_ClassIcon-%s", class))
 
                 menuPanelDeckListview_Update(classID)
             end
@@ -147,16 +155,57 @@ function HearthstoneLiteMixin:OnLoad()
 end
 
 function HearthstoneLiteMixin:OnShow()
-    self:SetPortraitToUnit('player')
-    HearthstoneLitePortrait:SetParent(self.menuPanel)
+    -- HearthstoneLitePortrait:SetTexture([[Interface\Addons\HearthstoneLite\Media\icon]])
+    -- HearthstoneLitePortrait:SetParent(self)
 
-    --HearthstoneLite:SetWidth(1100)
+end
+
+HearthstoneButtonMixin = {}
+
+function HearthstoneButtonMixin:OnMouseDown()
+    for k, frame in ipairs(HearthstoneLite.frames) do
+        frame:Hide()
+    end
+    HearthstoneLite.home:Show()
+end
+
+function HearthstoneButtonMixin:OnEnter()
+    GameTooltip:SetOwner(self, 'ANCHOR_TOPRIGHT')
+    GameTooltip:AddLine(L["Menu"])
+    GameTooltip:Show()
+end
+
+function HearthstoneButtonMixin:OnLeave()
+    GameTooltip:Hide()
+end
+
+HomeMixin = {}
+
+function HomeMixin:OnShow()
+
+    fontSizeHack(self.deckBuilder.Text, 22)
+    self.deckBuilder.Text:SetPoint("TOP", 0, -10)
+    self.deckBuilder:SetText(L["DeckBuilder"])
+
+end
+
+function HomeMixin:DeckBuilder_OnClick()
+    HearthstoneLite.home:Hide()
+    HearthstoneLite.deckBuilder:Show()
 end
 
 
-HearthstoneLiteMenuPanelMixin = {}
+DeckBuilderMixin = {}
 
-function HearthstoneLiteMenuPanelMixin:OnLoad()
+function DeckBuilderMixin:OnShow()
+    -- HearthstoneLitePortrait:SetParent(HearthstoneLite.home)
+    -- HearthstoneLitePortrait:SetDrawLayer("HIGHLIGHT")
+end
+
+
+HslDeckBuilderMenuPanelMixin = {}
+
+function HslDeckBuilderMenuPanelMixin:OnLoad()
 
     -- font size hack
     local fontName, _, fontFlags = self.selectClass:GetFont()
@@ -181,24 +230,18 @@ function HearthstoneLiteMenuPanelMixin:OnLoad()
 
 end
 
-function HearthstoneLiteMenuPanelMixin:OnShow()
+function HslDeckBuilderMenuPanelMixin:OnShow()
 
 end
 
-HearthstoneLiteNewDeckMixin = {}
+HslNewDeckMixin = {}
 
-function HearthstoneLiteNewDeckMixin:OnMouseDown()
+function HslNewDeckMixin:OnMouseDown()
     if self.classID > 0 then
         StaticPopup_Show("HslNewDeck", self.className, nil, {ClassID = self.classID, Icon = self.classIcon, callback = menuPanelDeckListview_Update})
     end
 end
 
-
-HearthstoneLiteContentPanelMixin = {}
-
-function HearthstoneLiteContentPanelMixin:SetBackground_Atlas(atlas)
-    self.Background:SetAtlas(atlas)
-end
 
 
 
@@ -219,9 +262,7 @@ function HearthstoneCardViewerMixin:OnLoad()
     self.nextPage.Background:SetRotation(3.14)
     self.nextPage.Highlight:SetRotation(3.14)
 
-    -- font size hack
-    local fontName, _, fontFlags = self.pageNumber:GetFont()
-    self.pageNumber:SetFont(fontName, 32, fontFlags)
+    fontSizeHack(self.pageNumber, 32)
 
     self.classDropdown:SetText(L["SelectDeck"])
     self.classDropdown.menu = {}

@@ -246,21 +246,21 @@ function HslMenuPanelDeckListviewItemMixin:SetDeckID(id)
 end
 
 function HslMenuPanelDeckListviewItemMixin:OnMouseDown()
-    HearthstoneLite.contentPanel.cardViewer:Show()
-    HearthstoneLite.deckViewer:Show()
+    HearthstoneLite.deckBuilder.cardViewer:Show()
+    HearthstoneLite.deckBuilder.deckViewer:Show()
     if HSL.decks and HSL.decks[self.classID] and next(HSL.decks[self.classID]) then
         for k, deck in ipairs(HSL.decks[self.classID]) do
             if deck.id == self.deckID then
                 self.updateDeckViewer(deck.cards)
-                HearthstoneLite.deckViewer.classID = self.classID;
-                HearthstoneLite.deckViewer.deckID = self.deckID;
+                HearthstoneLite.deckBuilder.deckViewer.classID = self.classID;
+                HearthstoneLite.deckBuilder.deckViewer.deckID = self.deckID;
 
                 for i = 1, GetNumClasses() do
                     local className, classFile, classID = GetClassInfo(i)
                     if self.classID == classID then
-                        HearthstoneLite.contentPanel.cardViewer.showClass:SetBackground_Atlas(string.format("classicon-%s", classFile:lower()))
-                        HearthstoneLite.contentPanel.cardViewer.showClass.func = function()
-                            HearthstoneLite.contentPanel.cardViewer:LoadCards(hsl.db.cards[classFile:lower()])
+                        HearthstoneLite.deckBuilder.cardViewer.showClass:SetBackground_Atlas(string.format("classicon-%s", classFile:lower()))
+                        HearthstoneLite.deckBuilder.cardViewer.showClass.func = function()
+                            HearthstoneLite.deckBuilder.cardViewer:LoadCards(hsl.db.cards[classFile:lower()])
                         end
                     end
                 end
@@ -314,11 +314,11 @@ function HslCardListviewItemMixin:SetCard(card)
 end
 
 function HslCardListviewItemMixin:OnMouseDown()
-    local classID = HearthstoneLite.deckViewer.classID;
-    local deckID = HearthstoneLite.deckViewer.deckID;
+    local classID = HearthstoneLite.deckBuilder.deckViewer.classID;
+    local deckID = HearthstoneLite.deckBuilder.deckViewer.deckID;
 
     if IsControlKeyDown() then
-        HearthstoneLite.deckViewer:RemoveCard(self.card)
+        HearthstoneLite.deckBuilder.deckViewer:RemoveCard(self.card)
     end
 end
 
@@ -388,7 +388,7 @@ end
 
 function HslCardMixin:OnMouseDown()
     if IsControlKeyDown() then
-        HearthstoneLite.deckViewer:AddCard(self.card)
+        HearthstoneLite.deckBuilder.deckViewer:AddCard(self.card)
     end
 end
 
