@@ -35,6 +35,7 @@
                 </Layers>
                 <Scripts>
                     <OnMouseDown method="OnMouseDown"/>
+                    <OnMouseUp method="OnMouseUp"/>
                     <OnEnter method="OnEnter"/>
                     <OnLeave method="OnLeave"/>
                 </Scripts>
@@ -149,7 +150,7 @@
 
             </Frame>
 
-            <Frame parentKey="deckBuilder" parentArray="frames"  mixin="DeckBuilderMixin" hidden="true">
+            <Frame parentKey="deckBuilder" parentArray="frames" mixin="DeckBuilderMixin" hidden="true">
                 <Anchors>
                     <Anchor point="TOPLEFT" x="0" y="0"/>
                     <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
@@ -163,7 +164,7 @@
                     </Frame>
 
 
-                    <Frame parentKey="menuPanel" mixin="HslDeckBuilderMenuPanelMixin">
+                    <Frame parentKey="menuPanel">
                         <Anchors>
                             <Anchor point="TOPLEFT" x="0" y="-22"/>
                             <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" x="260" y="3"/>
@@ -361,12 +362,8 @@
 
                         </Frames>
 
-                        <Scripts>
-                            <OnLoad method="OnLoad"/>
-                            <OnShow method="OnShow"/>
-                        </Scripts>
                     </Frame>
-                    <Frame parentKey="cardViewer" mixin="HearthstoneCardViewerMixin" hidden="true">
+                    <Frame parentKey="cardViewer">
                         <Anchors>
                             <Anchor point="TOPLEFT" x="255" y="-20"/>
                             <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
@@ -477,17 +474,17 @@
                                 </Anchors>
                             </Frame>
 
-                            <Frame parentKey="classDropdown" inherits="HslDropdown" hidden="true">
+                            <!-- <Frame parentKey="classDropdown" inherits="HslDropdown" hidden="true">
                                 <Size x="130" y="30"/>
                                 <Anchors>
                                     <Anchor point="BOTTOMLEFT" x="150" y="22"/>
                                 </Anchors>
-                            </Frame>
+                            </Frame> -->
 
                             <Button parentKey="prevPage" >
                                 <Size x="30" y="50"/>
                                 <Anchors>
-                                    <Anchor point="BOTTOM" x="-50" y="10"/>
+                                    <Anchor point="BOTTOM" x="-65" y="10"/>
                                 </Anchors>
                                 <Layers>
                                     <Layer level="BACKGROUND">
@@ -497,7 +494,7 @@
                                 </Layers>
                                 <Scripts>
                                     <OnClick>
-                                        self:GetParent():PrevPage()
+                                        self:GetParent():GetParent():PrevPage()
                                     </OnClick>
                                 </Scripts>
                             </Button>
@@ -505,7 +502,7 @@
                             <Button parentKey="nextPage" >
                                 <Size x="30" y="50"/>
                                 <Anchors>
-                                    <Anchor point="BOTTOM" x="50" y="10"/>
+                                    <Anchor point="BOTTOM" x="65" y="10"/>
                                 </Anchors>
                                 <Layers>
                                     <Layer level="BACKGROUND">
@@ -517,7 +514,7 @@
                                 </Layers>
                                 <Scripts>
                                     <OnClick>
-                                        self:GetParent():NextPage()
+                                        self:GetParent():GetParent():NextPage()
                                     </OnClick>
                                 </Scripts>
                             </Button>
@@ -525,11 +522,8 @@
 
                         </Frames>
 
-                        <Scripts>
-                            <OnLoad method="OnLoad"/>
-                        </Scripts>
                     </Frame>
-                    <Frame parentKey="deckViewer" mixin="HearthstoneDeckViewerMixin" inherits="UIPanelDialogTemplate" virtual="true" hidden="true">
+                    <Frame parentKey="deckViewer" inherits="UIPanelDialogTemplate" virtual="true" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="HearthstoneLite" x="-5" y="4"/>
                             <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="HearthstoneLite" x="240" y="-5"/>
@@ -556,7 +550,7 @@
                             </Frame>
 
                             <ScrollFrame parentKey="listview" inherits="HybridScrollFrameTemplate">
-                                <Size x="240" y="400"/>
+                                <Size x="240" y="420"/>
                                 <Anchors>
                                     <Anchor point="TOP" x="-7" y="-26"/>
                                 </Anchors>
@@ -571,13 +565,11 @@
                             </ScrollFrame>
                         </Frames>
 
-                        <Scripts>
-                            <OnLoad method="OnLoad"/>
-                        </Scripts>
                     </Frame>
                 </Frames>
                 <Scripts>
                     <OnShow method="OnShow"/>
+                    <OnLoad method="OnLoad"/>
                 </Scripts>
             </Frame>
 

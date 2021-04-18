@@ -4,7 +4,6 @@
 ## Title: |cff0070DEHearthstoneLite|r
 ## Notes: Get ta tha fire side!
 ## SavedVariables: HSL
-## SavedVariablesPerCharacter: HSL
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua

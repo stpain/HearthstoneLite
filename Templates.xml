@@ -104,7 +104,7 @@
 
 	<!-- card listview item, used in the popout deck builder listview -->
 	<Frame name="HslCardListviewItem" mixin="HslCardListviewItemMixin" virtual="true" enableMouse="true" hidden="true">
-		<Size x="200" y="36"/>
+		<Size x="200" y="35"/>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="Background" atlas="PetList-ButtonBackground" useAtlasSize="false" setAllPoints="true"/>
