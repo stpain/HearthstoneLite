@@ -342,11 +342,11 @@ function HslCardMixin:LoadCard(card)
 
     if card.ability then
         if card.battlecry then
-            self.info:SetText(L["battlecry"]..string.format(card.ability.info, card.ability.power))
+            self.info:SetText(L["battlecry"]..string.format(hsl.db.battlecries[card.battlecry].info, card.power))
         elseif card.deathrattle then
-            self.info:SetText(L["deathrattle"]..string.format(card.ability.info, card.ability.power))
+            self.info:SetText(L["deathrattle"]..string.format(hsl.db.deathrattles[card.deathrattle].info, card.power))
         else
-            self.info:SetText(string.format(card.ability.info, card.ability.power))
+            self.info:SetText(string.format(hsl.db.abilities[card.ability].info, card.power))
         end
     end
 

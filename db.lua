@@ -4,12 +4,16 @@ local _, hsl = ...
 
 hsl.db = {}
 
-hsl.db.abilities = {}
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 -- abilities
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
-
 local abilities = {}
+abilities[0] = {
+    info = "",
+    func = function(sender, target)
+        print('no ability')
+    end,
+}
 abilities[1] = {
     info = "Attack a single target for %d damage",
     func = function(sender, target)
@@ -23,7 +27,36 @@ abilities[1] = {
 hsl.db.abilities = abilities;
 
 
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- battlecry
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local battlecries = {}
+battlecries[1] = {
+    info = "Attack a single target for %d damage",
+    func = function(sender, target)
+        if sender and target then
+            target.health = target.health - sender.attack;
+        end
+    end,
+}
 
+hsl.db.battlecries = battlecries;
+
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- deathrattle
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local deathrattles = {}
+deathrattles[1] = {
+    info = "Attack a single target for %d damage",
+    func = function(sender, target)
+        if sender and target then
+            target.health = target.health - sender.attack;
+        end
+    end,
+}
+
+hsl.db.deathrattles = deathrattles;
 
 
 
@@ -31,6 +64,25 @@ hsl.db.abilities = abilities;
 hsl.db.cards = {}
 -- neutral card backgrounds are determined by the backgroundPath
 -- all other cards use the background value as an identifier for the card in the file topleft=1
+
+    -- +++++ sample card table ++++++
+    -- {
+    --     art = 522189,                       -- the artwork of the card that appears in the upper section inset
+    --     name = "Gut Ripper",                -- name on card
+    --     health = 4,                         -- card health
+    --     attack = 5,                          -- card attack
+    --     ability = {
+    --         power = 2,
+    --         key = "attacksingle",
+    --         callback = abilities.attacksingle,
+    --     },
+    --     battlecry = true,                  -- effect when entering battle
+    --     deathrattle = false,                -- effect when dies
+    --     cost = 3,                           -- mana gem cost to play
+    --     backgroundPath = "neutral",         -- hero/set card belongs to -> this also determines the card background art
+    --     background = 1,                     -- this is the background of the card, from topleft 1>14 as viewed on template.tga
+    --     atlas = "NEUTRAL",                  -- this determines the texcoords used only weapon or neutral require different
+    -- }
 
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 -- generic cards
@@ -43,8 +95,7 @@ generic[1] = {
     attack = 5,                          -- card attack
     ability = {
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = true,                  -- effect when entering battle
     deathrattle = false,                -- effect when dies
@@ -60,8 +111,7 @@ generic[2] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -77,8 +127,7 @@ generic[3] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -94,8 +143,7 @@ generic[4] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = true,
@@ -111,8 +159,7 @@ generic[5] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -128,8 +175,7 @@ generic[6] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -145,8 +191,7 @@ generic[7] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -162,8 +207,7 @@ generic[8] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -179,8 +223,7 @@ generic[9] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -204,8 +247,7 @@ druid[1] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -229,8 +271,7 @@ hunter[1] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -254,8 +295,7 @@ rogue[1] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -279,8 +319,7 @@ shaman[1] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -304,8 +343,7 @@ mage[1] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -329,8 +367,7 @@ priest[1] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -354,8 +391,7 @@ paladin[1] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -379,8 +415,7 @@ warlock[1] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -404,8 +439,7 @@ warrior[1] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,
@@ -429,8 +463,7 @@ deathknight[1] = {
     attack = 5,
     ability = { 
         power = 2,
-        info = abilities[1].info,
-        callback = abilities[1].func,
+        id = 1,
     },
     battlecry = false,
     deathrattle = false,

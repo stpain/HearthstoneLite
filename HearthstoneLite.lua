@@ -37,26 +37,168 @@ local function navigateTo(frame)
     end
 end
 
-local function lootOpened()
+local function generateCreatureCard(creatureName, frameCount)
+        -- generate some card values
+        local _attack = math.ceil(math.floor(random()*10) * 0.7)
+        if _attack == 0 then
+            _attack = 1;
+        end
+        local _health = math.ceil(math.floor(random()*10) * 0.7)
+        if _health == 0 then
+            _health = 1;
+        end
+        local _abilityID, _abilityPower = nil, nil;
+        local _hasAbility = (random(10) < 4) and true or false;
+        if _hasAbility then
+            _abilityID = random(1, #hsl.db.abilities)
+            _abilityPower = math.ceil(random(6) * 0.7)
+        else
+            _abilityID = 0
+            _abilityPower = 0
+        end
 
-    -- +++++ sample card table ++++++
-    -- {
-    --     art = 522189,                       -- the artwork of the card that appears in the upper section inset
-    --     name = "Gut Ripper",                -- name on card
-    --     health = 4,                         -- card health
-    --     attack = 5,                          -- card attack
-    --     ability = {
-    --         power = 2,
-    --         key = "attacksingle",
-    --         callback = abilities.attacksingle,
-    --     },
-    --     battlecry = true,                  -- effect when entering battle
-    --     deathrattle = false,                -- effect when dies
-    --     cost = 3,                           -- mana gem cost to play
-    --     backgroundPath = "neutral",         -- hero/set card belongs to -> this also determines the card background art
-    --     background = 1,                     -- this is the background of the card, from topleft 1>14 as viewed on template.tga
-    --     atlas = "NEUTRAL",                  -- this determines the texcoords used only weapon or neutral require different
-    -- }
+        -- does card have battleCry or deathRattle
+        local _hasBCDR = (random(10) < 4) and true or false;
+        local _battlecry = false
+        local _deathrattle = false
+        if _hasBCDR then
+            local bcdr = random(10)
+            if bcdr < 6 then
+                _battlecry = random(1, #hsl.db.battlecries);
+            else
+                _deathrattle = random(1, #hsl.db.deathrattles);
+            end
+            -- make sure bcdr has a power
+            if _abilityPower == 0 then
+                _abilityPower = random(3)
+            end
+        end
+
+        -- generate the cost
+        local _cost = math.floor((_attack + _health) / 2)
+        if _abilityID and _hasBCDR then
+            _cost = _cost + math.floor((_abilityPower + 3) / 2)
+        end
+        -- cap cost at 9
+        if _cost > 9 then
+            _cost = 9
+        end
+
+        -- determine class
+        local _class, _atlas;
+        local className, classFile, classID = GetClassInfo(random(12))
+        if classFile:lower() == "demonhunter" or classFile:lower() == "monk" then
+            _class = "neutral";
+            _atlas = "NEUTRAL";
+        else
+            _class = classFile:lower();
+            _atlas = "CREATURE";
+        end
+
+
+        local showLoot = false;
+        local loot = {
+            art = 522189,
+            name = creatureName,
+            health = _health,
+            attack = _attack,
+            ability = _abilityID or 0,
+            power = _abilityPower or 0,
+            battlecry = _battlecry,
+            deathrattle = _deathrattle,
+            cost = _cost,
+            backgroundPath = _class,
+            background = 1,
+            atlas = _atlas,
+        };
+
+        -- use these to determine the rarity of the card
+        local rnd1 = math.floor(random()*10)
+        local rnd2 = math.floor(random()*10)
+        local rnd3 = math.floor(random()*10)
+        local rnd4 = math.floor(random()*10)
+        local rnd5 = math.floor(random()*10)
+        local rnd6 = math.floor(random()*10)
+
+        if rnd2 > rnd1 then
+            if rnd3 > rnd2 then
+                if rnd4 > rnd3 then
+                    if rnd5 > rnd4 then
+                        if rnd6 > rnd5 then
+                            --lego 13
+                            showLoot = true;
+                            loot.background = 12;
+                            -- all neutral cards have same background value
+                            if loot.atlas == "NEUTRAL" then
+                                loot.background = 1;
+                                loot.backgroundPath = "neutral_legendary"
+                            end
+
+                        else
+                            --epic 11
+                            showLoot = true;
+                            loot.background = 11;
+                            if loot.atlas == "NEUTRAL" then
+                                loot.background = 1;
+                                loot.backgroundPath = "neutral_epic"
+                            end
+                        end
+
+                    else
+                        --rare 9
+                        showLoot = true;
+                        loot.background = 8;
+                        if loot.atlas == "NEUTRAL" then
+                            loot.background = 1;
+                            loot.backgroundPath = "neutral_rare"
+                        end
+                    end
+
+                else
+                    --common 7
+                    showLoot = true;
+                    loot.background = 7;
+                    if loot.atlas == "NEUTRAL" then
+                        loot.background = 1;
+                        loot.backgroundPath = "neutral_common"
+                    end
+                end
+
+            else
+                --uncommon 5
+                showLoot = true;
+                loot.background = 5;
+                if loot.atlas == "NEUTRAL" then
+                    loot.background = 1;
+                    loot.backgroundPath = "neutral"
+                end
+            end
+        end
+
+        if not toastFrames[frameCount] then
+            toastFrames[frameCount] = CreateFrame("FRAME", "HearthstoneLiteToastFrame"..frameCount, UIParent, "HslLootToast")
+            toastFrames[frameCount]:SetPoint("CENTER", 0, -100)
+            toastFrames[frameCount]:Hide()
+        end
+
+        if showLoot == true then
+            toastFrames[frameCount]:Show();
+            --print(loot.name, loot.attack, loot.health, loot.cost)
+            print(string.format("Found card %s with %s attack and %s health and %s cost", loot.name, loot.attack, loot.health, loot.cost))
+
+
+            if not HSL.collection then
+                HSL.collection = {}
+            end
+            table.insert(HSL.collection, loot)
+        end
+
+        C_Timer.After(3, function()
+            toastFrames[frameCount]:Hide()
+        end)
+end
+
+local function lootOpened()
 
     local sourceGUIDs = {}
 
@@ -71,105 +213,13 @@ local function lootOpened()
     local frameCount = 1
     for GUID, _ in pairs(sourceGUIDs) do
         local creatureName = C_PlayerInfo.GetClass({guid = GUID})
-
-        -- use these to determine the rarity of the card
-        local rnd1 = math.floor(random()*10)
-        local rnd2 = math.floor(random()*10)
-        local rnd3 = math.floor(random()*10)
-        local rnd4 = math.floor(random()*10)
-        local rnd5 = math.floor(random()*10)
-
-        -- generate some card values
-        local _attack = math.ceil(math.floor(random()*10) * 0.7)
-        local _health = math.ceil(math.floor(random()*10) * 0.7)
-        local _ability, _abilityPower = nil, nil;
-        local _hasAbility = (random(10) < 4) and true or false;
-        if _hasAbility then
-            _ability = hsl.db.abilities[random(#hsl.db.abilities)]
-            _abilityPower = math.ceil(math.floor(random()*10) * 0.7)
-        else
-            _ability = { info = "", func = nil }
-            _abilityPower = 0
-        end
-
-        -- does card have battleCry or deathRattle
-        local _hasBCDR = (_attack < _health) and true or false;
-        local _battlecry = false
-        local _deathrattle = false
-        if _hasBCDR then
-            local bcdr = random(10)
-            if bcdr < 6 then
-                _battlecry = true;
-            else
-                _deathrattle = true;
+        if GUID:find("Creature") then
+            if (random(5) < 4) then
+                generateCreatureCard(creatureName, frameCount)
             end
         end
 
-        -- generate the cost
-        local _cost = math.floor((_attack + _health) / 2)
-        if _ability and _hasBCDR then
-            _cost = _cost + math.floor((_abilityPower + 3) / 2)
-        end
-        -- cap cost at 9
-        if _cost > 9 then
-            _cost = 9
-        end
-
-        local showLoot = false;
-        local loot = {
-            art = 522189,
-            name = creatureName,
-            health = _health,
-            attack = _attack,
-            ability = {
-                power = _abilityPower or 0,
-                info = _ability.info or "",
-                callback = _ability.func or nil,
-            },
-            battlecry = _battlecry,
-            deathrattle = _deathrattle,
-            cost = _cost,
-            backgroundPath = "neutral",
-            background = 1,
-            atlas = "NEUTRAL",
-        };
-
-
-        if rnd2 > rnd1 then
-            if rnd3 > rnd2 then
-                if rnd4 > rnd3 then
-                    if rnd5 > rnd4 then
-                        --lego
-                        showLoot = true;
-                    else
-                        --epic
-                        showLoot = true;
-                    end
-                else
-                    --rare
-                    showLoot = true;
-                end
-            else
-                --common
-                showLoot = true;
-            end
-        end
-
-        if not toastFrames[frameCount] then
-            toastFrames[frameCount] = CreateFrame("FRAME", "HearthstoneLiteToastFrame"..frameCount, UIParent, "HslLootToast")
-            toastFrames[frameCount]:SetPoint("CENTER", 0, -100)
-            toastFrames[frameCount]:Hide()
-        end
-
-        if showLoot == true then
-            toastFrames[frameCount]:Show();
-            --print(loot.name, loot.attack, loot.health, loot.cost)
-            print(string.format("Found card %s with %s attack and %s health and %s cost", loot.name, loot.attack, loot.health, loot.cost))
-        end
-
-        C_Timer.After(3, function()
-            toastFrames[frameCount]:Hide()
-        end)
+        frameCount = frameCount + 1;
     end
 end
 
@@ -540,6 +590,9 @@ function DeckBuilderMixin:HideCards()
 end
 
 function DeckBuilderMixin:LoadCards(deck)
+
+    deck = HSL.collection
+
     if not hsl.db.cards then
         return
     end

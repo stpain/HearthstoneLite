@@ -85,6 +85,7 @@ StaticPopupDialogs['ResetGlobalSettings'] = {
         HSL = nil;
         HSL = {};
         HSL.decks = {};
+        HSL.collection = {};
         info.callback()
         print("[|cff0070DDHearthstone Lite|r] "..L["GlobalSettingsReset"])
     end,
