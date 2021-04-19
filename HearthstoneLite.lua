@@ -37,6 +37,9 @@ local function navigateTo(frame)
     end
 end
 
+---generate a random creature card
+---@param creatureName looted mob name to use as card name
+---@param frameCount number of loot toast frames (this should be removed due to massive aoe looting ?)
 local function generateCreatureCard(creatureName, frameCount)
         -- generate some card values
         local _attack = math.ceil(math.floor(random()*10) * 0.7)

@@ -460,12 +460,12 @@
                             </Frame>
                             <Frame parentKey="card6" inherits="HslCard" hidden="true">
                                 <Anchors>
-                                    <Anchor point="CENTER" x="90" y="-100"/>
+                                    <Anchor point="CENTER" x="-90" y="-100"/>
                                 </Anchors>
                             </Frame>
                             <Frame parentKey="card7" inherits="HslCard" hidden="true">
                                 <Anchors>
-                                    <Anchor point="CENTER" x="-90" y="-100"/>
+                                    <Anchor point="CENTER" x="90" y="-100"/>
                                 </Anchors>
                             </Frame>
                             <Frame parentKey="card8" inherits="HslCard" hidden="true">
