@@ -187,13 +187,16 @@ local function generateCreatureCard(creatureName, frameCount)
         if showLoot == true then
             toastFrames[frameCount]:Show();
             --print(loot.name, loot.attack, loot.health, loot.cost)
-            print(string.format("Found card %s with %s attack and %s health and %s cost", loot.name, loot.attack, loot.health, loot.cost))
+            print(string.format("Found %s card %s with %s attack and %s health and %s cost", _class, loot.name, loot.attack, loot.health, loot.cost))
 
 
             if not HSL.collection then
                 HSL.collection = {}
             end
-            table.insert(HSL.collection, loot)
+            if not HSL.collection[_class] then
+                HSL.collection[_class] = {}
+            end
+            table.insert(HSL.collection[_class], loot)
         end
 
         C_Timer.After(3, function()
@@ -481,13 +484,15 @@ function DeckBuilderMixin:OnLoad()
     self.cardViewer.showClass:Resize(40,40)
     self.cardViewer.showClass.func = function()
         if self.classFile then
-            self:LoadCards(hsl.db.cards[self.classFile:lower()]);
+            --self:LoadCards(hsl.db.cards[self.classFile:lower()]);
+            self:LoadCards(HSL.collection[self.classFile:lower()]);
         end
     end
     self.cardViewer.showNeutral:Resize(40,40)
     self.cardViewer.showNeutral:SetBackground_Atlas("GarrMission_ClassIcon-Warrior-Protection")
     self.cardViewer.showNeutral.func = function()
-        self:LoadCards(hsl.db.cards.generic);
+        --self:LoadCards(hsl.db.cards.generic);
+        self:LoadCards(HSL.collection.neutral);
     end
 
     self.cardViewer.page = 1;
@@ -594,13 +599,8 @@ end
 
 function DeckBuilderMixin:LoadCards(deck)
 
-    deck = HSL.collection
-
-    if not hsl.db.cards then
-        return
-    end
     if not deck then
-        deck = hsl.db.cards.generic
+        return
     end
     if deck then
         self.deck = deck
@@ -631,7 +631,7 @@ function DeckBuilderMixin:AddCard(card)
     if HSL.decks and card then
         for _, deck in ipairs(HSL.decks[self.classID]) do
             if deck.id == self.deckID then
-                -- card is from the hsl.db.cards table
+                -- card is the HSL.collection[class] item
                 -- update the saved var table and pass back into the hybrid scroll update func
                 table.insert(deck.cards, card)
                 deckViewerListview_Update(deck.cards)

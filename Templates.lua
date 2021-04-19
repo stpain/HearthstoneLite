@@ -257,7 +257,7 @@ function HslMenuPanelDeckListviewItemMixin:OnMouseDown()
                 HearthstoneLite.deckBuilder.deckID = self.deckID;
 
                 HearthstoneLite.deckBuilder.cardViewer.showClass:SetBackground_Atlas(string.format("classicon-%s", classFile:lower()))
-                HearthstoneLite.deckBuilder:LoadCards(hsl.db.cards[classFile:lower()])
+                HearthstoneLite.deckBuilder:LoadCards(HSL.collection[classFile:lower()])
             end
         end
     end
