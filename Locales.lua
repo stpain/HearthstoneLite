@@ -4,7 +4,9 @@ local addonName, hsl = ...
 
 local L = {}
 
+L["InfoMsg"] = "[|cff0070DDHearthstone Lite|r] "
 L["HearthstoneLite"] = "Hearthstone Lite"
+L["Ok"] = "Ok"
 L["Create"] = "Create"
 L["Delete"] = "Delete"
 L["Cancel"] = "Cancel"
@@ -19,12 +21,17 @@ L["ShowClassCards"] = "Show class cards"
 L["ShowNeutralCards"] = "Show neutral cards"
 L["Menu"] = "Menu"
 L["Settings"] = "Settings"
+L["ResetGlobalSettings"] = "Reset all settings? This will delete all your decks and progress!"
+L["GlobalSettingsReset"] = "account settings have been reset."
 
 L["MenuHelptip"] = "Click the Hearthstone to return to the menu"
 L["SelectHeroHelptip"] = "Select a class to view decks.\n\nClick here to create new decks"
 L["DeckEditingHelptip"] = "|cff0070DDCtrl|r+click on a card to add it to your deck."
 L["DeckEditingHelptipPopout"] = "|cff0070DDCtrl|r+click on a card to remove it from your deck"
 L["ClassToggleHelptip"] = "Toggle between class or neutral cards"
+
+L["battlecry"] = "|cff000000Battlecry|r "
+L["deathrattle"] = "|cff000000Deathrattle|r "
 
 -- class and spec
 L['DEATHKNIGHT'] = 'Death Knight'

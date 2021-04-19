@@ -179,7 +179,7 @@
 						<Anchor point="TOPLEFT" x="10" y="-9"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="power" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
+				<FontString parentKey="attack" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
 					<Size x="30" y="30"/>
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="12" y="4"/>
@@ -213,7 +213,34 @@
 		</Scripts>
 	</Frame>
 
-
+	<Frame name="HslLootToast" mixin="HslLootToastMixin" virtual="true" enableMouse="true">
+		<Size x="276" y="96"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture atlas="loottoast-bg-questrewardupgrade" setAllPoints="true"/>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="Icon" file="interface/icons/item_hearthstone_card_purple">
+					<Size x="58" y="58"/>
+					<Anchors>
+						<Anchor point="LEFT" x="19" y="-1"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString parentKey="Text" inherits="GameFontNormalLarge" text="Random epic card!">
+					<Size x="170" y="35"/>
+					<Color r="1" g="1" b="1"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" x="83" y="20"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnShow method="OnShow"/>
+		</Scripts>
+	</Frame>
 
 
 	<!-- dropdown menu, we use this to avoid tainting the blizz menus -->

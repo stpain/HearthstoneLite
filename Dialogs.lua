@@ -76,3 +76,24 @@ StaticPopupDialogs['HslDeleteDeck'] = {
     preferredIndex = 3,
     showAlert = 1,
 }
+
+StaticPopupDialogs['ResetGlobalSettings'] = {
+    text = L["ResetGlobalSettings"],
+    button1 = L["Ok"],
+    button2 = L['Cancel'],
+    OnAccept = function(self, info)
+        HSL = nil;
+        HSL = {};
+        HSL.decks = {};
+        info.callback()
+        print("[|cff0070DDHearthstone Lite|r] "..L["GlobalSettingsReset"])
+    end,
+    OnCancel = function(self)
+
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = false,
+    preferredIndex = 3,
+    showAlert = 1,
+}

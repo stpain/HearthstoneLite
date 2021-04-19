@@ -573,6 +573,15 @@
                 </Scripts>
             </Frame>
 
+            <Frame parentKey="loot" parentArray="frames" hidden="true">
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="0" y="0"/>
+                    <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+                </Anchors>
+
+
+            </Frame>
+
             <Frame parentKey="settings" parentArray="frames" mixin="SettingsMixin" hidden="true">
                 <Anchors>
                     <Anchor point="TOPLEFT" x="0" y="0"/>
@@ -590,8 +599,7 @@
                         </Layers>
                         <Scripts>
                             <OnClick>
-                                HSL = nil;
-                                HSL = {};
+                                self:GetParent():ResetGlobalSettings()
                             </OnClick>
                         </Scripts>
                     </Button>
@@ -618,4 +626,5 @@
             </OnDragStop>
         </Scripts>
     </Frame>
+
 </UI>

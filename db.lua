@@ -5,25 +5,26 @@ local _, hsl = ...
 hsl.db = {}
 
 hsl.db.abilities = {}
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- abilities
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
-local abilities = {
-    ["attacksingle"] = function(sender, target)
-        target.health = target.health - sender.power;
-    end,
-    ["attackall"] = function(sender, targets)
-        for _, card in ipairs(targets) do
-            card.health = card.health - sender.power;
-        end
-    end,
-    ["healsingle"] = function(sender, target)
-        target.health = target.health + sender.power;
-    end,
-    ["healall"] = function(sender, targets)
-        for _, card in ipairs(targets) do
-            card.health = card.health + sender.power;
+local abilities = {}
+abilities[1] = {
+    info = "Attack a single target for %d damage",
+    func = function(sender, target)
+        if sender and target then
+            target.health = target.health - sender.attack;
         end
     end,
 }
+
+
+hsl.db.abilities = abilities;
+
+
+
+
 
 
 
@@ -39,10 +40,13 @@ generic[1] = {
     art = 522189,                       -- the artwork of the card that appears in the upper section inset
     name = "Gut Ripper",                -- name on card
     health = 4,                         -- card health
-    power = 5,                          -- card attack power
-    info = "",                          -- flavour text
-    ability = false,                    -- the card's ability (not determined yet, most likely this will be a table maybe?)
-    battlecry = false,                  -- effect when entering battle
+    attack = 5,                          -- card attack
+    ability = {
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
+    battlecry = true,                  -- effect when entering battle
     deathrattle = false,                -- effect when dies
     cost = 3,                           -- mana gem cost to play
     backgroundPath = "neutral",         -- hero/set card belongs to -> this also determines the card background art
@@ -53,9 +57,12 @@ generic[2] = {
     art = 522207,
     name = "Flame Hound",
     health = 4,
-    power = 5,
-    info = "",
-    ability = abilities.attackall,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -67,9 +74,12 @@ generic[3] = {
     art = 522206,
     name = "The Baron",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -81,11 +91,14 @@ generic[4] = {
     art = 522243,
     name = "Troll Priest",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
-    deathrattle = false,
+    deathrattle = true,
     cost = 3,
     backgroundPath = "neutral",
     background = 1,
@@ -95,9 +108,12 @@ generic[5] = {
     art = 522257,
     name = "Obsidian Drake",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -109,9 +125,12 @@ generic[6] = {
     art = 522207,
     name = "Flame Hound",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -123,9 +142,12 @@ generic[7] = {
     art = 522261,
     name = "Fire Elemental",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -137,9 +159,12 @@ generic[8] = {
     art = 536053,
     name = "Archbishop",
     health = 4,
-    power = 5,
-    info = "Weilding the power of the void, this once noble bishop now corrupted serves only darkness",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -151,9 +176,12 @@ generic[9] = {
     art = 536054,
     name = "Unknown",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -173,9 +201,12 @@ druid[1] = {
     art = 536054,
     name = "Elf druid",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -195,9 +226,12 @@ hunter[1] = {
     art = 536054,
     name = "Blood hunter",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -217,9 +251,12 @@ rogue[1] = {
     art = 536054,
     name = "Blood hunter",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -239,9 +276,12 @@ shaman[1] = {
     art = 536054,
     name = "Blood hunter",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -261,9 +301,12 @@ mage[1] = {
     art = 536054,
     name = "Blood hunter",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -283,9 +326,12 @@ priest[1] = {
     art = 536054,
     name = "Blood hunter",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -305,9 +351,12 @@ paladin[1] = {
     art = 536054,
     name = "Blood hunter",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -327,9 +376,12 @@ warlock[1] = {
     art = 536054,
     name = "Blood hunter",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -349,9 +401,12 @@ warrior[1] = {
     art = 536054,
     name = "Blood hunter",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,
@@ -371,9 +426,12 @@ deathknight[1] = {
     art = 536054,
     name = "Blood hunter",
     health = 4,
-    power = 5,
-    info = "",
-    ability = false,
+    attack = 5,
+    ability = { 
+        power = 2,
+        info = abilities[1].info,
+        callback = abilities[1].func,
+    },
     battlecry = false,
     deathrattle = false,
     cost = 3,

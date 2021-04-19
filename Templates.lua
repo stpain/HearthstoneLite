@@ -326,7 +326,7 @@ function HslCardMixin:OnShow()
     -- quick font size hack
     local fontName, _, fontFlags = self.cost:GetFont()
     self.cost:SetFont(fontName, 28, fontFlags)
-    self.power:SetFont(fontName, 28, fontFlags)
+    self.attack:SetFont(fontName, 28, fontFlags)
     self.health:SetFont(fontName, 28, fontFlags)
     self.name:SetFont(fontName, 10, fontFlags)
 end
@@ -336,10 +336,19 @@ function HslCardMixin:LoadCard(card)
     self.card = card;
     self.art:SetTexture(card.art)
     self.cost:SetText(card.cost)
-    self.power:SetText(card.power)
+    self.attack:SetText(card.attack)
     self.health:SetText(card.health)
     self.name:SetText(card.name)
-    self.info:SetText(card.info)
+
+    if card.ability then
+        if card.battlecry then
+            self.info:SetText(L["battlecry"]..string.format(card.ability.info, card.ability.power))
+        elseif card.deathrattle then
+            self.info:SetText(L["deathrattle"]..string.format(card.ability.info, card.ability.power))
+        else
+            self.info:SetText(string.format(card.ability.info, card.ability.power))
+        end
+    end
 
     if card.background > 4 then
         self.name:SetPoint("CENTER", 4, -8)
@@ -347,7 +356,7 @@ function HslCardMixin:LoadCard(card)
         self.name:SetPoint("CENTER", 4, -4)
     end
 
-    for _, attribute in ipairs({"cost", "power", "health"}) do
+    for _, attribute in ipairs({"cost", "attack", "health"}) do
         if self.card[attribute] then
             self[attribute]:Show();
         else
@@ -372,10 +381,12 @@ end
 function HslCardMixin:ClearCard()
     self.art:SetTexture(nil)
     self.cost:SetText(nil)
-    self.power:SetText(nil)
+    self.attack:SetText(nil)
     self.health:SetText(nil)
     self.name:SetText(nil)
     self.info:SetText(nil)
+
+    self.card = nil;
 
     self:Hide()
 end
@@ -387,6 +398,13 @@ function HslCardMixin:OnMouseDown()
     end
 end
 
+
+
+HslLootToastMixin = {}
+
+function HslLootToastMixin:OnShow()
+    PlaySound(1068314)
+end
 
 
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--

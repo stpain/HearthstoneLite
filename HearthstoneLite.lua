@@ -9,16 +9,23 @@ local randomSeed = time()
 local showHelptips = false;
 local helptips = {}
 
+local toastFrames = {};
+local playerMixin = nil;
+
+--- prints a message with addon name in []
 local function printInfoMessage(msg)
     print("[|cff0070DDHearthstone Lite|r] "..msg)
 end
 
+--- adjusts the font size of a fontObject while keeping fontName and fontFlags intact
 local function fontSizeHack(obj, size)
     -- font size hack
     local fontName, _, fontFlags = obj:GetFont()
     obj:SetFont(fontName, size, fontFlags)
 end
 
+--- hides all frames in the parent \<Frames\> element and then shows the frame given
+---@param frame frame to be shown
 local function navigateTo(frame)
     for k, frame in ipairs(HearthstoneLite.frames) do
         frame:Hide()
@@ -31,10 +38,139 @@ local function navigateTo(frame)
 end
 
 local function lootOpened()
-    print('looting for hearthstone')
-    local rnd1 = math.floor(random()*10)
-    local rnd2 = math.floor(random()*10)
-    print(rnd1..'.'..rnd2)
+
+    -- +++++ sample card table ++++++
+    -- {
+    --     art = 522189,                       -- the artwork of the card that appears in the upper section inset
+    --     name = "Gut Ripper",                -- name on card
+    --     health = 4,                         -- card health
+    --     attack = 5,                          -- card attack
+    --     ability = {
+    --         power = 2,
+    --         key = "attacksingle",
+    --         callback = abilities.attacksingle,
+    --     },
+    --     battlecry = true,                  -- effect when entering battle
+    --     deathrattle = false,                -- effect when dies
+    --     cost = 3,                           -- mana gem cost to play
+    --     backgroundPath = "neutral",         -- hero/set card belongs to -> this also determines the card background art
+    --     background = 1,                     -- this is the background of the card, from topleft 1>14 as viewed on template.tga
+    --     atlas = "NEUTRAL",                  -- this determines the texcoords used only weapon or neutral require different
+    -- }
+
+    local sourceGUIDs = {}
+
+    for i = 1, GetNumLootItems() do
+		local sources = {GetLootSourceInfo(i)}
+		local _, name = GetLootSlotInfo(i)
+		for j = 1, #sources, 2 do
+			sourceGUIDs[sources[j]] = false;
+		end
+	end
+
+    local frameCount = 1
+    for GUID, _ in pairs(sourceGUIDs) do
+        local creatureName = C_PlayerInfo.GetClass({guid = GUID})
+
+        -- use these to determine the rarity of the card
+        local rnd1 = math.floor(random()*10)
+        local rnd2 = math.floor(random()*10)
+        local rnd3 = math.floor(random()*10)
+        local rnd4 = math.floor(random()*10)
+        local rnd5 = math.floor(random()*10)
+
+        -- generate some card values
+        local _attack = math.ceil(math.floor(random()*10) * 0.7)
+        local _health = math.ceil(math.floor(random()*10) * 0.7)
+        local _ability, _abilityPower = nil, nil;
+        local _hasAbility = (random(10) < 4) and true or false;
+        if _hasAbility then
+            _ability = hsl.db.abilities[random(#hsl.db.abilities)]
+            _abilityPower = math.ceil(math.floor(random()*10) * 0.7)
+        else
+            _ability = { info = "", func = nil }
+            _abilityPower = 0
+        end
+
+        -- does card have battleCry or deathRattle
+        local _hasBCDR = (_attack < _health) and true or false;
+        local _battlecry = false
+        local _deathrattle = false
+        if _hasBCDR then
+            local bcdr = random(10)
+            if bcdr < 6 then
+                _battlecry = true;
+            else
+                _deathrattle = true;
+            end
+        end
+
+        -- generate the cost
+        local _cost = math.floor((_attack + _health) / 2)
+        if _ability and _hasBCDR then
+            _cost = _cost + math.floor((_abilityPower + 3) / 2)
+        end
+        -- cap cost at 9
+        if _cost > 9 then
+            _cost = 9
+        end
+
+        local showLoot = false;
+        local loot = {
+            art = 522189,
+            name = creatureName,
+            health = _health,
+            attack = _attack,
+            ability = {
+                power = _abilityPower or 0,
+                info = _ability.info or "",
+                callback = _ability.func or nil,
+            },
+            battlecry = _battlecry,
+            deathrattle = _deathrattle,
+            cost = _cost,
+            backgroundPath = "neutral",
+            background = 1,
+            atlas = "NEUTRAL",
+        };
+
+
+        if rnd2 > rnd1 then
+            if rnd3 > rnd2 then
+                if rnd4 > rnd3 then
+                    if rnd5 > rnd4 then
+                        --lego
+                        showLoot = true;
+                    else
+                        --epic
+                        showLoot = true;
+                    end
+                else
+                    --rare
+                    showLoot = true;
+                end
+            else
+                --common
+                showLoot = true;
+            end
+        end
+
+        if not toastFrames[frameCount] then
+            toastFrames[frameCount] = CreateFrame("FRAME", "HearthstoneLiteToastFrame"..frameCount, UIParent, "HslLootToast")
+            toastFrames[frameCount]:SetPoint("CENTER", 0, -100)
+            toastFrames[frameCount]:Hide()
+        end
+
+        if showLoot == true then
+            toastFrames[frameCount]:Show();
+            --print(loot.name, loot.attack, loot.health, loot.cost)
+            print(string.format("Found card %s with %s attack and %s health and %s cost", loot.name, loot.attack, loot.health, loot.cost))
+        end
+
+        C_Timer.After(3, function()
+            toastFrames[frameCount]:Hide()
+        end)
+    end
 end
 
 
@@ -182,12 +318,10 @@ function HearthstoneLiteMixin:OnLoad()
 end
 
 function HearthstoneLiteMixin:OnShow()
-    -- HearthstoneLitePortrait:SetTexture([[Interface\Addons\HearthstoneLite\Media\icon]])
-    -- HearthstoneLitePortrait:SetParent(self)
 
+    -- set helptip text and add to helptips table
     self.menuHelptip.Text:SetText(L["MenuHelptip"])
     table.insert(helptips, self.menuHelptip)
-
 end
 
 HearthstoneButtonMixin = {}
@@ -236,6 +370,10 @@ function HomeMixin:OnShow()
     self.settings.Text:SetPoint("TOP", 0, -10)
     self.settings:SetText(L["Settings"])
 
+
+    -- introstinger ?
+    --PlaySoundFile(1068313)
+
 end
 
 function HomeMixin:MenuButton_OnClick(frame)
@@ -250,6 +388,11 @@ function SettingsMixin:OnShow()
     self.resetSavedVar.Text:SetText('Reset saved var')
     self.resetSavedVar.Text:SetPoint("TOP", 0, -10)
 end
+
+function SettingsMixin:ResetGlobalSettings()
+    StaticPopup_Show('ResetGlobalSettings', nil, nil, {callback = deckViewerDeckListview_Update})
+end
+
 
 
 
@@ -310,6 +453,9 @@ end
 
 function DeckBuilderMixin:OnShow()
 
+    -- deck open
+    PlaySound(1068314)
+
     self.selectHeroHelptip.Text:SetText(L["SelectHeroHelptip"])
     self.selectHeroHelptip:Show()
     table.insert(helptips, self.selectHeroHelptip)
@@ -330,6 +476,8 @@ function DeckBuilderMixin:OnShow()
     deckViewerDeckListview_Update(nil)
 
     HearthstoneLite.deckBuilder:HideCards()
+
+    self.deckViewer:Hide()
 
 end
 
@@ -421,6 +569,9 @@ function DeckBuilderMixin:AddCard(card)
     if not HSL then
         return;
     end
+    if not HSL.decks[self.classID] then
+        return;
+    end
     if HSL.decks and card then
         for _, deck in ipairs(HSL.decks[self.classID]) do
             if deck.id == self.deckID then
@@ -428,7 +579,7 @@ function DeckBuilderMixin:AddCard(card)
                 -- update the saved var table and pass back into the hybrid scroll update func
                 table.insert(deck.cards, card)
                 deckViewerListview_Update(deck.cards)
-                printInfoMessage(string.format("added %s to deck %s", card.name, deck.name))
+                --printInfoMessage(string.format("added %s to deck %s", card.name, deck.name))
                 return;
             end
         end
