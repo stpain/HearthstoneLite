@@ -10,6 +10,7 @@ L["Ok"] = "Ok"
 L["Create"] = "Create"
 L["Delete"] = "Delete"
 L["Cancel"] = "Cancel"
+L["Collection"] = "Collection"
 L["DeckBuilder"] = "Deck builder"
 L["NewDeck"] = "Create new deck for" -- used in the static popup dialog
 L["DeleteDeck"] = "Do you want to delete" -- used in the static popup dialog
