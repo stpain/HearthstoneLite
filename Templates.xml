@@ -209,6 +209,7 @@
 
 		<Scripts>
 			<OnShow method="OnShow"/>
+			<OnHide method="OnHide"/>
 			<OnMouseDown method="OnMouseDown"/>
 		</Scripts>
 	</Frame>

@@ -339,14 +339,20 @@ function HslCardMixin:LoadCard(card)
     self.attack:SetText(card.attack)
     self.health:SetText(card.health)
     self.name:SetText(card.name)
+    self.info:SetText("")
 
-    if card.battlecry > 0 then
-        self.info:SetText(L["battlecry"]..string.format(hsl.db.battlecries[card.battlecry].info, card.power))
-    elseif card.deathrattle > 0 then
-        self.info:SetText(L["deathrattle"]..string.format(hsl.db.deathrattles[card.deathrattle].info, card.power))
-    elseif card.ability > 0 then
-        self.info:SetText(string.format(hsl.db.abilities[card.ability].info, card.power))
+    local function infoDelay()
+        if card.battlecry and card.battlecry > 0 then
+            self.info:SetText(L["battlecry"]..string.format(hsl.db.battlecries[card.battlecry].info, card.power))
+        end
+        if card.deathrattle and card.deathrattle > 0 then
+            self.info:SetText(L["deathrattle"]..string.format(hsl.db.deathrattles[card.deathrattle].info, card.power))
+        end
+        if card.ability and card.ability > 0 then
+            self.info:SetText(string.format(hsl.db.abilities[card.class][card.ability].info, card.power))
+        end
     end
+    C_Timer.After(0, infoDelay)
 
     if card.background > 4 then
         self.name:SetPoint("CENTER", 4, -8)
@@ -376,17 +382,15 @@ function HslCardMixin:LoadCard(card)
     self:Show()
 end
 
-function HslCardMixin:ClearCard()
+function HslCardMixin:OnHide()
     self.art:SetTexture(nil)
-    self.cost:SetText(nil)
-    self.attack:SetText(nil)
-    self.health:SetText(nil)
-    self.name:SetText(nil)
-    self.info:SetText(nil)
+    self.cost:SetText("")
+    self.attack:SetText("")
+    self.health:SetText("")
+    self.name:SetText("")
+    self.info:SetText("")
 
     self.card = nil;
-
-    self:Hide()
 end
 
 function HslCardMixin:OnMouseDown()

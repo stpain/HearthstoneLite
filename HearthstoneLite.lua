@@ -39,56 +39,30 @@ local function navigateTo(frame)
     end
 end
 
----generate a random creature card
----@param creatureName looted mob name to use as card name
----@param frameCount number of loot toast frames (this should be removed due to massive aoe looting ?)
-local function generateCreatureCard(creatureName, frameCount)
-    -- scaler
-    local scaler = random(3,7) / 10
-    -- generate some card values
-    local _attack = math.floor(random(10) * scaler)
-    if _attack == 0 then
-        _attack = 1;
-    end
-    local _health = math.floor(random(10) * scaler)
-    if _health == 0 then
-        _health = 1;
-    end
-    local _abilityID, _abilityPower = nil, nil;
-    local _hasAbility = (random(10) < 4) and true or false;
-    if _hasAbility then
-        _abilityID = random(1, #hsl.db.abilities)
-        _abilityPower = math.ceil(random(6) * scaler)
+
+---return a random number thats modified with a random scaler
+local function generateRandom()
+    local r1, r2, r3, r4, r5 = random(4), random(4), random(4), random(4), random(14) -- max=30
+    -- 20% chance for a bonus
+    if (random(100) < 20) then
+        return math.floor((r1+r2+r3+r4+r5) / 5) + random(3)
     else
-        _abilityID = 0
-        _abilityPower = 0
+        return math.floor((r1+r2+r3+r4+r5) / 5)
     end
+end
 
-    -- does card have battleCry or deathRattle
-    local _hasBCDR = (random(10) < 4) and true or false;
-    local _battlecry = 0;
-    local _deathrattle = 0;
-    if _hasBCDR then
-        local bcdr = random(10)
-        if bcdr < 6 then
-            _battlecry = random(1, #hsl.db.battlecries);
-        else
-            _deathrattle = random(1, #hsl.db.deathrattles);
-        end
-        -- make sure bcdr has a power
-        if _abilityPower == 0 then
-            _abilityPower = random(3)
-        end
-    end
+---generate a random creature card
+---@param creatureName name to use as card name
+---@param returnLink boolean should return a card hyperlink
+---@param isElite boolean roll for legendary card from elite mob
+local function generateCreatureCard(creatureName, returnLink, isElite)
 
-    -- generate the cost
-    local _cost = ((_attack + _health) < 6) and math.floor((_attack + _health) / 2) or math.ceil((_attack + _health) / 2)
-    if _abilityPower > 0 then
-        _cost = _cost + math.floor((_abilityPower + 1) / 3)
-    end
-    -- cap cost at 9
-    if _cost > 9 then
-        _cost = 9
+    -- we need to generate some values for the card
+    -- we will use random() quite a bit
+    -- first determine if mob drops a card
+    local isDrop = random(1, 100)
+    if isDrop > 9 then -- 10% chance of a card dropping
+        --return
     end
 
     -- determine class
@@ -102,134 +76,175 @@ local function generateCreatureCard(creatureName, frameCount)
         _atlas = "CREATURE";
     end
 
+    -- generate some card values
+    local _attack = generateRandom()
+    local _health = generateRandom()
+    -- health cannot be 0
+    if _health == 0 then
+        _health = 1;
+    end
+
+    --if health and attack match then 50% chance to re-roll then
+    if _attack == _health and (random(100) < 51) then
+        _attack = generateRandom()
+        _health = generateRandom()
+        -- health cannot be 0
+        if _health == 0 then
+            _health = 1;
+        end
+    end
+
+    --does card have an ability
+    local _abilityID, _abilityPower = nil, nil;
+    local _hasAbility = (random(10) < 6) and true or false;
+    if _hasAbility then
+        _abilityID = random(1, #hsl.db.abilities[_class] - 1)
+        _abilityPower = generateRandom()
+    else
+        _abilityID = 0
+        _abilityPower = 0
+    end
+
+    -- does card have battleCry or deathRattle
+    local _hasBCDR = ((_abilityID == 0) and (random(10) < 4)) and true or false;
+    local _battlecry = 0;
+    local _deathrattle = 0;
+    --if card has an ability then cancel
+    if _hasBCDR then
+        if random(10) < 6 then
+            _battlecry = random(#hsl.db.battlecries - 1);
+        else
+            _deathrattle = random(#hsl.db.deathrattles - 1);
+        end
+        -- make sure bcdr has a power
+        if _abilityPower == 0 then
+            _abilityPower = random(3)
+        end
+    end
+
+    -- generate the cost
+    local _cost = ((_attack + _health) < 7) and math.floor((_attack + _health) / 3) or math.ceil((_attack + _health) / 3) + 1
+    if _abilityPower > 0 then
+        _cost = _cost + math.ceil((_abilityPower + 3) / 3)
+    end
+    -- cap cost at 9
+    if _cost > 9 then
+        _cost = 9
+    end
+    if _cost == 0 then
+        _cost = 1;
+    end
+
     local showLoot = false;
     local loot = {
         art = 522189,                       -- this needs to be a lookup table value, need to go through art and make lookup table
         name = creatureName,                -- name on card
         health = _health,
         attack = _attack,
-        ability = _abilityID or 0,
-        power = _abilityPower or 0,
-        battlecry = _battlecry,
-        deathrattle = _deathrattle,
         cost = _cost,
         backgroundPath = _class,
         background = 1,
         atlas = _atlas,
         rarity = 1,
+        class = _class,
     };
 
-    -- use these to determine the rarity of the card
-    -- rare and better also get an ability/bcdr
-    local rnd1 = random(10)
-    local rnd2 = random(10)
-    local rnd3 = random(10)
-    local rnd4 = random(10)
-    local rnd5 = random(10)
-    local rnd6 = random(10)
-    local rnd7 = random(3)
-
-
-    if rnd2 > rnd1 then
-        if rnd3 > rnd2 then
-            if rnd4 > rnd3 then
-                if rnd5 > rnd4 then
-                    if rnd6 > rnd5 then
-                        --legendary 13
-                        showLoot = true;
-                        loot.background = 13;
-                        loot.rarity = 5;
-                        loot.power = math.ceil(random(6,10) * scaler)
-                        if rnd7 == 3 then
-                            loot.ability = random(1, #hsl.db.abilities) -- make a special lego ability table
-                        elseif rnd7 == 2 then
-                            loot.battlecry = random(1, #hsl.db.battlecries);
-                        else
-                            loot.deathrattle = random(1, #hsl.db.deathrattles);
-                        end
-
-                        -- all neutral cards have same background value, change the path to get different rarities
-                        if loot.atlas == "NEUTRAL" then
-                            loot.background = 1;
-                            loot.backgroundPath = "neutral_legendary"
-                        end
-
-                    else
-                        --epic 11
-                        showLoot = true;
-                        loot.background = 11;
-                        loot.rarity = 4;
-                        loot.power = math.ceil(random(4,7) * scaler)
-                        if rnd7 == 3 then
-                            loot.ability = random(1, #hsl.db.abilities)
-                        elseif rnd7 == 2 then
-                            loot.battlecry = random(1, #hsl.db.battlecries);
-                        else
-                            loot.deathrattle = random(1, #hsl.db.deathrattles);
-                        end
-
-                        if loot.atlas == "NEUTRAL" then
-                            loot.background = 1;
-                            loot.backgroundPath = "neutral_epic"
-                        end
-                    end
-
-                else
-                    --rare 9
-                    showLoot = true;
-                    loot.background = 9;
-                    loot.rarity = 3;
-                    loot.power = math.ceil(random(2,5) * scaler)
-                    if rnd7 == 3 then
-                        loot.ability = random(1, #hsl.db.abilities)
-                    elseif rnd7 == 2 then
-                        loot.battlecry = random(1, #hsl.db.battlecries);
-                    else
-                        loot.deathrattle = random(1, #hsl.db.deathrattles);
-                    end
-
-                    if loot.atlas == "NEUTRAL" then
-                        loot.background = 1;
-                        loot.backgroundPath = "neutral_rare"
-                    end
-                end
-
-            else
-                --common 7
-                showLoot = true;
-                loot.background = 7;
-                loot.rarity = 2
-                if loot.atlas == "NEUTRAL" then
-                    loot.background = 1;
-                    loot.backgroundPath = "neutral_common"
-                end
-            end
-
+    local rnd7 = random(3) -- used to decide between ability/battlecry/deathrattle for cards rare and above
+    local rnd = random(100)
+    -- 45%
+    if rnd < 46 then
+        --common 5 these get no ability or bcdr
+        showLoot = true;
+        loot.abilityID = 0;
+        loot.power = 0;
+        loot.battlecry = 0;
+        loot.deathrattle = 0;
+        loot.background = 5;
+        loot.rarity = 1;
+        if loot.atlas == "NEUTRAL" then
+            loot.background = 1;
+            loot.backgroundPath = "neutral"
+        end  
+    end
+    -- 35%
+    if rnd > 45 and rnd < 81 then
+        --uncommon 7 ability decided earlier
+        showLoot = true;
+        loot.abilityID = _abilityID;
+        loot.power = _abilityPower;
+        loot.battlecry = _battlecry;
+        loot.deathrattle = _deathrattle;
+        loot.background = 7;
+        loot.rarity = 2
+        if loot.atlas == "NEUTRAL" then
+            loot.background = 1;
+            loot.backgroundPath = "neutral_common"
+        end  
+    end
+    -- 15%
+    if rnd > 80 and rnd < 96 then
+        --rare 9
+        showLoot = true;
+        loot.background = 9;
+        loot.rarity = 3;
+        loot.power = random(2,6)
+        if rnd7 == 3 then
+            loot.ability = random(1, #hsl.db.abilities[_class] - 1)
+        elseif rnd7 == 2 then
+            loot.battlecry = random(1, #hsl.db.battlecries - 1);
         else
-            --uncommon 5
-            showLoot = true;
-            loot.background = 5;
-            loot.rarity = 1;
-            if loot.atlas == "NEUTRAL" then
-                loot.background = 1;
-                loot.backgroundPath = "neutral"
-            end
+            loot.deathrattle = random(1, #hsl.db.deathrattles - 1);
         end
+
+        if loot.atlas == "NEUTRAL" then
+            loot.background = 1;
+            loot.backgroundPath = "neutral_rare"
+        end     
+    end
+    if rnd > 95 then
+        --epic 11
+        showLoot = true;
+        loot.background = 11;
+        loot.rarity = 4;
+        loot.power = random(4,8)
+        if rnd7 == 3 then
+            loot.ability = random(1, #hsl.db.abilities[_class] - 1)
+        elseif rnd7 == 2 then
+            loot.battlecry = random(1, #hsl.db.battlecries - 1);
+        else
+            loot.deathrattle = random(1, #hsl.db.deathrattles - 1);
+        end
+
+        if loot.atlas == "NEUTRAL" then
+            loot.background = 1;
+            loot.backgroundPath = "neutral_epic"
+        end 
+    end
+    if rnd > 99 and isElite then
+        --legendary
+        showLoot = true;
+        loot.background = 13;
+        loot.rarity = 5;
+        loot.power = random(7,10)
+        if rnd7 == 3 then
+            loot.ability = random(1, #hsl.db.abilities[_class] - 1)
+        elseif rnd7 == 2 then
+            loot.battlecry = random(1, #hsl.db.battlecries - 1);
+        else
+            loot.deathrattle = random(1, #hsl.db.deathrattles - 1);
+        end
+
+        if loot.atlas == "NEUTRAL" then
+            loot.background = 1;
+            loot.backgroundPath = "neutral_legendary"
+        end 
     end
 
-    if not toastFrames[frameCount] then
-        toastFrames[frameCount] = CreateFrame("FRAME", "HearthstoneLiteToastFrame"..frameCount, UIParent, "HslLootToast")
-        toastFrames[frameCount]:SetPoint("CENTER", 0, -100)
-        toastFrames[frameCount]:Hide()
-    end
+    local link;
 
     if showLoot == true then
-        --toastFrames[frameCount]:Show();
-        --print(loot.name, loot.attack, loot.health, loot.cost)
-        --print(string.format("|cff1D9800You receive hearthstone card:|r %s %s", loot.name, _class))
 
-        --linkType, addon, name, attack, health, cost, class, ability
-        local link = string.format("|cFFFFFF00|Hgarrmission:hsl:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
+        link = string.format("|cFFFFFF00|Hgarrmission:hsl:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
             tostring(loot.art),
             tostring(loot.name), 
             tostring(loot.health), 
@@ -256,9 +271,11 @@ local function generateCreatureCard(creatureName, frameCount)
         table.insert(HSL.collection[_class], loot)
     end
 
-    -- C_Timer.After(3, function()
-    --     toastFrames[frameCount]:Hide()
-    -- end)
+    -- return the card link
+    if returnLink and link then
+        return link
+    end
+
 end
 
 
@@ -275,14 +292,16 @@ local function lootOpened()
 		end
 	end
 
-    -- looting creatures gives creature type calendarShowDarkmoon
+    -- looting creatures gives creature type cards
     -- looting chest etc gives a spell/weapon type card
     local frameCount = 1
     for GUID, _ in pairs(sourceGUIDs) do
         local creatureName = C_PlayerInfo.GetClass({guid = GUID})
         if GUID:find("Creature") then
-            if (random(5) < 4) then
-                generateCreatureCard(creatureName, frameCount)
+            if (random(3) < 4) then
+                for i = 1, 100 do
+                    generateCreatureCard(creatureName, false, (UnitClassification("mouseover") == "elite") and true or false) -- if the target is an elite chance for legendary card
+                end
             end
         end
 
@@ -505,13 +524,20 @@ end
 
 SettingsMixin = {}
 
+local function resetUI()
+    deckViewerDeckListview_Update()
+    deckViewerListview_Update()
+    HearthstoneLite.collection:HideCards()
+    HearthstoneLite.collection.deck = nil;
+end
+
 function SettingsMixin:OnShow()
     self.resetSavedVar.Text:SetText('Reset saved var')
     self.resetSavedVar.Text:SetPoint("TOP", 0, -10)
 end
 
 function SettingsMixin:ResetGlobalSettings()
-    StaticPopup_Show('ResetGlobalSettings', nil, nil, {callback = deckViewerDeckListview_Update})
+    StaticPopup_Show('ResetGlobalSettings', nil, nil, {callback = resetUI})
 end
 
 
@@ -560,11 +586,20 @@ function HslCollectionMixin:OnLoad()
     self.nextPage.Highlight:SetRotation(3.14)
 end
 
+function HslCollectionMixin:HideCards()
+    for i = 1, 10 do
+        self["card"..i]:Hide()
+    end
+end
+
 function HslCollectionMixin:PrevPage()
     if not HSL.collection then
         return;
     end
     if self.page == 1 then
+        return
+    end
+    if not self.deck then
         return
     end
     self.page = self.page - 1;
@@ -575,7 +610,7 @@ function HslCollectionMixin:PrevPage()
         if self.deck[i] then
             self["card"..cardIndex]:LoadCard(self.deck[i])
         else
-            self["card"..cardIndex]:ClearCard()
+            self["card"..cardIndex]:Hide()
         end
         cardIndex = cardIndex + 1;
     end
@@ -584,6 +619,9 @@ end
 function HslCollectionMixin:NextPage()
     if not HSL.collection then
         return;
+    end
+    if not self.deck then
+        return
     end
     if self.page == math.ceil(#self.deck / 10) then
         return
@@ -596,7 +634,7 @@ function HslCollectionMixin:NextPage()
         if self.deck[i] then
             self["card"..cardIndex]:LoadCard(self.deck[i])
         else
-            self["card"..cardIndex]:ClearCard()
+            self["card"..cardIndex]:Hide()
         end
         cardIndex = cardIndex + 1;
     end
@@ -714,7 +752,7 @@ function DeckBuilderMixin:NextPage()
         if self.deck[i] then
             self.cardViewer["card"..cardIndex]:LoadCard(self.deck[i])
         else
-            self.cardViewer["card"..cardIndex]:ClearCard()
+            self.cardViewer["card"..cardIndex]:Hide()
         end
         cardIndex = cardIndex + 1;
     end
@@ -735,7 +773,7 @@ function DeckBuilderMixin:PrevPage()
         if self.deck[i] then
             self.cardViewer["card"..cardIndex]:LoadCard(self.deck[i])
         else
-            self.cardViewer["card"..cardIndex]:ClearCard()
+            self.cardViewer["card"..cardIndex]:Hide()
         end
         cardIndex = cardIndex + 1;
     end
@@ -873,7 +911,7 @@ end)
 local function parseCardHyperlink(link, showCard)
     local linkType, addon, _art, _name, _health, _attack, _ability, _power, _battlecry, _deathrattle, _cost, _backgroundPath, _background, _atlas, _rarity = strsplit(":", link)
     if _name and showCard then
-        hyperlinkCard:ClearCard()
+        hyperlinkCard:Hide()
         hyperlinkCard:LoadCard({
             art = tonumber(_art),
             name = _name,
