@@ -43,12 +43,14 @@ end
 ---@param creatureName looted mob name to use as card name
 ---@param frameCount number of loot toast frames (this should be removed due to massive aoe looting ?)
 local function generateCreatureCard(creatureName, frameCount)
+    -- scaler
+    local scaler = random(3,7) / 10
     -- generate some card values
-    local _attack = math.ceil(random(10) * 0.7)
+    local _attack = math.floor(random(10) * scaler)
     if _attack == 0 then
         _attack = 1;
     end
-    local _health = math.ceil(random(10) * 0.7)
+    local _health = math.floor(random(10) * scaler)
     if _health == 0 then
         _health = 1;
     end
@@ -56,7 +58,7 @@ local function generateCreatureCard(creatureName, frameCount)
     local _hasAbility = (random(10) < 4) and true or false;
     if _hasAbility then
         _abilityID = random(1, #hsl.db.abilities)
-        _abilityPower = math.ceil(random(6) * 0.7)
+        _abilityPower = math.ceil(random(6) * scaler)
     else
         _abilityID = 0
         _abilityPower = 0
@@ -64,8 +66,8 @@ local function generateCreatureCard(creatureName, frameCount)
 
     -- does card have battleCry or deathRattle
     local _hasBCDR = (random(10) < 4) and true or false;
-    local _battlecry = false
-    local _deathrattle = false
+    local _battlecry = 0;
+    local _deathrattle = 0;
     if _hasBCDR then
         local bcdr = random(10)
         if bcdr < 6 then
@@ -82,7 +84,7 @@ local function generateCreatureCard(creatureName, frameCount)
     -- generate the cost
     local _cost = ((_attack + _health) < 6) and math.floor((_attack + _health) / 2) or math.ceil((_attack + _health) / 2)
     if _abilityPower > 0 then
-        _cost = _cost + math.floor((_abilityPower + 3) / 2)
+        _cost = _cost + math.floor((_abilityPower + 1) / 3)
     end
     -- cap cost at 9
     if _cost > 9 then
@@ -100,7 +102,6 @@ local function generateCreatureCard(creatureName, frameCount)
         _atlas = "CREATURE";
     end
 
-
     local showLoot = false;
     local loot = {
         art = 522189,                       -- this needs to be a lookup table value, need to go through art and make lookup table
@@ -115,15 +116,19 @@ local function generateCreatureCard(creatureName, frameCount)
         backgroundPath = _class,
         background = 1,
         atlas = _atlas,
+        rarity = 1,
     };
 
     -- use these to determine the rarity of the card
+    -- rare and better also get an ability/bcdr
     local rnd1 = random(10)
     local rnd2 = random(10)
     local rnd3 = random(10)
     local rnd4 = random(10)
     local rnd5 = random(10)
     local rnd6 = random(10)
+    local rnd7 = random(3)
+
 
     if rnd2 > rnd1 then
         if rnd3 > rnd2 then
@@ -133,6 +138,16 @@ local function generateCreatureCard(creatureName, frameCount)
                         --legendary 13
                         showLoot = true;
                         loot.background = 13;
+                        loot.rarity = 5;
+                        loot.power = math.ceil(random(6,10) * scaler)
+                        if rnd7 == 3 then
+                            loot.ability = random(1, #hsl.db.abilities) -- make a special lego ability table
+                        elseif rnd7 == 2 then
+                            loot.battlecry = random(1, #hsl.db.battlecries);
+                        else
+                            loot.deathrattle = random(1, #hsl.db.deathrattles);
+                        end
+
                         -- all neutral cards have same background value, change the path to get different rarities
                         if loot.atlas == "NEUTRAL" then
                             loot.background = 1;
@@ -143,6 +158,16 @@ local function generateCreatureCard(creatureName, frameCount)
                         --epic 11
                         showLoot = true;
                         loot.background = 11;
+                        loot.rarity = 4;
+                        loot.power = math.ceil(random(4,7) * scaler)
+                        if rnd7 == 3 then
+                            loot.ability = random(1, #hsl.db.abilities)
+                        elseif rnd7 == 2 then
+                            loot.battlecry = random(1, #hsl.db.battlecries);
+                        else
+                            loot.deathrattle = random(1, #hsl.db.deathrattles);
+                        end
+
                         if loot.atlas == "NEUTRAL" then
                             loot.background = 1;
                             loot.backgroundPath = "neutral_epic"
@@ -153,6 +178,16 @@ local function generateCreatureCard(creatureName, frameCount)
                     --rare 9
                     showLoot = true;
                     loot.background = 9;
+                    loot.rarity = 3;
+                    loot.power = math.ceil(random(2,5) * scaler)
+                    if rnd7 == 3 then
+                        loot.ability = random(1, #hsl.db.abilities)
+                    elseif rnd7 == 2 then
+                        loot.battlecry = random(1, #hsl.db.battlecries);
+                    else
+                        loot.deathrattle = random(1, #hsl.db.deathrattles);
+                    end
+
                     if loot.atlas == "NEUTRAL" then
                         loot.background = 1;
                         loot.backgroundPath = "neutral_rare"
@@ -163,6 +198,7 @@ local function generateCreatureCard(creatureName, frameCount)
                 --common 7
                 showLoot = true;
                 loot.background = 7;
+                loot.rarity = 2
                 if loot.atlas == "NEUTRAL" then
                     loot.background = 1;
                     loot.backgroundPath = "neutral_common"
@@ -173,6 +209,7 @@ local function generateCreatureCard(creatureName, frameCount)
             --uncommon 5
             showLoot = true;
             loot.background = 5;
+            loot.rarity = 1;
             if loot.atlas == "NEUTRAL" then
                 loot.background = 1;
                 loot.backgroundPath = "neutral"
@@ -187,10 +224,28 @@ local function generateCreatureCard(creatureName, frameCount)
     end
 
     if showLoot == true then
-        toastFrames[frameCount]:Show();
+        --toastFrames[frameCount]:Show();
         --print(loot.name, loot.attack, loot.health, loot.cost)
-        print(string.format("Found %s card %s with %s attack and %s health and %s cost", _class, loot.name, loot.attack, loot.health, loot.cost))
+        --print(string.format("|cff1D9800You receive hearthstone card:|r %s %s", loot.name, _class))
 
+        --linkType, addon, name, attack, health, cost, class, ability
+        local link = string.format("|cFFFFFF00|Hgarrmission:hsl:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
+            tostring(loot.art),
+            tostring(loot.name), 
+            tostring(loot.health), 
+            tostring(loot.attack),  
+            tostring(loot.ability), 
+            tostring(loot.power), 
+            tostring(loot.battlecry), 
+            tostring(loot.deathrattle), 
+            tostring(loot.cost), 
+            tostring(loot.backgroundPath), 
+            tostring(loot.background), 
+            tostring(loot.atlas), 
+            tostring(loot.rarity), 
+            ITEM_QUALITY_COLORS[loot.rarity].hex.."["..loot.name.."]|r"
+        )
+        print(string.format("|cff1D9800You receive hearthstone card:|r %s", link))
 
         if not HSL.collection then
             HSL.collection = {}
@@ -201,9 +256,9 @@ local function generateCreatureCard(creatureName, frameCount)
         table.insert(HSL.collection[_class], loot)
     end
 
-    C_Timer.After(3, function()
-        toastFrames[frameCount]:Hide()
-    end)
+    -- C_Timer.After(3, function()
+    --     toastFrames[frameCount]:Hide()
+    -- end)
 end
 
 
@@ -475,6 +530,13 @@ function HslCollectionMixin:OnShow()
             table.insert(deck, card)
         end
     end
+    table.sort(deck, function(a, b)
+        if a.backgroundPath == b.backgroundPath then
+            return a.cost > b.cost;
+        else
+            return a.backgroundPath < b.backgroundPath;
+        end
+    end)
     if next(deck) then
         self.deck = deck;
         -- self.cardViewer.page = 1;
@@ -790,4 +852,50 @@ e:SetScript("OnEvent", function(self, event, ...)
     if event == "LOOT_OPENED" then
         lootOpened()
     end
+end)
+
+
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- hyperlinks
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+
+local hyperlinkCard = CreateFrame("FRAME", "HearthstoneLiteHyperlinkCardTip", UIParent, "HslCard")
+hyperlinkCard:SetPoint("CENTER", 0, 0)
+hyperlinkCard:Hide()
+hyperlinkCard.close = CreateFrame("BUTTON", nil, hyperlinkCard, "UIPanelCloseButton")
+hyperlinkCard.close:SetPoint("TOPRIGHT", 0, 0)
+hyperlinkCard.close:SetScript("OnClick", function(self)
+    self:GetParent():Hide()
+end)
+
+
+local function parseCardHyperlink(link, showCard)
+    local linkType, addon, _art, _name, _health, _attack, _ability, _power, _battlecry, _deathrattle, _cost, _backgroundPath, _background, _atlas, _rarity = strsplit(":", link)
+    if _name and showCard then
+        hyperlinkCard:ClearCard()
+        hyperlinkCard:LoadCard({
+            art = tonumber(_art),
+            name = _name,
+            health = tonumber(_health),
+            attack = tonumber(_attack),
+            ability = tonumber(_ability),
+            power = tonumber(_power),
+            battlecry = tonumber(_battlecry),
+            deathrattle = tonumber(_deathrattle),
+            cost = tonumber(_cost),
+            backgroundPath = _backgroundPath,
+            background = tonumber(_background),
+            atlas = _atlas,
+            rarity = tonumber(_rarity),
+        })
+        hyperlinkCard:Show()
+    end
+end
+
+hooksecurefunc("SetItemRef", function(link)
+	local linkType, addon = strsplit(":", link)
+	if linkType == "garrmission" and addon == "hsl" then
+		parseCardHyperlink(link, true)
+	end
 end)
