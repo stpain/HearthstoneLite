@@ -1,8 +1,169 @@
+--[[
+    this db file will contain data that is randomly selected when a card is generated
+    creature cards will lookup their creature type and class and then select a 
+    random entry to use
 
+    abilities, battlecry, deathrattle are currently just a single look up table, this
+    needs to be changed into at minimum a table with sub tables for classes
+]]
+
+-- ["druid"] = {},
+-- ["hunter"] = {},
+-- ["mage"] = {},
+-- ["paladin"] = {},
+-- ["priest"] = {},
+-- ["rogue"] = {},
+-- ["shaman"] = {},
+-- ["warlock"] = {},
+-- ["warrior"] = {},
+-- ["deathknight"] = {},
 
 local _, hsl = ...
 
 hsl.db = {}
+
+
+-- TODO: work through each creature type and create names
+-- each type doesnt need every class
+-- fileID=the texture fileID, name=CardName
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- artwork -> this table is used to fetch a random artwork fileDataID
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local artwork = {
+    ["Beast"] = {
+        ["druid"] = {
+            {fileID = 522189, name = "Darkwood Mystic"},
+            {fileID = 522210, name = "Murloc Sprite"},
+        },
+        ["hunter"] = {
+            {fileID = 522210, name = "Murloc Hunter"},
+            {fileID = 522246, name = "Giant Crocolisk"},
+        },
+        ["mage"] = {},
+        ["paladin"] = {},
+        ["priest"] = {},
+        ["rogue"] = {},
+        ["shaman"] = {
+            {fileID = 522246, name = "Giant Snapjaw"},
+        },
+        ["warlock"] = {},
+        ["warrior"] = {},
+        ["deathknight"] = {},
+    },
+    ["Demon"] = {
+        ["druid"] = {},
+        ["hunter"] = {},
+        ["mage"] = {},
+        ["paladin"] = {},
+        ["priest"] = {},
+        ["rogue"] = {},
+        ["shaman"] = {},
+        ["warlock"] = {},
+        ["warrior"] = {},
+        ["deathknight"] = {},
+    },
+    ["Dragonkin"] = {
+        ["druid"] = {},
+        ["hunter"] = {},
+        ["mage"] = {},
+        ["paladin"] = {},
+        ["priest"] = {},
+        ["rogue"] = {},
+        ["shaman"] = {},
+        ["warlock"] = {},
+        ["warrior"] = {},
+        ["deathknight"] = {},
+    },
+    ["Elemental"] = {
+        ["druid"] = {},
+        ["hunter"] = {},
+        ["mage"] = {},
+        ["paladin"] = {},
+        ["priest"] = {},
+        ["rogue"] = {},
+        ["shaman"] = {
+            {fileID = 522229, name = "Air Elemental"},
+        },
+        ["warlock"] = {},
+        ["warrior"] = {},
+        ["deathknight"] = {},
+    },
+    ["Giant"] = {
+        ["druid"] = {},
+        ["hunter"] = {},
+        ["mage"] = {},
+        ["paladin"] = {},
+        ["priest"] = {},
+        ["rogue"] = {},
+        ["shaman"] = {},
+        ["warlock"] = {},
+        ["warrior"] = {},
+        ["deathknight"] = {},
+    },
+    ["Humanoid"] = {
+        ["druid"] = {
+            {fileID = 522190, name = "Feathermane Druid"},
+            {fileID = 522279, name = "Troll Mystic"},
+        },
+        ["hunter"] = {},
+        ["mage"] = {},
+        ["paladin"] = {},
+        ["priest"] = {},
+        ["rogue"] = {
+            {fileID = 522278, name = "SI:7 Assassin"},
+        },
+        ["shaman"] = {
+            {fileID = 522280, name = "Troll Shaman"},
+        },
+        ["warlock"] = {},
+        ["warrior"] = {
+            {fileID = 522263, name = "Troll Warrior"},
+        },
+        ["deathknight"] = {},
+    },
+    ["Mechanical"] = {
+        ["druid"] = {},
+        ["hunter"] = {},
+        ["mage"] = {},
+        ["paladin"] = {},
+        ["priest"] = {},
+        ["rogue"] = {},
+        ["shaman"] = {},
+        ["warlock"] = {},
+        ["warrior"] = {},
+        ["deathknight"] = {},
+    },
+    ["Undead"] = {
+        ["druid"] = {
+            {fileID = 522189, name = "Darkwood Mystic"},
+            {fileID = 522190, name = "Talonbeak Fiend"},
+        },
+        ["hunter"] = {},
+        ["mage"] = {},
+        ["paladin"] = {},
+        ["priest"] = {
+            {fileID = 522189, name = "Darkwood Priest"},
+            {fileID = 522205, name = "Crypt Wizzard"},
+        },
+        ["rogue"] = {
+            {fileID = 522189, name = "Shadow Stalker"},
+        },
+        ["shaman"] = {
+            {fileID = 522246, name = "Spirit Crocolisk"},
+        },
+        ["warlock"] = {
+            {fileID = 522189, name = "Mystwood Summoner"},
+        },
+        ["warrior"] = {
+            {fileID = 522189, name = "Ironfur Warrior"},
+        },
+        ["deathknight"] = {},
+    },
+}
+
+hsl.db.artwork = artwork;
+
+
 
 
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--

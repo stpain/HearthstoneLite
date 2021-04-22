@@ -341,6 +341,7 @@ function HslCardMixin:LoadCard(card)
     self.name:SetText(card.name)
     self.info:SetText("")
 
+    -- i had issues keeping the card text updated, using C_Timer to delay the update func by a frame
     local function infoDelay()
         if card.battlecry and card.battlecry > 0 then
             self.info:SetText(L["battlecry"]..string.format(hsl.db.battlecries[card.battlecry].info, card.power))
@@ -398,6 +399,32 @@ function HslCardMixin:OnMouseDown()
         --HearthstoneLite.deckBuilder.deckViewer:AddCard(self.card)
         HearthstoneLite.deckBuilder:AddCard(self.card)
     end
+end
+
+---return a custom hyperlink for a card
+---@return string hyperlink clickable link that can be shared with other hsl addon users
+function HslCardMixin:GetCardLink()
+    if not self.card then
+        return
+    end
+    local link = string.format("|cFFFFFF00|Hgarrmission:hsl:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
+    tostring(self.card.art),
+    tostring(self.card.class),
+    tostring(self.card.name), 
+    tostring(self.card.health), 
+    tostring(self.card.attack),  
+    tostring(self.card.ability), 
+    tostring(self.card.power), 
+    tostring(self.card.battlecry), 
+    tostring(self.card.deathrattle), 
+    tostring(self.card.cost), 
+    tostring(self.card.backgroundPath), 
+    tostring(self.card.background), 
+    tostring(self.card.atlas), 
+    tostring(self.card.rarity), 
+    ITEM_QUALITY_COLORS[self.card.rarity].hex.."["..self.card.name.."]|r"
+    )
+    return link;
 end
 
 

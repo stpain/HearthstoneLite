@@ -6,10 +6,12 @@ local L = {}
 
 L["InfoMsg"] = "[|cff0070DDHearthstone Lite|r] "
 L["HearthstoneLite"] = "Hearthstone Lite"
+L["WelcomeMessage"] = " loaded, remember to play fair!"
 L["Ok"] = "Ok"
 L["Create"] = "Create"
 L["Delete"] = "Delete"
 L["Cancel"] = "Cancel"
+L["GameBoard"] = "Play"
 L["Collection"] = "Collection"
 L["DeckBuilder"] = "Deck builder"
 L["NewDeck"] = "Create new deck for" -- used in the static popup dialog

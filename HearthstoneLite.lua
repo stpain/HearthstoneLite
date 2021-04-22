@@ -1,33 +1,43 @@
-    
+
 --https://www.curseforge.com/api/projects/474073/package?token=45de603f-d93c-4c20-ac24-1afba7041926
 
 
 local addonName, hsl = ...
 
+local AceComm = LibStub:GetLibrary("AceComm-3.0")
+local LibDeflate = LibStub:GetLibrary("LibDeflate")
+local LibSerialize = LibStub:GetLibrary("LibSerialize")
+
 local L = hsl.locales
+
+local COMMS;
 
 local randomSeed = time()
 
 local showHelptips = false;
 local helptips = {}
 
-local toastFrames = {};
-local playerMixin = nil;
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- local util functions
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
 --- prints a message with addon name in []
 local function printInfoMessage(msg)
     print("[|cff0070DDHearthstone Lite|r] "..msg)
 end
 
+
 --- adjusts the font size of a fontObject while keeping fontName and fontFlags intact
+---@param obj FontInstance the font object to adjust
+---@param size integer the new font size
 local function fontSizeHack(obj, size)
-    -- font size hack
     local fontName, _, fontFlags = obj:GetFont()
     obj:SetFont(fontName, size, fontFlags)
 end
 
---- hides all frames in the parent \<Frames\> element and then shows the frame given
----@param frame frame to be shown
+
+--- hides all frames in main addon UI then shows the supplied frame
+---@param frame frame the frame to be shown
 local function navigateTo(frame)
     for k, frame in ipairs(HearthstoneLite.frames) do
         frame:Hide()
@@ -40,9 +50,9 @@ local function navigateTo(frame)
 end
 
 
----return a random number thats modified with a random scaler
+---return a random number with a 20% chance for a bonus added
 local function generateRandom()
-    local r1, r2, r3, r4, r5 = random(4), random(4), random(4), random(4), random(14) -- max=30
+    local r1, r2, r3, r4, r5 = random(4), random(4), random(4), random(4), random(14) -- max=28
     -- 20% chance for a bonus
     if (random(100) < 20) then
         return math.floor((r1+r2+r3+r4+r5) / 5) + random(3)
@@ -51,30 +61,14 @@ local function generateRandom()
     end
 end
 
+
 ---generate a random creature card
----@param creatureName name to use as card name
+---@param _class string class/set to use as card 
+---@param _atlas string atlas to use for card
+---@param _name name to use as card name
 ---@param returnLink boolean should return a card hyperlink
 ---@param isElite boolean roll for legendary card from elite mob
-local function generateCreatureCard(creatureName, returnLink, isElite)
-
-    -- we need to generate some values for the card
-    -- we will use random() quite a bit
-    -- first determine if mob drops a card
-    local isDrop = random(1, 100)
-    if isDrop > 9 then -- 10% chance of a card dropping
-        --return
-    end
-
-    -- determine class
-    local _class, _atlas;
-    local className, classFile, classID = GetClassInfo(random(12))
-    if classFile:lower() == "demonhunter" or classFile:lower() == "monk" then
-        _class = "neutral";
-        _atlas = "NEUTRAL";
-    else
-        _class = classFile:lower();
-        _atlas = "CREATURE";
-    end
+local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isElite)
 
     -- generate some card values
     local _attack = generateRandom()
@@ -103,6 +97,11 @@ local function generateCreatureCard(creatureName, returnLink, isElite)
     else
         _abilityID = 0
         _abilityPower = 0
+    end
+
+    -- bump up taunt ability card health value
+    if hsl.db.abilities[_class][_abilityID].info == "Taunt" then
+        _health = _health + random(2, 4)
     end
 
     -- does card have battleCry or deathRattle
@@ -137,8 +136,8 @@ local function generateCreatureCard(creatureName, returnLink, isElite)
 
     local showLoot = false;
     local loot = {
-        art = 522189,                       -- this needs to be a lookup table value, need to go through art and make lookup table
-        name = creatureName,                -- name on card
+        art = _art,
+        name = _name,
         health = _health,
         attack = _attack,
         cost = _cost,
@@ -201,6 +200,7 @@ local function generateCreatureCard(creatureName, returnLink, isElite)
             loot.backgroundPath = "neutral_rare"
         end     
     end
+    -- 5%
     if rnd > 95 then
         --epic 11
         showLoot = true;
@@ -220,6 +220,7 @@ local function generateCreatureCard(creatureName, returnLink, isElite)
             loot.backgroundPath = "neutral_epic"
         end 
     end
+    -- 1% and only on elite mobs
     if rnd > 99 and isElite then
         --legendary
         showLoot = true;
@@ -244,8 +245,9 @@ local function generateCreatureCard(creatureName, returnLink, isElite)
 
     if showLoot == true then
 
-        link = string.format("|cFFFFFF00|Hgarrmission:hsl:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
+        link = string.format("|cFFFFFF00|Hgarrmission:hsl:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
             tostring(loot.art),
+            tostring(loot.class),
             tostring(loot.name), 
             tostring(loot.health), 
             tostring(loot.attack),  
@@ -260,7 +262,7 @@ local function generateCreatureCard(creatureName, returnLink, isElite)
             tostring(loot.rarity), 
             ITEM_QUALITY_COLORS[loot.rarity].hex.."["..loot.name.."]|r"
         )
-        print(string.format("|cff1D9800You receive hearthstone card:|r %s", link))
+        --print(string.format("|cff1D9800You receive hearthstone card:|r %s", link))
 
         if not HSL.collection then
             HSL.collection = {}
@@ -279,7 +281,7 @@ local function generateCreatureCard(creatureName, returnLink, isElite)
 end
 
 
-
+---scan the looted guids and determine a drop chance
 local function lootOpened()
 
     local sourceGUIDs = {}
@@ -294,25 +296,50 @@ local function lootOpened()
 
     -- looting creatures gives creature type cards
     -- looting chest etc gives a spell/weapon type card
-    local frameCount = 1
     for GUID, _ in pairs(sourceGUIDs) do
-        local creatureName = C_PlayerInfo.GetClass({guid = GUID})
-        if GUID:find("Creature") then
-            if (random(3) < 4) then
-                for i = 1, 100 do
-                    generateCreatureCard(creatureName, false, (UnitClassification("mouseover") == "elite") and true or false) -- if the target is an elite chance for legendary card
-                end
-            end
+        local hasDrop = random(1, 100)
+        if hasDrop > 10 then -- 10% chance of a card dropping
+            --return
         end
+        --local creatureName = C_PlayerInfo.GetClass({guid = GUID})
+        if GUID:find("Creature") then
+            for i = 1, 100 do
+                -- determine class, name and art
+                local class, atlas, name, art;
+                local className, classFile, classID = GetClassInfo(random(12))
+                if classFile:lower() == "demonhunter" or classFile:lower() == "monk" then
+                    class = "neutral";
+                    atlas = "NEUTRAL";
+                else
+                    class = classFile:lower();
+                    atlas = "CREATURE";
+                end
+                local creatureType = UnitCreatureType("mouseover")
+                if not hsl.db.artwork[creatureType] then
+                    return
+                end
+                if not hsl.db.artwork[creatureType][class] then
+                    return
+                end
+                if not next(hsl.db.artwork[creatureType][class]) then
+                    return
+                end
+                local randomKey = random(#hsl.db.artwork[creatureType][class])
+                name = hsl.db.artwork[creatureType][class][randomKey].name
+                art = hsl.db.artwork[creatureType][class][randomKey].fileID
+                local isElite = UnitClassification("mouseover") == "elite" and true or false
+                generateCreatureCard(class, atlas, name, art, false, isElite)
+            end
+        elseif GUID:find("GameObject") then
 
-        frameCount = frameCount + 1;
+        end
     end
 end
 
 
 ---deck view popout listview update function
 ---@param deck table the deck to view
-local function deckViewerListview_Update(deck)
+local function deckViewerPopoutListview_Update(deck)
     if not deck then
         return
     end
@@ -350,7 +377,7 @@ local function deckViewerListview_Update(deck)
 
             button.card = item; --set the button.card to the hsl.db.card
 
-            button.callback = deckViewerListview_Update;
+            button.callback = deckViewerPopoutListview_Update;
         else
             button.card = nil;
             button:Hide()
@@ -363,7 +390,7 @@ end
 
 ---menu panel listview update function
 ---@param classID number the classID to be used when creating a new deck or loading decks
-local function deckViewerDeckListview_Update(classID)
+local function deckViewerMenuPanelListview_Update(classID)
     if not HSL then
         return
     end
@@ -394,9 +421,9 @@ local function deckViewerDeckListview_Update(classID)
                 button:SetDeckID(item.id)
                 button:Show()
 
-                button.deleteDeck = deckViewerDeckListview_Update; -- dirty hack, when the delete button is pressed we call this function via Getparent()
+                button.deleteDeck = deckViewerMenuPanelListview_Update; -- dirty hack, when the delete button is pressed we call this function via Getparent()
 
-                button.updateDeckViewer = deckViewerListview_Update
+                button.updateDeckViewer = deckViewerPopoutListview_Update
             else
                 button:Hide()
             end
@@ -414,7 +441,7 @@ end
 
 
 
-
+-- TODO: check this is setting up the new deckBuilderMixin system rather than the older menuPanel system
 ---this function is used to update the menu panel listview when a new class/hero is selected
 ---@param button table
 local function classButton_Clicked(button)
@@ -439,13 +466,16 @@ local function classButton_Clicked(button)
 
                 HearthstoneLite.deckBuilder.menuPanel.listviewHeader:SetIcon_Atlas(string.format("GarrMission_ClassIcon-%s", class))
 
-                deckViewerDeckListview_Update(classID)
+                deckViewerMenuPanelListview_Update(classID)
             end
         end
     end
 end
 
 
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- main UI
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
 HearthstoneLiteMixin = {}
 
@@ -492,7 +522,9 @@ function ToggleHelptipMixin:OnMouseDown()
 end
 
 
-
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- home
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
 HomeMixin = {}
 
@@ -510,6 +542,10 @@ function HomeMixin:OnShow()
     self.collection.Text:SetPoint("TOP", 0, -10)
     self.collection:SetText(L["Collection"])
 
+    fontSizeHack(self.gameBoard.Text, 22)
+    self.gameBoard.Text:SetPoint("TOP", 0, -10)
+    self.gameBoard:SetText(L["GameBoard"])
+
 
     -- introstinger ?
     --PlaySoundFile(1068313)
@@ -521,12 +557,15 @@ function HomeMixin:MenuButton_OnClick(frame)
 end
 
 
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- settings
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
 SettingsMixin = {}
 
 local function resetUI()
-    deckViewerDeckListview_Update()
-    deckViewerListview_Update()
+    deckViewerMenuPanelListview_Update()
+    deckViewerPopoutListview_Update()
     HearthstoneLite.collection:HideCards()
     HearthstoneLite.collection.deck = nil;
 end
@@ -541,7 +580,9 @@ function SettingsMixin:ResetGlobalSettings()
 end
 
 
-
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- collection
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
 HslCollectionMixin = {}
 HslCollectionMixin.page = 1;
@@ -557,7 +598,7 @@ function HslCollectionMixin:OnShow()
         end
     end
     table.sort(deck, function(a, b)
-        if a.backgroundPath == b.backgroundPath then
+        if a.backgroundPath == b.backgroundPath then -- backgroundPath=class
             return a.cost > b.cost;
         else
             return a.backgroundPath < b.backgroundPath;
@@ -641,6 +682,9 @@ function HslCollectionMixin:NextPage()
 end
 
 
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- deck builder
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
 DeckBuilderMixin = {}
 DeckBuilderMixin.ClassID = nil;
@@ -721,7 +765,7 @@ function DeckBuilderMixin:OnShow()
     self.cardViewer.cardToggleHelptip:Show()
     table.insert(helptips, self.cardViewer.cardToggleHelptip)
 
-    deckViewerDeckListview_Update(nil)
+    deckViewerMenuPanelListview_Update(nil)
 
     HearthstoneLite.deckBuilder:HideCards()
 
@@ -808,7 +852,7 @@ function DeckBuilderMixin:LoadCards(deck)
         end
     end
 
-    --deckViewerListview_Update(deck)
+    --deckViewerPopoutListview_Update(deck)
 end
 
 function DeckBuilderMixin:AddCard(card)
@@ -824,7 +868,7 @@ function DeckBuilderMixin:AddCard(card)
                 -- card is the HSL.collection[class] item
                 -- update the saved var table and pass back into the hybrid scroll update func
                 table.insert(deck.cards, card)
-                deckViewerListview_Update(deck.cards)
+                deckViewerPopoutListview_Update(deck.cards)
                 --printInfoMessage(string.format("added %s to deck %s", card.name, deck.name))
                 return;
             end
@@ -851,7 +895,7 @@ function DeckBuilderMixin:RemoveCard(card)
                 if cardIndex then
                     -- update the saved var table and pass back into the hybrid scroll update func
                     table.remove(deck.cards, cardIndex)
-                    deckViewerListview_Update(deck.cards)
+                    deckViewerPopoutListview_Update(deck.cards)
                     return;
                 end
             end
@@ -867,25 +911,93 @@ HslNewDeckMixin = {}
 
 function HslNewDeckMixin:OnMouseDown()
     if self.classID > 0 then
-        StaticPopup_Show("HslNewDeck", self.className, nil, {ClassID = self.classID, Icon = self.classIcon, callback = deckViewerDeckListview_Update})
+        StaticPopup_Show("HslNewDeck", self.className, nil, {ClassID = self.classID, Icon = self.classIcon, callback = deckViewerMenuPanelListview_Update})
     end
 end
 
 
 
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- game board
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+
+GameBoardMixin = {}
+
+function GameBoardMixin:TestComms()
+    local testMessage = {
+        type = "TEST_MESSAGE",
+        payload = "this is a test message!"
+    }
+    local target = UnitName('player')
+    target = Ambiguate(target, "none")
+    COMMS:Transmit(testMessage, "WHISPER", target, "NORMAL")
+end
 
 
 
 
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- addon comms
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+
+local commsMixin = {}
+commsMixin.prefix = "HearthstoneLite";
+
+function commsMixin:Transmit(data, channel, target, priority)
+    local serialized = LibSerialize:Serialize(data);
+    local compressed = LibDeflate:CompressDeflate(serialized);
+    local encoded    = LibDeflate:EncodeForWoWAddonChannel(compressed);
+
+    if encoded and channel and priority then
+        print('comms_out', string.format("type: %s, channel: %s target: %s, prio: %s", data.type or 'nil', channel, (target or 'nil'), priority))
+        self:SendCommMessage(self.prefix, encoded, channel, target, priority)
+    end
+end
+
+function commsMixin:OnCommReceived(prefix, message, distribution, sender)
+    if prefix ~= self.prefix then
+        return
+    end
+    local decoded = LibDeflate:DecodeForWoWAddonChannel(message);
+    if not decoded then
+        return;
+    end
+    local decompressed = LibDeflate:DecompressDeflate(decoded);
+    if not decompressed then
+        return;
+    end
+    local success, data = LibSerialize:Deserialize(decompressed);
+    if not success or type(data) ~= "table" then
+        return;
+    end
+    print('comms_in', string.format("%s from %s", data.type, sender))
+end
+
+COMMS = commsMixin
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+-- init
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+
+local function init()
+    local version = GetAddOnMetadata(addonName, "Version")
+    printInfoMessage("v"..version..L["WelcomeMessage"])
+
+    AceComm:Embed(COMMS)
+    COMMS:RegisterComm(COMMS.prefix)
+end
+
+
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 -- event frame
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+
 local e = CreateFrame("FRAME")
 e:RegisterEvent("ADDON_LOADED")
 e:RegisterEvent("LOOT_OPENED")
 e:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" and select(1, ...):lower() == "hearthstonelite" then
-        print(L["HearthstoneLite"].." loaded!")
+        init()
     end
     if event == "LOOT_OPENED" then
         lootOpened()
@@ -893,28 +1005,29 @@ e:SetScript("OnEvent", function(self, event, ...)
 end)
 
 
-
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 -- hyperlinks
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
 local hyperlinkCard = CreateFrame("FRAME", "HearthstoneLiteHyperlinkCardTip", UIParent, "HslCard")
 hyperlinkCard:SetPoint("CENTER", 0, 0)
 hyperlinkCard:Hide()
+-- add a close button
 hyperlinkCard.close = CreateFrame("BUTTON", nil, hyperlinkCard, "UIPanelCloseButton")
-hyperlinkCard.close:SetPoint("TOPRIGHT", 0, 0)
+hyperlinkCard.close:SetPoint("TOPRIGHT", 4, 4)
 hyperlinkCard.close:SetScript("OnClick", function(self)
     self:GetParent():Hide()
 end)
 
 
 local function parseCardHyperlink(link, showCard)
-    local linkType, addon, _art, _name, _health, _attack, _ability, _power, _battlecry, _deathrattle, _cost, _backgroundPath, _background, _atlas, _rarity = strsplit(":", link)
+    local linkType, addon, _art, _class, _name, _health, _attack, _ability, _power, _battlecry, _deathrattle, _cost, _backgroundPath, _background, _atlas, _rarity = strsplit(":", link)
     if _name and showCard then
         hyperlinkCard:Hide()
         hyperlinkCard:LoadCard({
             art = tonumber(_art),
             name = _name,
+            class = _class,
             health = tonumber(_health),
             attack = tonumber(_attack),
             ability = tonumber(_ability),

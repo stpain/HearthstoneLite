@@ -112,6 +112,21 @@
                 </Layers>
 
                 <Frames>
+                    <Button parentKey="gameBoard" inherits="UIPanelGoldButtonTemplate">
+                        <Size x="275" y="55"/>
+                        <Anchors>
+                            <Anchor point="CENTER" x="0" y="120"/>
+                        </Anchors>
+                        <Layers>
+                            <Layer level="OVERLAY">
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnClick>
+                                self:GetParent():MenuButton_OnClick("gameBoard")
+                            </OnClick>
+                        </Scripts>
+                    </Button>
                     <Button parentKey="collection" inherits="UIPanelGoldButtonTemplate">
                         <Size x="275" y="55"/>
                         <Anchors>
@@ -489,13 +504,6 @@
                                 </Anchors>
                             </Frame>
 
-                            <!-- <Frame parentKey="classDropdown" inherits="HslDropdown" hidden="true">
-                                <Size x="130" y="30"/>
-                                <Anchors>
-                                    <Anchor point="BOTTOMLEFT" x="150" y="22"/>
-                                </Anchors>
-                            </Frame> -->
-
                             <Button parentKey="prevPage" >
                                 <Size x="30" y="50"/>
                                 <Anchors>
@@ -713,6 +721,30 @@
                     <OnLoad method="OnLoad"/>
                 </Scripts>
 
+            </Frame>
+
+            <Frame parentKey="gameBoard" parentArray="frames" mixin="GameBoardMixin" hidden="true">
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="0" y="0"/>
+                    <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+                </Anchors>
+                <Frames>
+                    <Button parentKey="testComms" inherits="UIPanelGoldButtonTemplate">
+                        <Size x="255" y="35"/>
+                        <Anchors>
+                            <Anchor point="CENTER"/>
+                        </Anchors>
+                        <Layers>
+                            <Layer level="OVERLAY">
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnClick>
+                                self:GetParent():TestComms()
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                </Frames>
             </Frame>
 
             <Frame parentKey="settings" parentArray="frames" mixin="SettingsMixin" hidden="true">
