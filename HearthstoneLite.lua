@@ -78,7 +78,7 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
         _health = 1;
     end
 
-    --if health and attack match then 50% chance to re-roll then
+    --if health and attack match then 50% chance to re-roll
     if _attack == _health and (random(100) < 51) then
         _attack = generateRandom()
         _health = generateRandom()
@@ -262,7 +262,7 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
             tostring(loot.rarity), 
             ITEM_QUALITY_COLORS[loot.rarity].hex.."["..loot.name.."]|r"
         )
-        --print(string.format("|cff1D9800You receive hearthstone card:|r %s", link))
+        print(string.format("|cff1D9800You receive hearthstone card:|r %s", link))
 
         if not HSL.collection then
             HSL.collection = {}
@@ -288,7 +288,6 @@ local function lootOpened()
 
     for i = 1, GetNumLootItems() do
 		local sources = {GetLootSourceInfo(i)}
-		local _, name = GetLootSlotInfo(i)
 		for j = 1, #sources, 2 do
 			sourceGUIDs[sources[j]] = false;
 		end
@@ -923,16 +922,78 @@ end
 
 GameBoardMixin = {}
 
-function GameBoardMixin:TestComms()
-    local testMessage = {
-        type = "TEST_MESSAGE",
-        payload = "this is a test message!"
+function GameBoardMixin:OnShow()
+
+    if not self.playerBattlefield.testCard then
+        local card = CreateFrame("FRAME", "HslGameBoardPlayerCard_Test", self.playerBattlefield, "HslBattlefieldCard")
+        card:SetPoint("CENTER", 0, 0)
+        card:LoadCard(HSL.collection.shaman[3])
+        card:ScaleTo(0.75)
+        card.hasBattleTooltip = true
+        --card.isPlayer = true
+        self.playerBattlefield.testCard = card;
+    else
+        self.playerBattlefield.testCard:LoadCard(HSL.collection.shaman[3])
+    end
+
+    if not self.targetBattlefield.testCard then
+        local card = CreateFrame("FRAME", "HslGameBoardTargetCard_Test", self.targetBattlefield, "HslBattlefieldCard")
+        card:SetPoint("CENTER", 0, 0)
+        card:LoadCard(HSL.collection.druid[1])
+        card:ScaleTo(0.75)
+        card.hasBattleTooltip = true
+        --card.isTarget = true
+        self.targetBattlefield.testCard = card;
+    else
+        self.targetBattlefield.testCard:LoadCard(HSL.collection.druid[1])
+    end
+     
+end
+
+function GameBoardMixin:CardSelected(card)
+
+end
+
+function GameBoardMixin:PlayBasicAttack(player, target)
+    --target.card is the data table, target is the ui template
+    target.card.health = target.card.health - player.card.attack; -- update data table
+    --target.health:SetText(target.card.health) -- update UI
+
+    -- send new card data table to opponent
+    local move = {
+        event = "BASIC_ATTACK",
+        player = player.card,
+        target = target.card,
     }
     local target = UnitName('player')
     target = Ambiguate(target, "none")
-    COMMS:Transmit(testMessage, "WHISPER", target, "NORMAL")
+    COMMS:Transmit(move, "WHISPER", target, "NORMAL")
 end
 
+
+function GameBoardMixin:OnBasicAttack(target, player)
+
+    -- swap ?
+    local x = target;
+    target = player;
+    player = x;
+
+    self.playerBattlefield.selectedCard = nil;
+    self.targetBattlefield.selectedCard = nil;
+
+    -- for now its just a dummy card
+    self.playerBattlefield.testCard:Hide()
+    self.playerBattlefield.testCard:LoadCard(player)
+
+    self.targetBattlefield.testCard:Hide()
+    self.targetBattlefield.testCard:LoadCard(target)
+
+    if player.health < 1 then
+        print("card has been lost")
+        self.playerBattlefield.testCard:Hide()
+    end
+
+end
 
 
 
@@ -949,7 +1010,7 @@ function commsMixin:Transmit(data, channel, target, priority)
     local encoded    = LibDeflate:EncodeForWoWAddonChannel(compressed);
 
     if encoded and channel and priority then
-        print('comms_out', string.format("type: %s, channel: %s target: %s, prio: %s", data.type or 'nil', channel, (target or 'nil'), priority))
+        print('comms_out', string.format("type: %s, channel: %s target: %s, prio: %s", data.event or 'nil', channel, (target or 'nil'), priority))
         self:SendCommMessage(self.prefix, encoded, channel, target, priority)
     end
 end
@@ -970,7 +1031,11 @@ function commsMixin:OnCommReceived(prefix, message, distribution, sender)
     if not success or type(data) ~= "table" then
         return;
     end
-    print('comms_in', string.format("%s from %s", data.type, sender))
+    print('comms_in', string.format("%s from %s", data.event, sender))
+
+    if data.event == "BASIC_ATTACK" then
+        HearthstoneLite.gameBoard:OnBasicAttack(data.target, data.player)
+    end
 end
 
 COMMS = commsMixin

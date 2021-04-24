@@ -331,9 +331,28 @@ function HslCardMixin:OnShow()
     self.name:SetFont(fontName, 10, fontFlags)
 end
 
+function HslCardMixin:ScaleTo(scale)
+    local fontSize = 28 * scale;
+    local fontName, _, fontFlags = self.cost:GetFont()
+    self.cost:SetFont(fontName, fontSize, fontFlags)
+    self.attack:SetFont(fontName, fontSize, fontFlags)
+    self.health:SetFont(fontName, fontSize, fontFlags)
+    self.name:SetFont(fontName, 10 * scale, fontFlags)
+
+    self:SetScale(scale)
+end
+
 function HslCardMixin:LoadCard(card)
 
-    self.card = card;
+    self.selected = false;
+
+    --self.defaults = card;
+    self.card = {}
+    for k, v in pairs(card) do
+        self.card[k] = v;
+    end
+
+    --self.card = card;
     self.art:SetTexture(card.art)
     self.cost:SetText(card.cost)
     self.attack:SetText(card.attack)
@@ -391,15 +410,56 @@ function HslCardMixin:OnHide()
     self.name:SetText("")
     self.info:SetText("")
 
+    self.selected = false;
+    self.cardSelected:SetShown(self.selected)
+
     self.card = nil;
 end
 
+function HslCardMixin:OnMouseUp()
+
+end
+
 function HslCardMixin:OnMouseDown()
-    if IsControlKeyDown() then
-        --HearthstoneLite.deckBuilder.deckViewer:AddCard(self.card)
-        HearthstoneLite.deckBuilder:AddCard(self.card)
+    if not self.card then
+        return;
+    end
+
+    self.selected = not self.selected;
+    self.cardSelected:SetShown(self.selected)
+
+    --use parent name to determine action TODO: setup more templates ?
+    local parent = self:GetParent():GetName();
+    if parent then
+        if parent == "deckBuilderCardViewer" and IsControlKeyDown() then
+            --HearthstoneLite.deckBuilder.deckViewer:AddCard(self.card)
+            HearthstoneLite.deckBuilder:AddCard(self.card)
+            return;
+        end
     end
 end
+
+
+function HslCardMixin:OnEnter()
+    if not self.tooltipCard then
+        self.tooltipCard = CreateFrame("FRAME", "HearthstoneLiteTooltipCard", self, "HslCard")
+        self.tooltipCard:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", -10, -20)
+        self.tooltipCard:Hide()
+    end
+    if self.card and self.hasBattleTooltip then
+        self.tooltipCard:LoadCard(self.card)
+        self.tooltipCard:Show()
+        self.tooltipCard:ScaleTo(1.25)
+        self.tooltipCard:SetFrameStrata("TOOLTIP")
+    end
+end
+
+function HslCardMixin:OnLeave()
+    if self.tooltipCard then
+        self.tooltipCard:Hide()
+    end
+end
+
 
 ---return a custom hyperlink for a card
 ---@return string hyperlink clickable link that can be shared with other hsl addon users
@@ -428,11 +488,35 @@ function HslCardMixin:GetCardLink()
 end
 
 
+HslBattlefieldCardMixin = {}
 
-HslLootToastMixin = {}
+function HslBattlefieldCardMixin:OnMouseDown()
+    if not self.card then
+        return;
+    end
 
-function HslLootToastMixin:OnShow()
-    PlaySound(1068314)
+    local gb = HearthstoneLite.gameBoard;
+
+    self.selected = not self.selected;
+    self.cardSelected:SetShown(self.selected)
+
+    if self.selected then
+        self:GetParent().selectedCard = self;
+        print(string.format("selected card %s", self.card.name))
+    else
+        self:GetParent().selectedCard = nil;
+        print(string.format("deselected card %s", self.card.name))
+    end
+
+
+    if gb.playerBattlefield.selectedCard and gb.targetBattlefield.selectedCard then
+        gb:PlayBasicAttack(gb.playerBattlefield.selectedCard, gb.targetBattlefield.selectedCard)
+    end
+
+end
+
+function HslBattlefieldCardMixin:CardKilled()
+    
 end
 
 
