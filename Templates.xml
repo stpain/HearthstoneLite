@@ -146,7 +146,7 @@
 
 	<!-- basic card template -->
 	<Frame name="HslCard" mixin="HslCardMixin" virtual="true" enableMouse="true">
-		<Size x="162" y="210"/>
+		<Size x="150" y="210"/>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="cardTemplate" setAllPoints="true" file="Interface/Addons/HearthstoneLite/CardTemplates/neutral">
@@ -180,19 +180,19 @@
 			</Layer>
 			<Layer level="OVERLAY">
 				<FontString parentKey="cost" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="30" y="30"/>
+					<Size x="30" y="35"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" x="10" y="-9"/>
+						<Anchor point="TOPLEFT" x="7" y="-10"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="attack" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="30" y="30"/>
+					<Size x="30" y="35"/>
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="12" y="4"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="health" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="30" y="30"/>
+					<Size x="30" y="35"/>
 					<Anchors>
 						<Anchor point="BOTTOMRIGHT" x="2" y="2"/>
 					</Anchors>
@@ -204,10 +204,10 @@
 				</FontString>
 				<FontString parentKey="info" inherits="GameFontNormalSmall">
 					<Shadow x="0" y="0"/>
-					<Size x="125" y="55"/>
+					<Size x="120" y="60"/>
 					<Color r="0.121" g="0.054" b="0.007"/>
 					<Anchors>
-						<Anchor point="BOTTOM" x="5" y="20"/>
+						<Anchor point="BOTTOM" x="5" y="15"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -225,6 +225,16 @@
 	<Frame name="HslBattlefieldCard" mixin="HslBattlefieldCardMixin" inherits="HslCard" virtual="true" enableMouse="true">
 		<Scripts>
 			<OnMouseDown method="OnMouseDown"/>
+			<OnMouseUp method="OnMouseUp"/>
+			<OnLoad>
+                self:RegisterForDrag("LeftButton")
+            </OnLoad>
+            <!-- <OnDragStart>
+                self:StartMoving()
+            </OnDragStart>
+            <OnDragStop>
+                self:StopMovingOrSizing()
+            </OnDragStop> -->
 		</Scripts>
 	</Frame>
 

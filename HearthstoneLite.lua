@@ -8,6 +8,8 @@ local AceComm = LibStub:GetLibrary("AceComm-3.0")
 local LibDeflate = LibStub:GetLibrary("LibDeflate")
 local LibSerialize = LibStub:GetLibrary("LibSerialize")
 
+local LibFlyPaper = LibStub:GetLibrary("LibFlyPaper-1.0")
+
 local L = hsl.locales
 
 local COMMS;
@@ -134,7 +136,6 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
         _cost = 1;
     end
 
-    local showLoot = false;
     local loot = {
         art = _art,
         name = _name,
@@ -153,7 +154,6 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
     -- 45%
     if rnd < 46 then
         --common 5 these get no ability or bcdr
-        showLoot = true;
         loot.abilityID = 0;
         loot.power = 0;
         loot.battlecry = 0;
@@ -168,7 +168,6 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
     -- 35%
     if rnd > 45 and rnd < 81 then
         --uncommon 7 ability decided earlier
-        showLoot = true;
         loot.abilityID = _abilityID;
         loot.power = _abilityPower;
         loot.battlecry = _battlecry;
@@ -183,7 +182,6 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
     -- 15%
     if rnd > 80 and rnd < 96 then
         --rare 9
-        showLoot = true;
         loot.background = 9;
         loot.rarity = 3;
         loot.power = random(2,6)
@@ -203,7 +201,6 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
     -- 5%
     if rnd > 95 then
         --epic 11
-        showLoot = true;
         loot.background = 11;
         loot.rarity = 4;
         loot.power = random(4,8)
@@ -221,12 +218,12 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
         end 
     end
     -- 1% and only on elite mobs
-    if rnd > 99 and isElite then
+    if rnd > 90 and isElite then -- CHANGE THIS BACK TO A 1% CHANCE, 10% ONLY FOR TESTING
         --legendary
-        showLoot = true;
         loot.background = 13;
         loot.rarity = 5;
-        loot.power = random(7,10)
+        loot.power = random(8,12)
+        loot.health = random(7,10) -- override the health to a higher value
         if rnd7 == 3 then
             loot.ability = random(1, #hsl.db.abilities[_class] - 1)
         elseif rnd7 == 2 then
@@ -243,38 +240,39 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
 
     local link;
 
-    if showLoot == true then
-
-        link = string.format("|cFFFFFF00|Hgarrmission:hsl:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
-            tostring(loot.art),
-            tostring(loot.class),
-            tostring(loot.name), 
-            tostring(loot.health), 
-            tostring(loot.attack),  
-            tostring(loot.ability), 
-            tostring(loot.power), 
-            tostring(loot.battlecry), 
-            tostring(loot.deathrattle), 
-            tostring(loot.cost), 
-            tostring(loot.backgroundPath), 
-            tostring(loot.background), 
-            tostring(loot.atlas), 
-            tostring(loot.rarity), 
-            ITEM_QUALITY_COLORS[loot.rarity].hex.."["..loot.name.."]|r"
-        )
-        print(string.format("|cff1D9800You receive hearthstone card:|r %s", link))
-
-        if not HSL.collection then
-            HSL.collection = {}
-        end
-        if not HSL.collection[_class] then
-            HSL.collection[_class] = {}
-        end
-        table.insert(HSL.collection[_class], loot)
+    if not HSL.collection then
+        HSL.collection = {}
     end
+    if not HSL.collection[_class] then
+        HSL.collection[_class] = {}
+    end
+    -- set a card id as the table key so we can fetch it super easy
+    loot.id = #HSL.collection[_class] + 1;
+
+    link = string.format("|cFFFFFF00|Hgarrmission:hslite:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
+        tostring(loot.art),
+        tostring(loot.class),
+        tostring(loot.id),
+        tostring(loot.name), 
+        tostring(loot.health), 
+        tostring(loot.attack),  
+        tostring(loot.ability), 
+        tostring(loot.power), 
+        tostring(loot.battlecry), 
+        tostring(loot.deathrattle), 
+        tostring(loot.cost), 
+        tostring(loot.backgroundPath), 
+        tostring(loot.background), 
+        tostring(loot.atlas), 
+        tostring(loot.rarity), 
+        ITEM_QUALITY_COLORS[loot.rarity].hex.."["..loot.name.."]|r"
+    )
+    print(string.format("|cff1D9800You receive hearthstone card:|r %s", link))
+
+    table.insert(HSL.collection[_class], loot)
 
     -- return the card link
-    if returnLink and link then
+    if returnLink == true and link then
         return link
     end
 
@@ -314,18 +312,18 @@ local function lootOpened()
                     atlas = "CREATURE";
                 end
                 local creatureType = UnitCreatureType("mouseover")
-                if not hsl.db.artwork[creatureType] then
+                if not hsl.db.cardMeta[creatureType] then
                     return
                 end
-                if not hsl.db.artwork[creatureType][class] then
+                if not hsl.db.cardMeta[creatureType][class] then
                     return
                 end
-                if not next(hsl.db.artwork[creatureType][class]) then
+                if not next(hsl.db.cardMeta[creatureType][class]) then
                     return
                 end
-                local randomKey = random(#hsl.db.artwork[creatureType][class])
-                name = hsl.db.artwork[creatureType][class][randomKey].name
-                art = hsl.db.artwork[creatureType][class][randomKey].fileID
+                local randomKey = random(#hsl.db.cardMeta[creatureType][class])
+                name = hsl.db.cardMeta[creatureType][class][randomKey].name
+                art = hsl.db.cardMeta[creatureType][class][randomKey].fileID
                 local isElite = UnitClassification("mouseover") == "elite" and true or false
                 generateCreatureCard(class, atlas, name, art, false, isElite)
             end
@@ -572,10 +570,48 @@ end
 function SettingsMixin:OnShow()
     self.resetSavedVar.Text:SetText('Reset saved var')
     self.resetSavedVar.Text:SetPoint("TOP", 0, -10)
+
+    self.runFirstLoad.Text:SetText("Run first load [dev]")
 end
 
 function SettingsMixin:ResetGlobalSettings()
     StaticPopup_Show('ResetGlobalSettings', nil, nil, {callback = resetUI})
+end
+
+function SettingsMixin:RunFirstLoad()
+    HSL = nil;
+    HSL = {
+        decks = {},
+        collection = {},
+    };
+    local ct = {
+        "Beast",
+        "Humanoid",
+        "Elemental",
+        "Undead",
+        "Demon",
+        "Giant",
+        "Dragonkin",
+    }
+    for k, class in pairs({"druid", "hunter", "rogue", "shaman", "mage", "paladin", "priest", "warlock", "warrior", "deathknight"}) do
+        for i = 1, 20 do
+            local creatureType = ct[random(#ct)]
+            if hsl.db.cardMeta[creatureType][class] and next(hsl.db.cardMeta[creatureType][class]) then
+                local randomKey = random(#hsl.db.cardMeta[creatureType][class])
+                local isElite = (random(100) > 50) and true or false;
+                generateCreatureCard(class, "CREATURE", hsl.db.cardMeta[creatureType][class][randomKey].name, hsl.db.cardMeta[creatureType][class][randomKey].fileID, false, isElite)
+            end
+        end
+    end
+    local class = "neutral";
+    for i = 1, 1000 do
+        local creatureType = ct[random(#ct)]
+        if hsl.db.cardMeta[creatureType][class] then
+            local randomKey = random(#hsl.db.cardMeta[creatureType][class])
+            local isElite = (random(100) > 85) and true or false;
+            generateCreatureCard(class, "NEUTRAL", hsl.db.cardMeta[creatureType][class][randomKey].name, hsl.db.cardMeta[creatureType][class][randomKey].fileID, false, isElite)
+        end
+    end
 end
 
 
@@ -590,12 +626,14 @@ function HslCollectionMixin:OnShow()
     if HSL.collecion then
         return
     end
+    self.page = 1;
     local deck = {} -- we'll load all cards into 1 deck
     for class, cards in pairs(HSL.collection) do
         for _, card in ipairs(cards) do
             table.insert(deck, card)
         end
     end
+    -- sort by set/class then by cost
     table.sort(deck, function(a, b)
         if a.backgroundPath == b.backgroundPath then -- backgroundPath=class
             return a.cost > b.cost;
@@ -605,18 +643,19 @@ function HslCollectionMixin:OnShow()
     end)
     if next(deck) then
         self.deck = deck;
-        -- self.cardViewer.page = 1;
-        -- self.cardViewer.pageNumber:SetText(self.cardViewer.page..' / '..math.ceil(#self.deck / 8));
+        self.pageNumber:SetText(self.page..' / '..math.ceil(#self.deck / 10));
 
         for i = 1, 10 do
             self["card"..i]:Hide()
         end
 
-        for i = 1, 10 do
-            if self.deck[i] then
-                self["card"..i]:LoadCard(self.deck[i])
+        C_Timer.After(0, function()
+            for i = 1, 10 do
+                if self.deck[i] then
+                    self["card"..i]:LoadCard(self.deck[i])
+                end
             end
-        end
+        end)
     end
 end
 
@@ -921,43 +960,169 @@ end
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
 GameBoardMixin = {}
+GameBoardMixin.playerBattlefield = {
+    cards = {},
+}
+GameBoardMixin.cardPool = CreateFramePool("FRAME", nil, "HslBattlefieldCard", nil, false)
+GameBoardMixin.playerBattlefieldCardOffsets = {
+    [1] = {0},
+    [2] = {-100, 100},
+    [3] = {-170, 0, 170},
+    [4] = {-270, -100, 100, 270},
+    [5] = {-340, -170, 0, 170, 340},
+    [6] = {-510, -270, -100, 100, 270, 510},
+    [7] = {-510, -340, -170, 0, 170, 340, 510},
+}
+GameBoardMixin.playerControlsCardOffsets = {
+    [1] = {0},
+    [2] = {0, 150},
+    [3] = {0, 150, 300,},
+    [4] = {0, 150, 300, 450,},
+    [5] = {0, 150, 300, 450, 600},
+    [6] = {0},
+    [7] = {0, 150},
+    [8] = {0, 150, 300,},
+    [9] = {0, 150, 300, 450,},
+    [10] = {0, 150, 300, 450, 600},
+}
+
+-- do i need these?
+function GameBoardMixin:PlayerBattlefield_OnLeave()
+    self.playerBattlefield.mouseOver = false
+end
+
+function GameBoardMixin:PlayerBattlefield_OnEnter()
+    self.playerBattlefield.mouseOver = true
+end
+--
 
 function GameBoardMixin:OnShow()
 
-    if not self.playerBattlefield.testCard then
-        local card = CreateFrame("FRAME", "HslGameBoardPlayerCard_Test", self.playerBattlefield, "HslBattlefieldCard")
-        card:SetPoint("CENTER", 0, 0)
-        card:LoadCard(HSL.collection.shaman[3])
-        card:ScaleTo(0.75)
-        card.hasBattleTooltip = true
-        --card.isPlayer = true
-        self.playerBattlefield.testCard = card;
-    else
-        self.playerBattlefield.testCard:LoadCard(HSL.collection.shaman[3])
+    -- move to an OnLoad script?
+    if not self.tooltipCard then
+        self.tooltipCard = CreateFrame("FRAME", "HearthstoneLiteTooltipCard", self, "HslCard")
+        self.tooltipCard:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", -10, -20)
+        self.tooltipCard:Hide()
     end
 
-    if not self.targetBattlefield.testCard then
-        local card = CreateFrame("FRAME", "HslGameBoardTargetCard_Test", self.targetBattlefield, "HslBattlefieldCard")
-        card:SetPoint("CENTER", 0, 0)
-        card:LoadCard(HSL.collection.druid[1])
-        card:ScaleTo(0.75)
-        card.hasBattleTooltip = true
-        --card.isTarget = true
-        self.targetBattlefield.testCard = card;
-    else
-        self.targetBattlefield.testCard:LoadCard(HSL.collection.druid[1])
+    -- copy some dummy cards, make sure these exist in sv file!
+    self.deck = {}
+    for _, card in ipairs(HSL.collection.priest) do
+        table.insert(self.deck, card)
     end
-     
+    self.playerControls.theHand.cards = nil;
 end
 
-function GameBoardMixin:CardSelected(card)
+
+---loop the cards in the hand table and reset their positions
+function GameBoardMixin:ResetCardsInHandPositions()
+    if next(self.playerControls.theHand.cards) then
+        for i, card in ipairs(self.playerControls.theHand.cards) do
+            card:ClearAllPoints()
+            card:SetParent(self.playerControls.theHand)
+            if i < 6 then
+                card:SetPoint("LEFT", (i-1) * 150, 20)
+            else
+                card:SetPoint("LEFT", ((i - 6) * 150) + 55, -20)
+            end
+            card:SetFrameLevel(i+20)
+            card:StopMovingOrSizing()
+        end
+    end
+end
+
+
+---draw a random card from the deck, this also uses the cardPool for the ui frame
+function GameBoardMixin:DrawCard()
+    if not self.playerControls.theHand.cards then
+        self.playerControls.theHand.cards = {}
+    end
+    local numCards = #self.playerControls.theHand.cards
+    if numCards > 9 then
+        return
+    end
+    if not self.deck and not next(self.deck) then
+        return
+    end
+
+    if not self.playerControls.theHand.cards[numCards+1] then
+        local card = self.cardPool:Acquire()
+        card.id = time()
+        card:SetParent(self.playerControls.theHand)
+        card:ScaleTo(0.75)
+        -- adjust the positions
+        if numCards < 5 then
+            card:SetPoint("LEFT", numCards * 150, 20)
+        else
+            card:SetPoint("LEFT", ((numCards - 5) * 150) + 55, -20)
+        end
+        card:SetFrameLevel(numCards+20)
+        card.showTooltipCard = true
+
+        -- pick random from deck
+        local rndCardIndex = random(#self.deck)
+        if self.deck[rndCardIndex] then
+            card:LoadCard(self.deck[rndCardIndex])
+            table.remove(self.deck, rndCardIndex)
+        end
+
+        self.playerControls.theHand.cards[numCards+1] = card;
+
+    else
+        local card = self.playerControls.theHand.cards[numCards+1];
+
+        local rndCardIndex = random(#self.deck)
+        if self.deck[rndCardIndex] then
+            card:LoadCard(self.deck[rndCardIndex])
+            table.remove(self.deck, rndCardIndex)
+        end
+    end
 
 end
+
+---reset the currently held card back to the hand
+---@param card frame the ui card frame currently held
+function GameBoardMixin:ReturnCardToHand(card)
+    card:SetParent(self.playerControls.theHand)
+    self:ResetCardsInHandPositions()
+end
+
+
+---move card from the hand to battlefield
+---@param card frame the card to be played
+function GameBoardMixin:PlayCardToBattlefield(card)
+    card:StopMovingOrSizing()
+
+    if not self.playerBattlefield.cards then
+        self.playerBattlefield.cards = {}
+    end
+    if #self.playerBattlefield.cards > 6 then
+        return
+    end
+    local numCards = #self.playerBattlefield.cards
+
+    self.playerBattlefield.cards[numCards+1] = card;
+    card:SetParent(self.playerBattlefield)
+    local handIndex;
+    for k, c in ipairs(self.playerControls.theHand.cards) do
+        if c.id == card.id then
+            handIndex = k;
+        end
+    end
+    table.remove(self.playerControls.theHand.cards, handIndex)
+
+    for i = 1, numCards+1 do
+        self.playerBattlefield.cards[i]:ClearAllPoints()
+        self.playerBattlefield.cards[i]:SetPoint("CENTER", self.playerBattlefieldCardOffsets[numCards+1][i], 0)
+    end
+
+    self:ResetCardsInHandPositions()
+end
+
 
 function GameBoardMixin:PlayBasicAttack(player, target)
     --target.card is the data table, target is the ui template
     target.card.health = target.card.health - player.card.attack; -- update data table
-    --target.health:SetText(target.card.health) -- update UI
 
     -- send new card data table to opponent
     local move = {
@@ -1086,13 +1251,14 @@ end)
 
 
 local function parseCardHyperlink(link, showCard)
-    local linkType, addon, _art, _class, _name, _health, _attack, _ability, _power, _battlecry, _deathrattle, _cost, _backgroundPath, _background, _atlas, _rarity = strsplit(":", link)
+    local linkType, addon, _art, _class, _id, _name, _health, _attack, _ability, _power, _battlecry, _deathrattle, _cost, _backgroundPath, _background, _atlas, _rarity = strsplit(":", link)
     if _name and showCard then
         hyperlinkCard:Hide()
         hyperlinkCard:LoadCard({
             art = tonumber(_art),
             name = _name,
             class = _class,
+            id = tonumber(_id),
             health = tonumber(_health),
             attack = tonumber(_attack),
             ability = tonumber(_ability),
@@ -1111,7 +1277,7 @@ end
 
 hooksecurefunc("SetItemRef", function(link)
 	local linkType, addon = strsplit(":", link)
-	if linkType == "garrmission" and addon == "hsl" then
+	if linkType == "garrmission" and addon == "hslite" then
 		parseCardHyperlink(link, true)
 	end
 end)

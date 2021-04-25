@@ -23,16 +23,16 @@ local _, hsl = ...
 hsl.db = {}
 
 
--- TODO: work through each creature type and create names
--- each type doesnt need every class
--- fileID=the texture fileID, name=CardName
+-- TODO: work through each creature type and choose names and art
+-- each creature type doesnt need every class
+-- fileID=the card art texure fileID, name=CardName
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
--- artwork -> this table is used to fetch a random artwork fileDataID
+-- card meta
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
-local artwork = {
+local cardMeta = {
     ["Beast"] = {
         ["druid"] = {
-            {fileID = 522189, name = "Darkwood Mystic"},
+            {fileID = 522189, name = "Ironfur Stomper"},
             {fileID = 522210, name = "Murloc Sprite"},
         },
         ["hunter"] = {
@@ -46,7 +46,10 @@ local artwork = {
         ["shaman"] = {
             {fileID = 522246, name = "Giant Snapjaw"},
         },
-        ["warlock"] = {},
+        ["warlock"] = {
+            {fileID = 522207, name = "Chaos Beast"},
+            {fileID = 522207, name = "Fel Hound"},
+        },
         ["warrior"] = {},
         ["deathknight"] = {},
     },
@@ -65,12 +68,16 @@ local artwork = {
     ["Dragonkin"] = {
         ["druid"] = {},
         ["hunter"] = {},
-        ["mage"] = {},
+        ["mage"] = {
+            {fileID = 522271, name = "Frost Dragon"},
+        },
         ["paladin"] = {},
         ["priest"] = {},
         ["rogue"] = {},
         ["shaman"] = {},
-        ["warlock"] = {},
+        ["warlock"] = {
+            {fileID = 522276, name = "Void Drake"},
+        },
         ["warrior"] = {},
         ["deathknight"] = {},
     },
@@ -78,13 +85,19 @@ local artwork = {
         ["druid"] = {},
         ["hunter"] = {},
         ["mage"] = {},
-        ["paladin"] = {},
-        ["priest"] = {},
+        ["paladin"] = {
+            {fileID = 522229, name = "Lights Guardian"},
+        },
+        ["priest"] = {
+            {fileID = 522215, name = "Shadow Worm"},
+        },
         ["rogue"] = {},
         ["shaman"] = {
             {fileID = 522229, name = "Air Elemental"},
         },
-        ["warlock"] = {},
+        ["warlock"] = {
+            {fileID = 522215, name = "Void Worm"},
+        },
         ["warrior"] = {},
         ["deathknight"] = {},
     },
@@ -104,18 +117,29 @@ local artwork = {
         ["druid"] = {
             {fileID = 522190, name = "Feathermane Druid"},
             {fileID = 522279, name = "Troll Mystic"},
+            {fileID = 522189, name = "Darkwood Mystic"},
+            {fileID = 522236, name = "Tuskbark Warrior"},
         },
         ["hunter"] = {},
-        ["mage"] = {},
+        ["mage"] = {
+            {fileID = 522216, name = "Arcanist"},
+            {fileID = 131323, name = "Elf Mage"},
+            {fileID = 131393, name = "Draenei Arcanist"},
+        },
         ["paladin"] = {},
-        ["priest"] = {},
+        ["priest"] = {
+            {fileID = 522206, name = "Archbishop"},
+            {fileID = 522216, name = "Shadow Priest"},
+        },
         ["rogue"] = {
             {fileID = 522278, name = "SI:7 Assassin"},
         },
         ["shaman"] = {
             {fileID = 522280, name = "Troll Shaman"},
         },
-        ["warlock"] = {},
+        ["warlock"] = {
+            --{fileID = 131736, name = "Forgotten One"},
+        },
         ["warrior"] = {
             {fileID = 522263, name = "Troll Warrior"},
         },
@@ -125,17 +149,21 @@ local artwork = {
         ["druid"] = {},
         ["hunter"] = {},
         ["mage"] = {},
-        ["paladin"] = {},
+        ["paladin"] = {
+            {fileID = 1385731, name = "Flame Leviathan"},
+        },
         ["priest"] = {},
         ["rogue"] = {},
         ["shaman"] = {},
-        ["warlock"] = {},
+        ["warlock"] = {
+            {fileID = 1385754, name = "Choas Bot"},
+        },
         ["warrior"] = {},
         ["deathknight"] = {},
     },
     ["Undead"] = {
         ["druid"] = {
-            {fileID = 522189, name = "Darkwood Mystic"},
+            {fileID = 522189, name = "Shadow Summoner"},
             {fileID = 522190, name = "Talonbeak Fiend"},
         },
         ["hunter"] = {},
@@ -161,7 +189,7 @@ local artwork = {
     },
 }
 
-hsl.db.artwork = artwork;
+hsl.db.cardMeta = cardMeta;
 
 
 

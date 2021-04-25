@@ -2,6 +2,8 @@ local _, hsl = ...
 
 local L = hsl.locales;
 
+local LibFlyPaper = LibStub:GetLibrary("LibFlyPaper-1.0")
+
 local CARD_TEMPLATE_PATH = [[Interface\Addons\HearthstoneLite\CardTemplates\]]
 local CARD_ATLAS = {}
 
@@ -142,8 +144,6 @@ CARD_ATLAS.WEAPON[5] = {
     top = 434 / WEAPON_TEMPLATE_HEIGHT,
     bottom = 819 / WEAPON_TEMPLATE_HEIGHT,
 }
-
-
 
 
 
@@ -317,6 +317,7 @@ function HslCardListviewItemMixin:OnMouseDown()
 end
 
 
+
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 -- this is the mixin for the cards
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
@@ -332,7 +333,10 @@ function HslCardMixin:OnShow()
 end
 
 function HslCardMixin:ScaleTo(scale)
-    local fontSize = 28 * scale;
+    if not scale then
+        scale = 1;
+    end
+    local fontSize = 28 * (scale * 0.85);
     local fontName, _, fontFlags = self.cost:GetFont()
     self.cost:SetFont(fontName, fontSize, fontFlags)
     self.attack:SetFont(fontName, fontSize, fontFlags)
@@ -439,26 +443,33 @@ function HslCardMixin:OnMouseDown()
     end
 end
 
+local tooltipCard;
 
 function HslCardMixin:OnEnter()
-    if not self.tooltipCard then
-        self.tooltipCard = CreateFrame("FRAME", "HearthstoneLiteTooltipCard", self, "HslCard")
-        self.tooltipCard:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", -10, -20)
-        self.tooltipCard:Hide()
-    end
-    if self.card and self.hasBattleTooltip then
-        self.tooltipCard:LoadCard(self.card)
-        self.tooltipCard:Show()
-        self.tooltipCard:ScaleTo(1.25)
-        self.tooltipCard:SetFrameStrata("TOOLTIP")
+    if self.showTooltipCard then
+        tooltipCard:LoadCard(self.card)
+        tooltipCard:ClearAllPoints()
+        tooltipCard:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 0, 0)
+        tooltipCard:Show()
+        tooltipCard:ScaleTo(self.tooltipScaleTo)
+        tooltipCard:SetFrameStrata("TOOLTIP")
     end
 end
 
 function HslCardMixin:OnLeave()
-    if self.tooltipCard then
-        self.tooltipCard:Hide()
-    end
+    tooltipCard:Hide()
 end
+
+tooltipCard = CreateFrame("FRAME", "HearthstoneLiteTooltipCard", UIParent, "HslCard")
+tooltipCard:SetPoint("CENTER", 0, 0)
+tooltipCard:SetFrameLevel(500)
+tooltipCard:Hide()
+-- add a close button
+tooltipCard.close = CreateFrame("BUTTON", nil, tooltipCard, "UIPanelCloseButton")
+tooltipCard.close:SetPoint("TOPRIGHT", 4, 4)
+tooltipCard.close:SetScript("OnClick", function(self)
+    self:GetParent():Hide()
+end)
 
 
 ---return a custom hyperlink for a card
@@ -467,10 +478,11 @@ function HslCardMixin:GetCardLink()
     if not self.card then
         return
     end
-    local link = string.format("|cFFFFFF00|Hgarrmission:hsl:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
+    local link = string.format("|cFFFFFF00|Hgarrmission:hslite:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
     tostring(self.card.art),
     tostring(self.card.class),
     tostring(self.card.name), 
+    tostring(self.card.id), 
     tostring(self.card.health), 
     tostring(self.card.attack),  
     tostring(self.card.ability), 
@@ -488,7 +500,9 @@ function HslCardMixin:GetCardLink()
 end
 
 
+-- cards ont he battlefield
 HslBattlefieldCardMixin = {}
+HslBattlefieldCardMixin.tooltipScaleTo = 1.25
 
 function HslBattlefieldCardMixin:OnMouseDown()
     if not self.card then
@@ -497,7 +511,13 @@ function HslBattlefieldCardMixin:OnMouseDown()
 
     local gb = HearthstoneLite.gameBoard;
 
-    self.selected = not self.selected;
+    -- handle the card selection
+    local x = self.selected
+    for _, card in ipairs(self:GetParent().cards) do
+        card.selected = false;
+        card.cardSelected:SetShown(card.selected)
+    end
+    self.selected = not x;
     self.cardSelected:SetShown(self.selected)
 
     if self.selected then
@@ -513,11 +533,58 @@ function HslBattlefieldCardMixin:OnMouseDown()
         gb:PlayBasicAttack(gb.playerBattlefield.selectedCard, gb.targetBattlefield.selectedCard)
     end
 
+    if gb.playerControls:IsMouseOver() then --IsControlKeyDown() and 
+        self:SetMovable(true)
+        self:EnableMouse(true)
+        self:StartMoving()
+
+        gb.cursorHascard = true
+    else
+        self:SetMovable(false)
+        self:SetScript("OnDragStart", nil)
+        self:SetScript("OnDragStop", nil)
+    end
+
 end
 
-function HslBattlefieldCardMixin:CardKilled()
-    
+
+function HslBattlefieldCardMixin:OnMouseUp()
+    local card = self;
+    local gb = HearthstoneLite.gameBoard;
+    if gb.cursorHascard == true then
+        if gb.playerBattlefield:IsMouseOver() then
+            if not gb.playerBattlefield.cards then
+                gb.playerBattlefield.cards = {}
+            end
+            if #gb.playerBattlefield.cards > 6 then
+                print('to many cards')
+                gb:ReturnCardToHand(card)
+            else
+                gb:PlayCardToBattlefield(card)
+            end
+        elseif gb.playerControls:IsMouseOver() then -- deal with this differently?
+            --self:StopMovingOrSizing()
+            gb:ReturnCardToHand(card)
+        end
+    end
+
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--

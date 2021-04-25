@@ -730,11 +730,11 @@
                 </Anchors>
                 <Frames>
 
-                    <Frame parentKey="playerHand" frameLevel="1">
-                        <Size y="220"/>
+                    <Frame parentKey="playerControls" frameLevel="1" enableMouse="true">
+                        <Size y="240"/>
                         <Anchors>
-                            <Anchor point="BOTTOMLEFT" x="50" y="-200"/>
-                            <Anchor point="BOTTOMRIGHT" x="-50" y="-200"/>
+                            <Anchor point="BOTTOMLEFT" x="50" y="-220"/>
+                            <Anchor point="BOTTOMRIGHT" x="-50" y="-220"/>
                         </Anchors>
 
                         <Layers>
@@ -742,14 +742,80 @@
                                 <Texture atlas="UI-Frame-Mechagon-CardParchmentWider" setAllPoints="true" useAtlasSize="false"/>
                             </Layer>
                         </Layers>
+
+                        <Frames>
+                            <Frame parentKey="theDeck" enableMouse="true">
+                                <Size x="112.5" y="157.5"/>
+                                <Anchors>
+                                    <Anchor point="BOTTOMLEFT" x="40" y="30"/>
+                                </Anchors>
+                                <Layers>
+                                    <Layer level="BACKGROUND">
+                                        <Texture file="Interface\Addons\HearthstoneLite\Media\standardCardBack" setAllPoints="true">
+                                            <TexCoords left="0" right="0.877" top="0" bottom="0.655" />
+                                        </Texture>
+                                    </Layer>
+                                    <Layer level="HIGHLIGHT" textureSubLevel="-5">
+                                        <Texture atlas="streamcinematic-highlight" useAtlasSize="false">
+                                            <Anchors>
+                                                <Anchor point="TOPLEFT" x="-7" y="5"/>
+                                                <Anchor point="BOTTOMRIGHT" x="7" y="-5"/>
+                                            </Anchors>
+                                        </Texture>
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnMouseDown>
+                                        self:GetParent():GetParent():DrawCard()
+                                    </OnMouseDown>
+                                </Scripts>
+                            </Frame>
+
+                            <Frame parentKey="theHand">
+                                <Anchors>
+                                    <Anchor point="BOTTOMLEFT" x="180" y="20"/>
+                                    <Anchor point="TOPRIGHT" x="-140" y="-40"/>
+                                </Anchors>
+                            </Frame>
+
+                            <!-- <Button parentKey="testComms" inherits="UIPanelGoldButtonTemplate">
+                                <Size x="100" y="35"/>
+                                <Anchors>
+                                    <Anchor point="TOPRIGHT" x="-10" y="-20"/>
+                                </Anchors>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnLoad> self.Text:SetText("test move") </OnLoad>
+                                    <OnClick>
+                                        self:GetParent():GetParent():TestComms()
+                                    </OnClick>
+                                </Scripts>
+                            </Button> -->
+                        </Frames>
                     </Frame>
 
-                    <Frame parentKey="playerBattlefield">
-                        <Size y="220"/>
+                    <Frame parentKey="playerBattlefield" enableMouse="true">
+                        <Size y="240"/>
                         <Anchors>
                             <Anchor point="BOTTOMLEFT" x="0" y="0"/>
                             <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
                         </Anchors>
+                        <Layers>
+                            <Layer level="HIGHLIGHT">
+                                <Texture parentKey="Highlight" atlas="auctionhouse-background-buy-noncommodities-market" useAtlasSize="false" setAllPoints="true"/>
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnEnter>
+                                self:GetParent():PlayerBattlefield_OnEnter()
+                            </OnEnter>
+                            <OnLeave>
+                                self:GetParent():PlayerBattlefield_OnLeave()
+                            </OnLeave>
+                        </Scripts>
                     </Frame>
                     <Frame parentKey="targetBattlefield">
                         <Size y="220"/>
@@ -759,22 +825,6 @@
                         </Anchors>
                     </Frame>
 
-
-                    <Button parentKey="testComms" inherits="UIPanelGoldButtonTemplate">
-                        <Size x="255" y="35"/>
-                        <Anchors>
-                            <Anchor point="CENTER"/>
-                        </Anchors>
-                        <Layers>
-                            <Layer level="OVERLAY">
-                            </Layer>
-                        </Layers>
-                        <Scripts>
-                            <OnClick>
-                                self:GetParent():TestComms()
-                            </OnClick>
-                        </Scripts>
-                    </Button>
                 </Frames>
 
                 <Scripts>
@@ -800,6 +850,21 @@
                         <Scripts>
                             <OnClick>
                                 self:GetParent():ResetGlobalSettings()
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                    <Button parentKey="runFirstLoad" inherits="UIPanelGoldButtonTemplate">
+                        <Size x="255" y="35"/>
+                        <Anchors>
+                            <Anchor point="CENTER" y="-50"/>
+                        </Anchors>
+                        <Layers>
+                            <Layer level="OVERLAY">
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnClick>
+                                self:GetParent():RunFirstLoad()
                             </OnClick>
                         </Scripts>
                     </Button>
