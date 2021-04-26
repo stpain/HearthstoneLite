@@ -223,10 +223,46 @@
 	</Frame>
 
 	<Frame name="HslBattlefieldCard" mixin="HslBattlefieldCardMixin" inherits="HslCard" virtual="true" enableMouse="true">
+		<Frames>
+			<Frame parentKey="attackArrow" hidden="true" movable="true" resizable="true">
+				<ResizeBounds>
+					<minResize x="62" y="44" />
+				</ResizeBounds>
+				<Size x="62" y="44"/>
+				<Anchors>
+					<Anchor point="TOP" x="0" y="40"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BORDER">
+						<Line parentKey="attackLine" thickness="20">
+							<Color r="0.5" g="0.8" b="0.3"/>
+						</Line>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnUpdate>
+						<!-- self:GetParent:OnUpdate() -->
+					</OnUpdate>
+					<OnMouseDown>
+						<!-- self:StartSizing("TOPLEFT") -->
+						self.startCursorPosX, self.startCursorPosY = GetCursorPosition()
+						self.isMouseDown= true
+					</OnMouseDown>
+					<OnMouseUp>
+						self.endCursorPosX, self.endCursorPosY = GetCursorPosition()
+						self.isMouseDown = false
+						<!-- self:StopMovingOrSizing() -->
+					</OnMouseUp>
+				</Scripts>
+			</Frame>
+		</Frames>
 		<Scripts>
 			<OnMouseDown method="OnMouseDown"/>
 			<OnMouseUp method="OnMouseUp"/>
 			<OnLoad>
+				<!-- self.attackArrow.atlas:SetRotation(3.14) -->
+				self.attackArrow.attackLine:SetStartPoint("TOP", 0, 0)
+				self.attackArrow.attackLine:SetEndPoint("BOTTOM", 0, 0)
                 self:RegisterForDrag("LeftButton")
             </OnLoad>
             <!-- <OnDragStart>

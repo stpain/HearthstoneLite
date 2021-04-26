@@ -594,7 +594,7 @@ function SettingsMixin:RunFirstLoad()
         "Dragonkin",
     }
     for k, class in pairs({"druid", "hunter", "rogue", "shaman", "mage", "paladin", "priest", "warlock", "warrior", "deathknight"}) do
-        for i = 1, 20 do
+        for i = 1, 50 do
             local creatureType = ct[random(#ct)]
             if hsl.db.cardMeta[creatureType][class] and next(hsl.db.cardMeta[creatureType][class]) then
                 local randomKey = random(#hsl.db.cardMeta[creatureType][class])
@@ -604,9 +604,9 @@ function SettingsMixin:RunFirstLoad()
         end
     end
     local class = "neutral";
-    for i = 1, 1000 do
+    for i = 1, 50 do
         local creatureType = ct[random(#ct)]
-        if hsl.db.cardMeta[creatureType][class] then
+        if hsl.db.cardMeta[creatureType][class] and next(hsl.db.cardMeta[creatureType][class]) then
             local randomKey = random(#hsl.db.cardMeta[creatureType][class])
             local isElite = (random(100) > 85) and true or false;
             generateCreatureCard(class, "NEUTRAL", hsl.db.cardMeta[creatureType][class][randomKey].name, hsl.db.cardMeta[creatureType][class][randomKey].fileID, false, isElite)
@@ -960,31 +960,32 @@ end
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
 GameBoardMixin = {}
+GameBoardMixin.cardDrawnID = 1;
 GameBoardMixin.playerBattlefield = {
     cards = {},
 }
 GameBoardMixin.cardPool = CreateFramePool("FRAME", nil, "HslBattlefieldCard", nil, false)
-GameBoardMixin.playerBattlefieldCardOffsets = {
+GameBoardMixin.battlefieldCardOffsets = {
     [1] = {0},
     [2] = {-100, 100},
     [3] = {-170, 0, 170},
     [4] = {-270, -100, 100, 270},
     [5] = {-340, -170, 0, 170, 340},
-    [6] = {-510, -270, -100, 100, 270, 510},
+    [6] = {-440, -270, -100, 100, 270, 440},
     [7] = {-510, -340, -170, 0, 170, 340, 510},
 }
-GameBoardMixin.playerControlsCardOffsets = {
-    [1] = {0},
-    [2] = {0, 150},
-    [3] = {0, 150, 300,},
-    [4] = {0, 150, 300, 450,},
-    [5] = {0, 150, 300, 450, 600},
-    [6] = {0},
-    [7] = {0, 150},
-    [8] = {0, 150, 300,},
-    [9] = {0, 150, 300, 450,},
-    [10] = {0, 150, 300, 450, 600},
-}
+-- GameBoardMixin.playerControlsCardOffsets = {
+--     [1] = {0},
+--     [2] = {0, 150},
+--     [3] = {0, 150, 300,},
+--     [4] = {0, 150, 300, 450,},
+--     [5] = {0, 150, 300, 450, 600},
+--     [6] = {0},
+--     [7] = {0, 150},
+--     [8] = {0, 150, 300,},
+--     [9] = {0, 150, 300, 450,},
+--     [10] = {0, 150, 300, 450, 600},
+-- }
 
 -- do i need these?
 function GameBoardMixin:PlayerBattlefield_OnLeave()
@@ -996,23 +997,35 @@ function GameBoardMixin:PlayerBattlefield_OnEnter()
 end
 --
 
+function GameBoardMixin:FireEvent(eventName, eventData)
+    local event = {
+        type = "GAME_EVENT",
+        event = eventName,
+        args = eventData,
+    }
+    local target = UnitName('player')
+    target = Ambiguate(target, "none")
+    COMMS:Transmit(event, "WHISPER", target, "NORMAL")
+end
+
 function GameBoardMixin:OnShow()
-
-    -- move to an OnLoad script?
-    if not self.tooltipCard then
-        self.tooltipCard = CreateFrame("FRAME", "HearthstoneLiteTooltipCard", self, "HslCard")
-        self.tooltipCard:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", -10, -20)
-        self.tooltipCard:Hide()
-    end
-
     -- copy some dummy cards, make sure these exist in sv file!
     self.deck = {}
-    for _, card in ipairs(HSL.collection.priest) do
+    for _, card in ipairs(HSL.collection.shaman) do
         table.insert(self.deck, card)
     end
     self.playerControls.theHand.cards = nil;
 end
 
+
+function GameBoardMixin:StartGame()
+
+end
+
+
+function GameBoardMixin:ExitGame()
+
+end
 
 ---loop the cards in the hand table and reset their positions
 function GameBoardMixin:ResetCardsInHandPositions()
@@ -1047,7 +1060,8 @@ function GameBoardMixin:DrawCard()
 
     if not self.playerControls.theHand.cards[numCards+1] then
         local card = self.cardPool:Acquire()
-        card.id = time()
+        card.drawnID = self.cardDrawnID
+        self.cardDrawnID = self.cardDrawnID + 1;
         card:SetParent(self.playerControls.theHand)
         card:ScaleTo(0.75)
         -- adjust the positions
@@ -1065,12 +1079,10 @@ function GameBoardMixin:DrawCard()
             card:LoadCard(self.deck[rndCardIndex])
             table.remove(self.deck, rndCardIndex)
         end
-
         self.playerControls.theHand.cards[numCards+1] = card;
 
     else
         local card = self.playerControls.theHand.cards[numCards+1];
-
         local rndCardIndex = random(#self.deck)
         if self.deck[rndCardIndex] then
             card:LoadCard(self.deck[rndCardIndex])
@@ -1088,11 +1100,26 @@ function GameBoardMixin:ReturnCardToHand(card)
 end
 
 
+function GameBoardMixin:DeselectAllBattlefieldCards()
+    if self.playerBattlefield.cards and next(self.playerBattlefield.cards) then
+        for _, card in ipairs(self.playerBattlefield.cards) do
+            card.selected = false;
+            card.cardSelected:SetShown(card.selected)
+        end
+    end
+    if self.targetBattlefield.cards and next(self.targetBattlefield.cards) then
+        for _, card in ipairs(self.targetBattlefield.cards) do
+            card.selected = false;
+            card.cardSelected:SetShown(card.selected)
+        end
+    end
+end
+
 ---move card from the hand to battlefield
 ---@param card frame the card to be played
 function GameBoardMixin:PlayCardToBattlefield(card)
     card:StopMovingOrSizing()
-
+    print("playing card to battlefield")
     if not self.playerBattlefield.cards then
         self.playerBattlefield.cards = {}
     end
@@ -1100,64 +1127,98 @@ function GameBoardMixin:PlayCardToBattlefield(card)
         return
     end
     local numCards = #self.playerBattlefield.cards
-
     self.playerBattlefield.cards[numCards+1] = card;
     card:SetParent(self.playerBattlefield)
     local handIndex;
     for k, c in ipairs(self.playerControls.theHand.cards) do
-        if c.id == card.id then
+        if c.drawnID == card.drawnID then
             handIndex = k;
+            print(k, c.card.name)
         end
     end
+    --self.playerControls.theHand.cards[handIndex] = nil;
     table.remove(self.playerControls.theHand.cards, handIndex)
+    C_Timer.After(0, function()
+        for i = 1, numCards+1 do
+            self.playerBattlefield.cards[i]:ClearAllPoints()
+            self.playerBattlefield.cards[i]:SetPoint("CENTER", self.playerBattlefield, "CENTER", self.battlefieldCardOffsets[numCards+1][i], 0)
+        end
+        self:DeselectAllBattlefieldCards()
+        self:ResetCardsInHandPositions()
+    end)
 
-    for i = 1, numCards+1 do
-        self.playerBattlefield.cards[i]:ClearAllPoints()
-        self.playerBattlefield.cards[i]:SetPoint("CENTER", self.playerBattlefieldCardOffsets[numCards+1][i], 0)
+    self:FireEvent("CARD_PLAYED_TO_BATTLEFIELD", {
+        model = card.card,
+        drawnID = card.drawnID,
+    })
+end
+
+---this is called when the opponent fires the CARD_PLAYED_TO_BATTLEFIELD event
+---for this we will need to create a card frame and load the data into it
+---@param model table the data for the card
+function GameBoardMixin:CardPlayedToBattlefield(model, drawnID)
+    print('card played to battlefield')
+    print('model table')
+    for k, v in pairs(model) do
+        print("    ",k,v)
     end
-
-    self:ResetCardsInHandPositions()
+    if not self.targetBattlefield.cards then
+        self.targetBattlefield.cards = {}
+    end
+    local numCards = #self.targetBattlefield.cards
+    local card = self.cardPool:Acquire()
+    card.drawnID = drawnID;
+    card:Hide()
+    card:LoadCard(model, true)
+    card:Show()
+    print("card.card table")
+    for k, v in pairs(card.card) do
+        print("    ",k,v)
+    end
+    card:ScaleTo(0.75)
+    card:SetParent(self.targetBattlefield)
+    card:SetFrameLevel(numCards+20)
+    card.showTooltipCard = true;
+    self.targetBattlefield.cards[numCards+1] = card;
+    for i = 1, numCards+1 do
+        self.targetBattlefield.cards[i]:ClearAllPoints()
+        self.targetBattlefield.cards[i]:SetPoint("CENTER", self.battlefieldCardOffsets[numCards+1][i], 0)
+    end
+    print('END card played to battlefield')
 end
 
 
 function GameBoardMixin:PlayBasicAttack(player, target)
-    --target.card is the data table, target is the ui template
-    target.card.health = target.card.health - player.card.attack; -- update data table
+    if self.targetBattlefield.selectedCard and self.playerBattlefield.selectedCard then
+        target.card.health = target.card.health - player.card.attack; -- update data table
 
-    -- send new card data table to opponent
-    local move = {
-        event = "BASIC_ATTACK",
-        player = player.card,
-        target = target.card,
-    }
-    local target = UnitName('player')
-    target = Ambiguate(target, "none")
-    COMMS:Transmit(move, "WHISPER", target, "NORMAL")
+        print(player.card.name, player.drawnID, 'attacks', target.card.name, target.drawnID)
+
+        -- send new card data table to opponent
+        local move = {
+            event = "BASIC_ATTACK",
+            player = player.card,
+            target = target.card,
+        }
+        local target = UnitName('player')
+        target = Ambiguate(target, "none")
+        COMMS:Transmit(move, "WHISPER", target, "NORMAL")
+    end
 end
 
 
 function GameBoardMixin:OnBasicAttack(target, player)
+    print('being attacked', player.id, player.name, 'attacks', target.id, target.name)
 
-    -- swap ?
-    local x = target;
-    target = player;
-    player = x;
 
-    self.playerBattlefield.selectedCard = nil;
-    self.targetBattlefield.selectedCard = nil;
-
-    -- for now its just a dummy card
-    self.playerBattlefield.testCard:Hide()
-    self.playerBattlefield.testCard:LoadCard(player)
-
-    self.targetBattlefield.testCard:Hide()
-    self.targetBattlefield.testCard:LoadCard(target)
-
-    if player.health < 1 then
-        print("card has been lost")
-        self.playerBattlefield.testCard:Hide()
+    for k, card in ipairs(self.targetBattlefield.cards) do
+        print("OnBasicAttack", card.card.name)
+        if card.drawnID == target.drawnID then
+            print(card.card.name, 'attacked for', player.attack)
+        end
     end
 
+    self:DeselectAllBattlefieldCards()
 end
 
 
@@ -1197,6 +1258,12 @@ function commsMixin:OnCommReceived(prefix, message, distribution, sender)
         return;
     end
     print('comms_in', string.format("%s from %s", data.event, sender))
+
+    if data.type == "GAME_EVENT" then
+        if data.event == "CARD_PLAYED_TO_BATTLEFIELD" then
+            HearthstoneLite.gameBoard:CardPlayedToBattlefield(data.args.model, data.args.drawnID)
+        end
+    end
 
     if data.event == "BASIC_ATTACK" then
         HearthstoneLite.gameBoard:OnBasicAttack(data.target, data.player)

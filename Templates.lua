@@ -346,7 +346,10 @@ function HslCardMixin:ScaleTo(scale)
     self:SetScale(scale)
 end
 
-function HslCardMixin:LoadCard(card)
+function HslCardMixin:LoadCard(card, printInfo)
+    if not card then
+        return
+    end
 
     self.selected = false;
 
@@ -354,6 +357,9 @@ function HslCardMixin:LoadCard(card)
     self.card = {}
     for k, v in pairs(card) do
         self.card[k] = v;
+        if printInfo then
+            --print(string.format('    set card data [%s] >> %s', k, v)) 
+        end
     end
 
     --self.card = card;
@@ -418,6 +424,7 @@ function HslCardMixin:OnHide()
     self.cardSelected:SetShown(self.selected)
 
     self.card = nil;
+    self.drawnID = nil;
 end
 
 function HslCardMixin:OnMouseUp()
@@ -427,6 +434,13 @@ end
 function HslCardMixin:OnMouseDown()
     if not self.card then
         return;
+    end
+    --dev stuffs
+    if IsAltKeyDown() then
+        print('data table for card:', self.card.name)
+        for k, v in pairs(self.card) do
+            print(string.format('    card data [%s] = %s', k, v))
+        end
     end
 
     self.selected = not self.selected;
@@ -441,6 +455,7 @@ function HslCardMixin:OnMouseDown()
             return;
         end
     end
+
 end
 
 local tooltipCard;
@@ -449,7 +464,7 @@ function HslCardMixin:OnEnter()
     if self.showTooltipCard then
         tooltipCard:LoadCard(self.card)
         tooltipCard:ClearAllPoints()
-        tooltipCard:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 0, 0)
+        tooltipCard:SetPoint("BOTTOM", self, "TOP", 0, 0) -- this needs to be changable by the user
         tooltipCard:Show()
         tooltipCard:ScaleTo(self.tooltipScaleTo)
         tooltipCard:SetFrameStrata("TOOLTIP")
@@ -504,10 +519,48 @@ end
 HslBattlefieldCardMixin = {}
 HslBattlefieldCardMixin.tooltipScaleTo = 1.25
 
+function HslBattlefieldCardMixin:OnUpdate()
+    if self.isMouseDown == true then
+        local x1, y1 = self.startCursorPosX, self.startCursorPosY
+        local x2, y2 = self.endCursorPosX, self.endCursorPosY
+
+        local a = math.atan2(y2 - y1, x2 - x1)
+        print(a)
+    end
+end
+
+function HslBattlefieldCardMixin:OnEnter()
+    if self.showTooltipCard then
+        tooltipCard:LoadCard(self.card)
+        tooltipCard:ClearAllPoints()
+        tooltipCard:SetPoint("RIGHT", self, "LEFT", 0, 0) -- this needs to be changable by the user
+        tooltipCard:Show()
+        tooltipCard:ScaleTo(self.tooltipScaleTo)
+        tooltipCard:SetFrameStrata("TOOLTIP")
+    end
+
+    if self:GetParent() == HearthstoneLite.gameBoard.playerBattlefield then
+        --self.attackArrow:Show()
+    end
+end
+
+function HslBattlefieldCardMixin:OnLeave()
+    tooltipCard:Hide()
+    --self.attackArrow:Hide()
+end
+
 function HslBattlefieldCardMixin:OnMouseDown()
     if not self.card then
         return;
     end
+    --dev stuffs
+    if IsAltKeyDown() then
+        print('data table for card:', self.card.name)
+        for k, v in pairs(self.card) do
+            print(string.format('    card data [%s] = %s', k, v))
+        end
+    end
+    print("card parent:",self:GetParent():GetName())
 
     local gb = HearthstoneLite.gameBoard;
 
@@ -518,12 +571,15 @@ function HslBattlefieldCardMixin:OnMouseDown()
         card.cardSelected:SetShown(card.selected)
     end
     self.selected = not x;
-    self.cardSelected:SetShown(self.selected)
+    self.cardSelected:SetShown(false)
+    --self.cardSelected:SetShown(self.selected)
 
     if self.selected then
         self:GetParent().selectedCard = self;
+        self.attackArrow:Show()
         print(string.format("selected card %s", self.card.name))
     else
+        self.attackArrow:Hide()
         self:GetParent().selectedCard = nil;
         print(string.format("deselected card %s", self.card.name))
     end
@@ -539,10 +595,11 @@ function HslBattlefieldCardMixin:OnMouseDown()
         self:StartMoving()
 
         gb.cursorHascard = true
+        gb.cursorCard = self
     else
-        self:SetMovable(false)
         self:SetScript("OnDragStart", nil)
         self:SetScript("OnDragStop", nil)
+        self:SetMovable(false)
     end
 
 end
@@ -553,17 +610,17 @@ function HslBattlefieldCardMixin:OnMouseUp()
     local gb = HearthstoneLite.gameBoard;
     if gb.cursorHascard == true then
         if gb.playerBattlefield:IsMouseOver() then
-            if not gb.playerBattlefield.cards then
+            if not gb.playerBattlefield.cards then --this should be done elsewhere need to see why its an issue!
                 gb.playerBattlefield.cards = {}
             end
             if #gb.playerBattlefield.cards > 6 then
-                print('to many cards')
                 gb:ReturnCardToHand(card)
             else
-                gb:PlayCardToBattlefield(card)
+                if self:GetParent():GetName() == "HearthstoneGameBoardPlayerControlsHand" then
+                    gb:PlayCardToBattlefield(card)
+                end
             end
-        elseif gb.playerControls:IsMouseOver() then -- deal with this differently?
-            --self:StopMovingOrSizing()
+        else
             gb:ReturnCardToHand(card)
         end
     end

@@ -52,6 +52,7 @@ local cardMeta = {
         },
         ["warrior"] = {},
         ["deathknight"] = {},
+        ["neutral"] = {},
     },
     ["Demon"] = {
         ["druid"] = {},
@@ -64,6 +65,7 @@ local cardMeta = {
         ["warlock"] = {},
         ["warrior"] = {},
         ["deathknight"] = {},
+        ["neutral"] = {},
     },
     ["Dragonkin"] = {
         ["druid"] = {},
@@ -80,6 +82,7 @@ local cardMeta = {
         },
         ["warrior"] = {},
         ["deathknight"] = {},
+        ["neutral"] = {},
     },
     ["Elemental"] = {
         ["druid"] = {},
@@ -100,6 +103,7 @@ local cardMeta = {
         },
         ["warrior"] = {},
         ["deathknight"] = {},
+        ["neutral"] = {},
     },
     ["Giant"] = {
         ["druid"] = {},
@@ -112,6 +116,7 @@ local cardMeta = {
         ["warlock"] = {},
         ["warrior"] = {},
         ["deathknight"] = {},
+        ["neutral"] = {},
     },
     ["Humanoid"] = {
         ["druid"] = {
@@ -144,6 +149,7 @@ local cardMeta = {
             {fileID = 522263, name = "Troll Warrior"},
         },
         ["deathknight"] = {},
+        ["neutral"] = {},
     },
     ["Mechanical"] = {
         ["druid"] = {},
@@ -160,6 +166,7 @@ local cardMeta = {
         },
         ["warrior"] = {},
         ["deathknight"] = {},
+        ["neutral"] = {},
     },
     ["Undead"] = {
         ["druid"] = {
@@ -186,6 +193,9 @@ local cardMeta = {
             {fileID = 522189, name = "Ironfur Warrior"},
         },
         ["deathknight"] = {},
+        ["neutral"] = {
+            {fileID = 522189, name = "Random Bishop"},
+        },
     },
 }
 

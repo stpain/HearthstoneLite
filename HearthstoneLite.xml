@@ -771,13 +771,45 @@
                                 </Scripts>
                             </Frame>
 
-                            <Frame parentKey="theHand">
+                            <Frame name="HearthstoneGameBoardPlayerControlsHand" parentKey="theHand">
                                 <Anchors>
                                     <Anchor point="BOTTOMLEFT" x="180" y="20"/>
                                     <Anchor point="TOPRIGHT" x="-140" y="-40"/>
                                 </Anchors>
                             </Frame>
 
+                            <Button parentKey="startGame" inherits="UIPanelGoldButtonTemplate">
+                                <Size x="100" y="35"/>
+                                <Anchors>
+                                    <Anchor point="TOPRIGHT" x="-10" y="-20"/>
+                                </Anchors>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnLoad> self.Text:SetText("Start Game") </OnLoad>
+                                    <OnClick>
+                                        self:GetParent():GetParent():StartGame()
+                                    </OnClick>
+                                </Scripts>
+                            </Button>
+                            <Button parentKey="exitGame" inherits="UIPanelGoldButtonTemplate">
+                                <Size x="100" y="35"/>
+                                <Anchors>
+                                    <Anchor point="TOPRIGHT" x="-10" y="-70"/>
+                                </Anchors>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnLoad> self.Text:SetText("Exit Game") </OnLoad>
+                                    <OnClick>
+                                        self:GetParent():GetParent():ExitGame()
+                                    </OnClick>
+                                </Scripts>
+                            </Button>
                             <!-- <Button parentKey="testComms" inherits="UIPanelGoldButtonTemplate">
                                 <Size x="100" y="35"/>
                                 <Anchors>
@@ -797,16 +829,16 @@
                         </Frames>
                     </Frame>
 
-                    <Frame parentKey="playerBattlefield" enableMouse="true">
+                    <Frame name="playerBattlefield" parentKey="playerBattlefield" enableMouse="true"> <!-- is it wise to use same value for name and key? -->
                         <Size y="240"/>
                         <Anchors>
                             <Anchor point="BOTTOMLEFT" x="0" y="0"/>
                             <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
                         </Anchors>
                         <Layers>
-                            <Layer level="HIGHLIGHT">
-                                <Texture parentKey="Highlight" atlas="auctionhouse-background-buy-noncommodities-market" useAtlasSize="false" setAllPoints="true"/>
-                            </Layer>
+                            <!-- <Layer level="HIGHLIGHT">
+                                <Texture parentKey="Highlight" atlas="auctionhouse-background-buy-noncommodities-market" useAtlasSize="false" setAllPoints="true" alpha="0.2"/>
+                            </Layer> -->
                         </Layers>
                         <Scripts>
                             <OnEnter>
@@ -817,12 +849,17 @@
                             </OnLeave>
                         </Scripts>
                     </Frame>
-                    <Frame parentKey="targetBattlefield">
+                    <Frame name="targetBattlefield" parentKey="targetBattlefield" enableMouse="true">
                         <Size y="220"/>
                         <Anchors>
                             <Anchor point="TOPLEFT" x="0" y="-24"/>
                             <Anchor point="TOPRIGHT" x="0" y="-24"/>
                         </Anchors>
+                        <Layers>
+                            <!-- <Layer level="HIGHLIGHT">
+                                <Texture parentKey="Highlight" atlas="auctionhouse-background-buy-noncommodities-market" useAtlasSize="false" setAllPoints="true" alpha="0.2"/>
+                            </Layer> -->
+                        </Layers>
                     </Frame>
 
                 </Frames>
