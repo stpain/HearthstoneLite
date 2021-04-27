@@ -431,10 +431,6 @@ function HslBattlefieldCardMixin:OnMouseDown()
 
     local gb = HearthstoneLite.gameBoard;
 
-    if gb.playerBattlefield.selectedCard and gb.targetBattlefield.selectedCard then
-        --gb:PlayBasicAttack(gb.playerBattlefield.selectedCard, gb.targetBattlefield.selectedCard)
-    end
-
     if gb.playerControls:IsMouseOver() or gb.playerBattlefield:IsMouseOver() then --IsControlKeyDown() and 
         self:SetMovable(true)
         self:EnableMouse(true)
@@ -450,11 +446,27 @@ function HslBattlefieldCardMixin:OnMouseDown()
 
 end
 
+function HslBattlefieldCardMixin:GetGameBoardLocation()
+    if self.gameBoardLocation then
+        return self.gameBoardLocation;
+    end
+end
 
+function HslBattlefieldCardMixin:UpdateUI()
+    if self.model then
+        self.attack:SetText(self.model.attack)
+        self.health:SetText(self.model.health)
+    end
+end
+
+
+---this function will determine what happens based on if the cursor has a card and where the cursor is
 function HslBattlefieldCardMixin:OnMouseUp()
     local card = self;
     local gb = HearthstoneLite.gameBoard;
+
     if gb.cursorHascard == true then
+
         if gb.playerBattlefield:IsMouseOver() then
             print("mouse is over player battlefield")
             if not gb.playerBattlefield.cards then --this should be done elsewhere need to see why its an issue!
@@ -464,29 +476,35 @@ function HslBattlefieldCardMixin:OnMouseUp()
                 print("battlefield has max num cards")
                 gb:ReturnCardToHand(card)
             else
-                if self:GetParent() == gb.playerControls.theHand then --:GetName() == "HearthstoneGameBoardPlayerControlsHand" then
+                if self:GetParent() == gb.playerControls.theHand then -- if this card came from the hand then play it to battlefield
                     gb:PlayCardToBattlefield(card)
                 end
             end
-        end
-        if gb.targetBattlefield:IsMouseOver() then
-            print("mouse in target battlefield")
 
-            for _, targetCard in ipairs(gb.targetBattlefield.cards) do
-                if targetCard:IsMouseOver() then
-                    print("mouse in card", targetCard.model.name)
-                    gb:PlayBasicAttack(card, targetCard)
-                    gb:AddDebugMessage(string.format("Attack made! %s attacks %s", card.model.name, targetCard.model.name))
+        elseif gb.targetBattlefield:IsMouseOver() then
+            print("mouse in target battlefield")
+            if self:GetParent() == gb.playerBattlefield then -- if this card came from the players battlefield then play move
+                -- this needs to go into gameboard.lua ?
+                for _, targetCard in ipairs(gb.targetBattlefield.cards) do
+                    if targetCard:IsMouseOver() then
+                        print("mouse in card", targetCard.model.name)
+                        gb:PlayBasicAttack(card, targetCard)
+                    end
                 end
+
+            elseif self:GetParent() == gb.playerControls.theHand then
+                gb:ReturnCardToHand(card)
             end
 
-            gb:ReturnCardsToBattlefieldPositions()
-        end
-        if not gb.playerBattlefield:IsMouseOver() and not gb.targetBattlefield:IsMouseOver() then
+        else
             print("mouse not in battlefield")
-            gb:ReturnCardToHand(card)
+            if self:GetParent() == gb.playerControls.theHand then
+                gb:ReturnCardToHand(card)
+            end
         end
     end
+
+    gb:ReturnCardsToBattlefieldPositions()
 
     gb.cursorHascard = false;
     gb.cursorCard = nil;

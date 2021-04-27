@@ -37,11 +37,11 @@
     </Frame>
 
 	<Frame name="HslDebugListviewItem" virtual="true">
-		<Size x="200" y="40"/>
+		<Size x="210" y="29"/>
 		<Layers>
 			<Layer level="OVERLAY">
 				<FontString parentKey="text" inherits="GameFontNormalSmall">
-					<Size x="198" y="38"/>
+					<Size x="208" y="27"/>
 					<Anchors>
 						<Anchor point="CENTER" x="0" y="0"/>
 					</Anchors>

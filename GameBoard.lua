@@ -72,23 +72,23 @@ GameBoardMixin.battlefieldCardOffsets = {
 
 
 function GameBoardMixin:OnLoad()
-    HybridScrollFrame_CreateButtons(self.debugWindow.listview, "HslDebugListviewItem", -10, 0, "TOP", "TOP", 0, -1, "TOP", "BOTTOM")
+    HybridScrollFrame_CreateButtons(self.debugWindow.listview, "HslDebugListviewItem", -5, 0, "TOP", "TOP", 0, -1, "TOP", "BOTTOM")
     HybridScrollFrame_SetDoNotHideScrollBar(self.debugWindow.listview, true)
 end
 
-function GameBoardMixin:AddDebugMessage(msg)
+local function debugWindow_Update()
+    local gb = HearthstoneLite.gameBoard;
 
-    table.insert(self.debugMessages, msg)
-
-    local buttons = HybridScrollFrame_GetButtons(self.debugWindow.listview);
-    local offset = HybridScrollFrame_GetOffset(self.debugWindow.listview);
+    local buttons = HybridScrollFrame_GetButtons(gb.debugWindow.listview);
+    local offset = HybridScrollFrame_GetOffset(gb.debugWindow.listview);
 
     for buttonIndex = 1, #buttons do
         local button = buttons[buttonIndex]
         button:Hide()
     end
 
-    local items = self.debugMessages;
+    local items = gb.debugMessages;
+    print(#items)
 
     for buttonIndex = 1, #buttons do
         local button = buttons[buttonIndex]
@@ -102,9 +102,12 @@ function GameBoardMixin:AddDebugMessage(msg)
             button:Hide()
         end
     end
+    HybridScrollFrame_Update(gb.debugWindow.listview, (#items+2) * 30, gb.debugWindow.listview:GetHeight())
+end
 
-    HybridScrollFrame_Update(self.debugWindow.listview, #items * 22, self.debugWindow.listview:GetHeight())
-
+function GameBoardMixin:AddDebugMessage(msg)
+    table.insert(self.debugMessages, msg)
+    debugWindow_Update()
 end
 
 -- do i need these?
@@ -211,7 +214,8 @@ function GameBoardMixin:DrawCard()
             table.remove(self.deck, rndCardIndex)
         end
         self.playerControls.theHand.cards[numCards+1] = card;
-
+        card.gameBoardLocation = "theHand"
+        self:AddDebugMessage(string.format("Player card draw, %s", card.model.name))
     else
         local card = self.playerControls.theHand.cards[numCards+1];
         local rndCardIndex = random(#self.deck)
@@ -226,8 +230,9 @@ end
 ---reset the currently held card back to the hand
 ---@param card frame the ui card frame currently held
 function GameBoardMixin:ReturnCardToHand(card)
-    print("returning card to player hand", card.model.name, card.drawnID)
+    --print("returning card to player hand", card.model.name, card.drawnID)
     card:SetParent(self.playerControls.theHand)
+    self:AddDebugMessage(string.format("returning card %s with drawnID %s to player hand frame (not table)", card.model.name, card.drawnID))
     self:ResetCardsInHandPositions()
 end
 
@@ -251,7 +256,7 @@ end
 ---@param card frame the card to be played
 function GameBoardMixin:PlayCardToBattlefield(card)
     card:StopMovingOrSizing()
-    print("playing card to battlefield")
+    self:AddDebugMessage(string.format("playing %s to playerBattlefield", card.model.name))
     if not self.playerBattlefield.cards then
         self.playerBattlefield.cards = {}
     end
@@ -265,7 +270,7 @@ function GameBoardMixin:PlayCardToBattlefield(card)
     for k, c in ipairs(self.playerControls.theHand.cards) do
         if c.drawnID == card.drawnID then
             handIndex = k;
-            print('handIndex', k, c.model.name)
+            self:AddDebugMessage(string.format("found card %s with index %s in theHand table", c.model.name, k))
         end
     end
     --self.playerControls.theHand.cards[handIndex] = nil;
@@ -289,11 +294,7 @@ end
 ---for this we will need to create a card frame and load the data into it
 ---@param model table the data for the card
 function GameBoardMixin:CardPlayedToBattlefield(model, drawnID)
-    print('card played to battlefield', model.name, drawnID)
-    -- print('model table')
-    -- for k, v in pairs(model) do
-    --     print("    ",k,v)
-    -- end
+    self:AddDebugMessage(string.format("card %s was played to battlefield", model.name))
     if not self.targetBattlefield.cards then
         self.targetBattlefield.cards = {}
     end
@@ -316,9 +317,9 @@ end
 
 
 function GameBoardMixin:PlayBasicAttack(player, target)
+    self:AddDebugMessage(string.format("Attack made! %s attacks %s", player.model.name, target.model.name))
     target.model.health = target.model.health - player.model.attack; -- update data table
-
-    print(player.model.name, player.drawnID, 'attacks', target.model.name, target.drawnID)
+    target:UpdateUI()
 
     -- send move
     local move = {

@@ -737,9 +737,9 @@
                         </Anchors>
                         <Frames>
                             <ScrollFrame parentKey="listview" inherits="HybridScrollFrameTemplate">
-                                <Size x="240" y="420"/>
+                                <Size x="240" y="575"/>
                                 <Anchors>
-                                    <Anchor point="TOP" x="-7" y="-26"/>
+                                    <Anchor point="TOP" x="-4" y="-26"/>
                                 </Anchors>
                                 <Frames>
                                     <Slider name="$parentScrollBar" inherits="HybridScrollBarTemplate">
