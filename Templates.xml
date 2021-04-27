@@ -36,6 +36,21 @@
         </Scripts>
     </Frame>
 
+	<Frame name="HslDebugListviewItem" virtual="true">
+		<Size x="200" y="40"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString parentKey="text" inherits="GameFontNormalSmall">
+					<Size x="198" y="38"/>
+					<Anchors>
+						<Anchor point="CENTER" x="0" y="0"/>
+					</Anchors>
+					<Color r="1" g="1" b="1"/>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Frame>
+
 	<!-- a simple frame with a background texture and a font string -->
 	<Frame name="HslTexturedTextbox" mixin="HslTexturedTextboxMixin" virtual="true">
 		<Size x="100" y="25"/>
@@ -141,136 +156,6 @@
 		</Layers>
 		<Scripts>
 			<OnMouseDown method="OnMouseDown"/>
-		</Scripts>
-	</Frame>
-
-	<!-- basic card template -->
-	<Frame name="HslCard" mixin="HslCardMixin" virtual="true" enableMouse="true">
-		<Size x="150" y="210"/>
-		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture parentKey="cardTemplate" setAllPoints="true" file="Interface/Addons/HearthstoneLite/CardTemplates/neutral">
-					<TexCoords left="0.009" right="0.133" top="0.001" bottom="0.175" />
-				</Texture>
-			</Layer>
-			<Layer level="BACKGROUND" textureSubLevel="-1">
-				<Texture parentKey="cardSelected" atlas="streamcinematic-highlight" useAtlasSize="false" hidden="true">
-					<Anchors>
-						<Anchor point="TOPLEFT" x="0" y="5"/>
-						<Anchor point="BOTTOMRIGHT" x="10" y="-5"/>
-					</Anchors>
-				</Texture>
-				<!-- <Texture>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="15" y="-15"/>
-						<Anchor point="BOTTOMRIGHT" x="-15" y="15"/>
-					</Anchors>
-					<Color r="0" g="0" b="0" a="0.6" />
-				</Texture> -->
-			</Layer>
-			<Layer level="BORDER">
-				<Texture parentKey="art" textureSubLevel="-1">
-					<Size x="130" y="90"/>
-					<Anchors>
-						<Anchor point="TOP" x="10" y="-10"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-			<Layer level="ARTWORK">
-			</Layer>
-			<Layer level="OVERLAY">
-				<FontString parentKey="cost" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="30" y="35"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="7" y="-10"/>
-					</Anchors>
-				</FontString>
-				<FontString parentKey="attack" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="30" y="35"/>
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="12" y="4"/>
-					</Anchors>
-				</FontString>
-				<FontString parentKey="health" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="30" y="35"/>
-					<Anchors>
-						<Anchor point="BOTTOMRIGHT" x="2" y="2"/>
-					</Anchors>
-				</FontString>
-				<FontString parentKey="name" inherits="NumberFont_Outline_Large" text="Flame Dragon">
-					<Anchors>
-						<Anchor point="CENTER" x="4" y="-4"/>
-					</Anchors>
-				</FontString>
-				<FontString parentKey="info" inherits="GameFontNormalSmall">
-					<Shadow x="0" y="0"/>
-					<Size x="120" y="60"/>
-					<Color r="0.121" g="0.054" b="0.007"/>
-					<Anchors>
-						<Anchor point="BOTTOM" x="5" y="15"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-
-		<Scripts>
-			<OnEnter method="OnEnter"/>
-			<OnLeave method="OnLeave"/>
-			<OnShow method="OnShow"/>
-			<OnHide method="OnHide"/>
-			<OnMouseDown method="OnMouseDown"/>
-		</Scripts>
-	</Frame>
-
-	<Frame name="HslBattlefieldCard" mixin="HslBattlefieldCardMixin" inherits="HslCard" virtual="true" enableMouse="true">
-		<Frames>
-			<Frame parentKey="attackArrow" hidden="true" movable="true" resizable="true">
-				<ResizeBounds>
-					<minResize x="62" y="44" />
-				</ResizeBounds>
-				<Size x="62" y="44"/>
-				<Anchors>
-					<Anchor point="TOP" x="0" y="40"/>
-				</Anchors>
-				<Layers>
-					<Layer level="BORDER">
-						<Line parentKey="attackLine" thickness="20">
-							<Color r="0.5" g="0.8" b="0.3"/>
-						</Line>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnUpdate>
-						<!-- self:GetParent:OnUpdate() -->
-					</OnUpdate>
-					<OnMouseDown>
-						<!-- self:StartSizing("TOPLEFT") -->
-						self.startCursorPosX, self.startCursorPosY = GetCursorPosition()
-						self.isMouseDown= true
-					</OnMouseDown>
-					<OnMouseUp>
-						self.endCursorPosX, self.endCursorPosY = GetCursorPosition()
-						self.isMouseDown = false
-						<!-- self:StopMovingOrSizing() -->
-					</OnMouseUp>
-				</Scripts>
-			</Frame>
-		</Frames>
-		<Scripts>
-			<OnMouseDown method="OnMouseDown"/>
-			<OnMouseUp method="OnMouseUp"/>
-			<OnLoad>
-				<!-- self.attackArrow.atlas:SetRotation(3.14) -->
-				self.attackArrow.attackLine:SetStartPoint("TOP", 0, 0)
-				self.attackArrow.attackLine:SetEndPoint("BOTTOM", 0, 0)
-                self:RegisterForDrag("LeftButton")
-            </OnLoad>
-            <!-- <OnDragStart>
-                self:StartMoving()
-            </OnDragStart>
-            <OnDragStop>
-                self:StopMovingOrSizing()
-            </OnDragStop> -->
 		</Scripts>
 	</Frame>
 

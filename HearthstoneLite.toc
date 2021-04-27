@@ -27,5 +27,10 @@ db.lua
 Templates.xml
 Templates.lua
 
+HearthstoneLiteCard.xml
+HearthstoneLiteCard.lua
+
+GameBoard.lua
+
 HearthstoneLite.lua
 HearthstoneLite.xml
