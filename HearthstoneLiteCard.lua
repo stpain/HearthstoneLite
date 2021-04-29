@@ -175,58 +175,61 @@ function HslCardMixin:OnLoad()
     self.name:SetFont(fontName, 10, fontFlags)
 end
 
-function HslCardMixin:ScaleTo(scale)
+
+---scale the card frame and adjust the fontstring font heights
+---@param scale number the new scale to be used
+---@param fontSize number the size to use on the fontstrings
+function HslCardMixin:ScaleTo(scale, fontSize)
     if not scale then
         scale = 1;
     end
-    local fontSize = 28 * (scale * 0.85);
+    local fontSize = fontSize and fontSize or 28
     local fontName, _, fontFlags = self.cost:GetFont()
     self.cost:SetFont(fontName, fontSize, fontFlags)
     self.attack:SetFont(fontName, fontSize, fontFlags)
     self.health:SetFont(fontName, fontSize, fontFlags)
-    self.name:SetFont(fontName, 10 * scale, fontFlags)
+    self.name:SetFont(fontName, fontSize * 0.36, fontFlags) --monitor this, maybe just pass in a third value?
 
     self:SetScale(scale)
 end
 
----load a model data into the card object
----@param card table a table containing card info
----@param printInfo boolean
-function HslCardMixin:LoadCard(card)
-    if not card then
+---load card data model into a ui frame
+---@param model table a table containing the card info
+function HslCardMixin:LoadCard(model)
+    if not model then
         return
     end
 
     self.selected = false;
 
-    --self.defaults = card;
+    --self.defaults = model;
     self.model = {}
-    for k, v in pairs(card) do
+    for k, v in pairs(model) do
         self.model[k] = v;
     end
 
-    self.art:SetTexture(card.art)
-    self.cost:SetText(card.cost)
-    self.attack:SetText(card.attack)
-    self.health:SetText(card.health)
-    self.name:SetText(card.name)
+    self.art:SetTexture(model.art)
+    self.cost:SetText(model.cost)
+    self.attack:SetText(model.attack)
+    self.health:SetText(model.health)
+    self.name:SetText(model.name)
     self.info:SetText("")
 
-    -- i had issues keeping the card text updated, using C_Timer to delay the update func by a frame
+    -- i had issues keeping the model text updated, using C_Timer to delay the update func by a frame
     local function infoDelay()
-        if card.battlecry and card.battlecry > 0 then
-            self.info:SetText(L["battlecry"]..string.format(hsl.db.battlecries[card.battlecry].info, card.power))
+        if model.battlecry and model.battlecry > 0 then
+            self.info:SetText(L["battlecry"]..string.format(hsl.db.battlecries[model.battlecry].info, model.power))
         end
-        if card.deathrattle and card.deathrattle > 0 then
-            self.info:SetText(L["deathrattle"]..string.format(hsl.db.deathrattles[card.deathrattle].info, card.power))
+        if model.deathrattle and model.deathrattle > 0 then
+            self.info:SetText(L["deathrattle"]..string.format(hsl.db.deathrattles[model.deathrattle].info, model.power))
         end
-        if card.ability and card.ability > 0 then
-            self.info:SetText(string.format(hsl.db.abilities[card.class][card.ability].info, card.power))
+        if model.ability and model.ability > 0 then
+            self.info:SetText(string.format(hsl.db.abilities[model.class][model.ability].info, model.power))
         end
     end
     C_Timer.After(0, infoDelay)
 
-    if card.background > 4 then
+    if model.background > 4 then
         self.name:SetPoint("CENTER", 4, -8)
     else
         self.name:SetPoint("CENTER", 4, -4)
@@ -240,20 +243,21 @@ function HslCardMixin:LoadCard(card)
         end
     end
 
-    self.cardTemplate:SetTexture(CARD_TEMPLATE_PATH..card.backgroundPath)
+    self.cardTemplate:SetTexture(CARD_TEMPLATE_PATH..model.backgroundPath)
 
     -- card.atlas = the atlas table to use
     -- card.background = the card number from the file to use
     self.cardTemplate:SetTexCoord(
-        CARD_ATLAS[card.atlas][card.background].left, 
-        CARD_ATLAS[card.atlas][card.background].right, 
-        CARD_ATLAS[card.atlas][card.background].top, 
-        CARD_ATLAS[card.atlas][card.background].bottom
+        CARD_ATLAS[model.atlas][model.background].left, 
+        CARD_ATLAS[model.atlas][model.background].right, 
+        CARD_ATLAS[model.atlas][model.background].top, 
+        CARD_ATLAS[model.atlas][model.background].bottom
     )
 
     self:Show()
 end
 
+--- when the card is hidden we just remove the model data
 function HslCardMixin:OnHide()
     self.art:SetTexture(nil)
     self.cost:SetText("")
@@ -304,7 +308,7 @@ function HslCardMixin:OnEnter()
     if self.showTooltipCard then
         tooltipCard:LoadCard(self.model)
         tooltipCard:ClearAllPoints()
-        tooltipCard:SetPoint("BOTTOM", self, "TOP", 0, 0) -- this needs to be changable by the user
+        tooltipCard:SetPoint("RIGHT", self, "LEFT", 0, 0) -- this needs to be changable by the user
         tooltipCard:Show()
         tooltipCard:ScaleTo(self.tooltipScaleTo)
         tooltipCard:SetFrameStrata("TOOLTIP")
@@ -323,7 +327,7 @@ function HslCardMixin:GetCardLink()
     if not self.model then
         return
     end
-    local link = string.format("|cFFFFFF00|Hgarrmission:hslite:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
+    local link = string.format("|cFFFFFF00|Hgarrmission?hslite?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s|h%s|h|r", -- use ? as a sep because a card name may contain : (SI:7 for example)
     tostring(self.model.art),
     tostring(self.model.class),
     tostring(self.model.name), 
@@ -362,18 +366,7 @@ HslBattlefieldCardMixin = {}
 HslBattlefieldCardMixin.tooltipScaleTo = 1.25
 
 
-function HslBattlefieldCardMixin:OnUpdate()
-    if self.isMouseDown == true then
-        local x1, y1 = self.startCursorPosX, self.startCursorPosY
-        local x2, y2 = self.endCursorPosX, self.endCursorPosY
-
-        local a = math.atan2(y2 - y1, x2 - x1)
-        print(a)
-    end
-end
-
 function HslBattlefieldCardMixin:OnEnter()
-    local gb = HearthstoneLite.gameBoard;
     if self.showTooltipCard and IsShiftKeyDown() then
         tooltipCard:LoadCard(self.model)
         tooltipCard:ClearAllPoints()
@@ -382,10 +375,7 @@ function HslBattlefieldCardMixin:OnEnter()
         tooltipCard:ScaleTo(self.tooltipScaleTo)
         tooltipCard:SetFrameStrata("TOOLTIP")
     end
-
-    if gb.cursorHascard then
-        print("cursor has card")
-    end
+    self.attackArrow:Show()
 end
 
 function HslBattlefieldCardMixin:OnLeave()
@@ -419,24 +409,24 @@ function HslBattlefieldCardMixin:OnMouseDown()
     self.cardSelected:SetShown(false)
     --self.cardSelected:SetShown(self.selected)
 
+    -- is this still going to be used?
     if self.selected then
         self:GetParent().selectedCard = self;
-        self.attackArrow:Show()
         print(string.format("selected card %s", self.model.name))
     else
-        self.attackArrow:Hide()
         self:GetParent().selectedCard = nil;
         print(string.format("deselected card %s", self.model.name))
     end
 
     local gb = HearthstoneLite.gameBoard;
 
-    if gb.playerControls:IsMouseOver() or gb.playerBattlefield:IsMouseOver() then --IsControlKeyDown() and 
+    -- if the mouse is over a player area then we can move the card
+    if gb.playerControls:IsMouseOver() or gb.playerBattlefield:IsMouseOver() then
         self:SetMovable(true)
         self:EnableMouse(true)
         self:StartMoving()
 
-        gb.cursorHascard = true
+        gb.cursorHasCard = true
         gb.cursorCard = self
     else
         self:SetScript("OnDragStart", nil)
@@ -446,12 +436,22 @@ function HslBattlefieldCardMixin:OnMouseDown()
 
 end
 
-function HslBattlefieldCardMixin:GetGameBoardLocation()
-    if self.gameBoardLocation then
-        return self.gameBoardLocation;
+---get the table index for this card using drawnID as an identifier
+---@param t table the table this card belongs to
+---@return integer tableIndex the index of this card
+function HslBattlefieldCardMixin:GetTableKey(t)
+    local tableIndex = nil;
+    for k, card in ipairs(t) do
+        if self.drawnID == card.drawnID then
+            tableIndex = k;
+        end
+    end
+    if tableIndex then
+        return tableIndex;
     end
 end
 
+---update the card UI, this will set the health, attack etc to the current model values
 function HslBattlefieldCardMixin:UpdateUI()
     if self.model then
         self.attack:SetText(self.model.attack)
@@ -465,14 +465,14 @@ function HslBattlefieldCardMixin:OnMouseUp()
     local card = self;
     local gb = HearthstoneLite.gameBoard;
 
-    if gb.cursorHascard == true then
+    if gb.cursorHasCard == true then
 
         if gb.playerBattlefield:IsMouseOver() then
             print("mouse is over player battlefield")
-            if not gb.playerBattlefield.cards then --this should be done elsewhere need to see why its an issue!
-                gb.playerBattlefield.cards = {}
-            end
-            if #gb.playerBattlefield.cards > 6 then
+            -- if not gb.playerBattlefield.cards then --this should be done elsewhere need to see why its an issue!
+            --     gb.playerBattlefield.cards = {}
+            -- end
+            if #gb.playerBattlefield.cards > 6 then -- max num cards currently in battlefield
                 print("battlefield has max num cards")
                 gb:ReturnCardToHand(card)
             else
@@ -504,8 +504,9 @@ function HslBattlefieldCardMixin:OnMouseUp()
         end
     end
 
-    gb:ReturnCardsToBattlefieldPositions()
+    gb:ReturnCardsToBattlefieldPositions('playerBattlefield')
 
-    gb.cursorHascard = false;
+    gb.cursorHasCard = false;
     gb.cursorCard = nil;
 end
+

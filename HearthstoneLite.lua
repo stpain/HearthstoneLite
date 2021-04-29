@@ -243,7 +243,11 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
     -- set a card id as the table key so we can fetch it super easy
     loot.id = #HSL.collection[_class] + 1;
 
-    link = string.format("|cFFFFFF00|Hgarrmission:hslite:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s|h%s|h|r",
+    if _class == "rogue" then
+        print(loot.background)
+    end
+
+    link = string.format("|cFFFFFF00|Hgarrmission?hslite?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s|h%s|h|r",
         tostring(loot.art),
         tostring(loot.class),
         tostring(loot.id),
@@ -380,7 +384,7 @@ end
 
 
 ---menu panel listview update function
----@param classID number the classID to be used when creating a new deck or loading decks
+---@param classID integer the classID to be used when creating a new deck or loading decks
 local function deckViewerMenuPanelListview_Update(classID)
     if not HSL then
         return
@@ -440,11 +444,10 @@ local function classButton_Clicked(button)
         for i = 1, GetNumClasses() do
             local className, classFile, classID = GetClassInfo(i)
             if button.className == classFile then
-                --HearthstoneLite.deckBuilder.menuPanel.listviewHeader:SetText(className, 20);
                 HearthstoneLite.deckBuilder.menuPanel.listviewHeader.newDeck.classID = classID;
                 HearthstoneLite.deckBuilder.menuPanel.listviewHeader.newDeck.className = className;
-                --HearthstoneLite.deckBuilder.menuPanel.listviewHeader.newDeck.classIcon = button.Background:GetAtlas();
 
+                -- the atlas name used has a capitalized name for class
                 local class = classFile:sub(1,1):upper()..classFile:sub(2):lower()
                 if class == "Deathknight" then
                     class = "DeathKnight";
@@ -481,10 +484,18 @@ function HearthstoneLiteMixin:OnShow()
     table.insert(helptips, self.menuHelptip)
 end
 
+function HearthstoneLiteMixin:ToggleHelpTips()
+    showHelptips = not showHelptips;
+    for k, frame in ipairs(helptips) do
+        frame:SetShown(showHelptips)
+    end
+end
+
+
 HearthstoneButtonMixin = {}
 
 function HearthstoneButtonMixin:OnMouseDown()
-    navigateTo("home")
+    navigateTo("mainMenu")
     self:AdjustPointsOffset(-1, -1)
 end
 
@@ -503,23 +514,14 @@ function HearthstoneButtonMixin:OnLeave()
 end
 
 
-ToggleHelptipMixin = {}
-
-function ToggleHelptipMixin:OnMouseDown()
-    showHelptips = not showHelptips;
-    for k, frame in ipairs(helptips) do
-        frame:SetShown(showHelptips)
-    end
-end
-
 
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
--- home
+-- mainMenu
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
-HomeMixin = {}
+HearthstoneMainMenuMixin = {}
 
-function HomeMixin:OnShow()
+function HearthstoneMainMenuMixin:OnShow()
 
     fontSizeHack(self.deckBuilder.Text, 22)
     self.deckBuilder.Text:SetPoint("TOP", 0, -10)
@@ -543,7 +545,7 @@ function HomeMixin:OnShow()
 
 end
 
-function HomeMixin:MenuButton_OnClick(frame)
+function HearthstoneMainMenuMixin:MenuButton_OnClick(frame)
     navigateTo(frame)
 end
 
@@ -724,9 +726,7 @@ DeckBuilderMixin.ClassFile = nil;
 
 function DeckBuilderMixin:OnLoad()
 
-    -- font size hack
-    local fontName, _, fontFlags = self.menuPanel.selectClass:GetFont()
-    self.menuPanel.selectClass:SetFont(fontName, 26, fontFlags)
+    fontSizeHack(self.menuPanel.selectClass, 26)
     self.menuPanel.selectClass:SetText(L["SelectHero"])
 
     for i = 1, GetNumClasses() do
@@ -745,19 +745,15 @@ function DeckBuilderMixin:OnLoad()
     HybridScrollFrame_CreateButtons(self.menuPanel.listview, "HslDeckListviewItem", -10, 0, "TOP", "TOP", 0, -1, "TOP", "BOTTOM")
     HybridScrollFrame_SetDoNotHideScrollBar(self.menuPanel.listview, true)
 
-
-
     self.cardViewer.showClass:Resize(40,40)
     self.cardViewer.showClass.func = function()
         if self.classFile then
-            --self:LoadCards(hsl.db.cards[self.classFile:lower()]);
             self:LoadCards(HSL.collection[self.classFile:lower()]);
         end
     end
     self.cardViewer.showNeutral:Resize(40,40)
     self.cardViewer.showNeutral:SetBackground_Atlas("GarrMission_ClassIcon-Warrior-Protection")
     self.cardViewer.showNeutral.func = function()
-        --self:LoadCards(hsl.db.cards.generic);
         self:LoadCards(HSL.collection.neutral);
     end
 
@@ -769,7 +765,6 @@ function DeckBuilderMixin:OnLoad()
 
     fontSizeHack(self.cardViewer.pageNumber, 32)
 
-
     HybridScrollFrame_CreateButtons(self.deckViewer.listview, "HslCardListviewItem", -5, 0, "TOP", "TOP", 0, -1, "TOP", "BOTTOM")
     HybridScrollFrame_SetDoNotHideScrollBar(self.deckViewer.listview, true)
 
@@ -778,7 +773,7 @@ end
 function DeckBuilderMixin:OnShow()
 
     -- deck open
-    PlaySound(1068314)
+    --PlaySound(1068314)
 
     self.selectHeroHelptip.Text:SetText(L["SelectHeroHelptip"])
     self.selectHeroHelptip:Show()
@@ -901,7 +896,6 @@ function DeckBuilderMixin:AddCard(card)
                 -- update the saved var table and pass back into the hybrid scroll update func
                 table.insert(deck.cards, card)
                 deckViewerPopoutListview_Update(deck.cards)
-                --printInfoMessage(string.format("added %s to deck %s", card.name, deck.name))
                 return;
             end
         end
@@ -956,7 +950,7 @@ local function init()
     local version = GetAddOnMetadata(addonName, "Version")
     printInfoMessage("v"..version..L["WelcomeMessage"])
 
-    hsl.registerBattlefieldComms()
+    hsl.gameBoard_init()
 end
 
 
@@ -993,7 +987,7 @@ end)
 
 
 local function parseCardHyperlink(link, showCard)
-    local linkType, addon, _art, _class, _id, _name, _health, _attack, _ability, _power, _battlecry, _deathrattle, _cost, _backgroundPath, _background, _atlas, _rarity = strsplit(":", link)
+    local linkType, addon, _art, _class, _id, _name, _health, _attack, _ability, _power, _battlecry, _deathrattle, _cost, _backgroundPath, _background, _atlas, _rarity = strsplit("?", link)
     if _name and showCard then
         hyperlinkCard:Hide()
         hyperlinkCard:LoadCard({
@@ -1018,7 +1012,7 @@ local function parseCardHyperlink(link, showCard)
 end
 
 hooksecurefunc("SetItemRef", function(link)
-	local linkType, addon = strsplit(":", link)
+	local linkType, addon = strsplit("?", link)
 	if linkType == "garrmission" and addon == "hslite" then
 		parseCardHyperlink(link, true)
 	end

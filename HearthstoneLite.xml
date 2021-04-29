@@ -41,7 +41,7 @@
                 </Scripts>
             </Frame>
 
-            <Button parentKey="toggleHelptipsButton" mixin="ToggleHelptipMixin" enableMouse="true" frameStrata="HIGH" inherits="MainHelpPlateButton">
+            <Button parentKey="toggleHelptipsButton" enableMouse="true" frameStrata="HIGH" inherits="MainHelpPlateButton">
                 <!-- <Size x="20" y="20"/> -->
                 <Anchors>
                     <Anchor point="TOPLEFT" x="38" y="18"/> 
@@ -57,12 +57,14 @@
                     </Layer>
                 </Layers>
                 <Scripts>
-                    <OnMouseDown method="OnMouseDown"/>
+                    <OnClick>
+                        self:GetParent():ToggleHelpTips()
+                    </OnClick>
                 </Scripts>
             </Button>
 
 
-            <Frame parentKey="home" parentArray="frames" mixin="HomeMixin">
+            <Frame parentKey="mainMenu" parentArray="frames" mixin="HearthstoneMainMenuMixin">
                 <Anchors>
                     <Anchor point="TOPLEFT" x="0" y="-22"/>
                     <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
@@ -801,10 +803,17 @@
                                 </Anchors>
                             </Frame>
 
+                            <Frame parentKey="selectDeck" inherits="HslDropdown">
+                                <Size x="100" y="30"/>
+                                <Anchors>
+                                    <Anchor point="TOPRIGHT" x="-10" y="-20"/>
+                                </Anchors>
+                            </Frame>
+
                             <Button parentKey="startGame" inherits="UIPanelGoldButtonTemplate">
                                 <Size x="100" y="35"/>
                                 <Anchors>
-                                    <Anchor point="TOPRIGHT" x="-10" y="-20"/>
+                                    <Anchor point="TOPRIGHT" x="-10" y="-60"/>
                                 </Anchors>
                                 <Layers>
                                     <Layer level="OVERLAY">
@@ -820,7 +829,7 @@
                             <Button parentKey="exitGame" inherits="UIPanelGoldButtonTemplate">
                                 <Size x="100" y="35"/>
                                 <Anchors>
-                                    <Anchor point="TOPRIGHT" x="-10" y="-70"/>
+                                    <Anchor point="TOPRIGHT" x="-10" y="-100"/>
                                 </Anchors>
                                 <Layers>
                                     <Layer level="OVERLAY">
@@ -865,10 +874,10 @@
                         </Layers>
                         <Scripts>
                             <OnEnter>
-                                self:GetParent():PlayerBattlefield_OnEnter()
+                                <!-- self:GetParent():PlayerBattlefield_OnEnter() -->
                             </OnEnter>
                             <OnLeave>
-                                self:GetParent():PlayerBattlefield_OnLeave()
+                                <!-- self:GetParent():PlayerBattlefield_OnLeave() -->
                             </OnLeave>
                         </Scripts>
                     </Frame>
