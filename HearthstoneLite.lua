@@ -104,7 +104,6 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
     local _hasBCDR = ((_abilityID == 0) and (random(10) < 4)) and true or false;
     local _battlecry = 0;
     local _deathrattle = 0;
-    --if card has an ability then cancel
     if _hasBCDR then
         if random(10) < 6 then
             _battlecry = random(#hsl.db.battlecries - 1);
@@ -375,11 +374,11 @@ local function deckViewerPopoutListview_Update(deck)
             button.callback = deckViewerPopoutListview_Update;
         else
             button.model = nil;
-            button:Hide()
+            -- button:Hide()
         end
     end
 
-    HybridScrollFrame_Update(HearthstoneLite.deckBuilder.deckViewer.listview, #deck * 36, HearthstoneLite.deckBuilder.deckViewer.listview:GetHeight())
+    HybridScrollFrame_Update(HearthstoneLite.deckBuilder.deckViewer.listview, #deck*35, #buttons*35)
 end
 
 
@@ -765,7 +764,7 @@ function DeckBuilderMixin:OnLoad()
 
     fontSizeHack(self.cardViewer.pageNumber, 32)
 
-    HybridScrollFrame_CreateButtons(self.deckViewer.listview, "HslCardListviewItem", -5, 0, "TOP", "TOP", 0, -1, "TOP", "BOTTOM")
+    HybridScrollFrame_CreateButtons(self.deckViewer.listview, "HslCardListviewItem", -5, 0, "TOP", "TOP", 0, 0, "TOP", "BOTTOM")
     HybridScrollFrame_SetDoNotHideScrollBar(self.deckViewer.listview, true)
 
 end

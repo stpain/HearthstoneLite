@@ -520,21 +520,26 @@ battlecries[0] = {
     func = nil,
 }
 battlecries[1] = {
-    info = "Attack a single target for %d damage",
-    func = function(sender, target)
-        if sender and target then
-            target.health = target.health - sender.attack;
-        end
-    end,
+    info = "Attack all targets for %s damage.",
+    target = "ALL_TARGETS",
+    effect = "DAMAGE",
 }
 battlecries[2] = {
-    info = "Heal a single target for %d health",
-    func = function(sender, target)
-        if sender and target then
-            target.health = target.health - sender.attack;
-        end
-    end,
+    info = "Attack a random target for %s damage.",
+    target = "RANDOM_TARGET",
+    effect = "DAMAGE",
 }
+battlecries[3] = {
+    info = "Heal all minions for %s health.",
+    target = "ALL_PLAYER_CARDS",
+    effect = "HEAL",
+}
+battlecries[4] = {
+    info = "Heal all minions for %s health.",
+    target = "ALL_PLAYER_CARDS",
+    effect = "HEAL",
+}
+
 
 hsl.db.battlecries = battlecries;
 
@@ -548,20 +553,14 @@ deathrattles[0] = {
     func = nil,
 }
 deathrattles[1] = {
-    info = "Attack a single target for %d damage",
-    func = function(sender, target)
-        if sender and target then
-            target.health = target.health - sender.attack;
-        end
-    end,
+    info = "Attack all targets for %s damage.",
+    target = "ALL_TARGETS",
+    effect = "DAMAGE",
 }
 deathrattles[2] = {
-    info = "Heal a single target for %d health",
-    func = function(sender, target)
-        if sender and target then
-            target.health = target.health - sender.attack;
-        end
-    end,
+    info = "Attack all targets for %s damage.",
+    target = "ALL_TARGETS",
+    effect = "DAMAGE",
 }
 
 hsl.db.deathrattles = deathrattles;

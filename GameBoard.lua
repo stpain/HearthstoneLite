@@ -8,6 +8,7 @@ local LibSerialize = LibStub:GetLibrary("LibSerialize")
 
 local L = hsl.locales
 local gameBoard;
+local MAX_MOVE_TIME = 90
 
 local BATTLEFIELD_COMMS = {}
 BATTLEFIELD_COMMS.prefix = "hslite";
@@ -17,8 +18,12 @@ function BATTLEFIELD_COMMS:Transmit(data, channel, target, priority)
     local compressed = LibDeflate:CompressDeflate(serialized);
     local encoded    = LibDeflate:EncodeForWoWAddonChannel(compressed);
 
+    if not priority then
+        priority = "NORMAL"; -- 99% of game comms will just be normal prio so save us some typing
+    end
+
     if encoded and channel and priority then
-        print('comms_out', string.format("type: %s, channel: %s target: %s, prio: %s", data.event or 'nil', channel, (target or 'nil'), priority))
+        print('[comms_out]', string.format("type: %s, channel: %s target: %s", data.event or 'nil', channel, target or 'nil'))
         self:SendCommMessage(self.prefix, encoded, channel, target, priority)
     end
 end
@@ -56,6 +61,12 @@ function BATTLEFIELD_COMMS:OnCommReceived(prefix, message, distribution, sender)
     end
 end
 
+local function loadDeckToGameBoard(deck)
+    gameBoard:AddDebugMessage("loaded deck "..deck.name)
+    for _, card in ipairs(deck.cards) do
+        table.insert(gameBoard.deck, card)
+    end
+end
 
 local function gameBoard_OnUpdate()
 
@@ -67,10 +78,36 @@ local function gameBoard_OnUpdate()
         end
     end
 
+    if gameBoard.moveTimerStartTime then
+        local moveTimeRemaining = (GetTime() - (gameBoard.moveTimerStartTime + MAX_MOVE_TIME)) * -1;
+        if moveTimeRemaining > 0 then
+            gameBoard.moveTimer:SetValue(moveTimeRemaining)
+        end
+
+    end
+
+end
+
+---returns targets based on the effet target string
+---@param ts string the ability or bcdr target
+---@return table table of target cards can also be a single card
+local function getTargetCards(ts)
+    if gameBoard.targetBattlefield.cards and next(gameBoard.targetBattlefield.cards) then
+        if ts == "RANDOM_TARGET" then
+            return random(#gameBoard.targetBattlefield.cards);
+        end
+        if ts == "ALL_TARGETS" then
+            return gameBoard.targetBattlefield.cards;
+        end
+        if ts == "ALL_PLAYER_CARDS" then
+            return gameBoard.playerBattlefield.cards;
+        end
+    end
 end
 
 GameBoardMixin = {}
 GameBoardMixin.deck = {}
+GameBoardMixin.moveTimerStartTime = nil;
 GameBoardMixin.debugMessages = {}
 GameBoardMixin.cardDrawnID = 1;
 GameBoardMixin.playerBattlefield = {
@@ -92,48 +129,62 @@ GameBoardMixin.battlefieldCardOffsets = {
 
 
 function GameBoardMixin:OnLoad()
-    HybridScrollFrame_CreateButtons(self.debugWindow.listview, "HslDebugListviewItem", -5, 0, "TOP", "TOP", 0, -1, "TOP", "BOTTOM")
-    HybridScrollFrame_SetDoNotHideScrollBar(self.debugWindow.listview, true)
+    -- HybridScrollFrame_CreateButtons(self.debugWindow.listview, "HslDebugListviewItem", -5, 0, "TOP", "TOP", 0, -1, "TOP", "BOTTOM")
+    -- HybridScrollFrame_SetDoNotHideScrollBar(self.debugWindow.listview, true)
 
     self.targetBattlefield.cards = {}
     self.playerBattlefield.cards = {}
 
     gameBoard = HearthstoneLite.gameBoard;
-    --self:SetScript("OnUpdate", gameBoard_OnUpdate)
+    self:SetScript("OnUpdate", gameBoard_OnUpdate)
+
+    gameBoard.moveTimer:SetReverseFill(true)
+
+    -- using lua to setup the listview rows and scroll bar func
+    C_Timer.After(5, function()
+        self.debugListviewRows = {}
+        for i = 1, 19 do
+            local f = CreateFrame("FRAME", nil, self.debugWindow, "HslDebugListviewItem")
+            f:SetPoint("TOP", -6, ((i-1)*-30) -30)
+            self.debugListviewRows[i] = f
+        end
+    end)
 end
 
-local function debugWindow_Update()
-    local gb = HearthstoneLite.gameBoard;
-
-    local buttons = HybridScrollFrame_GetButtons(gb.debugWindow.listview);
-    local offset = HybridScrollFrame_GetOffset(gb.debugWindow.listview);
-
-    for buttonIndex = 1, #buttons do
-        local button = buttons[buttonIndex]
-        button:Hide()
-    end
-
-    local items = gb.debugMessages;
-    print(#items)
-
-    for buttonIndex = 1, #buttons do
-        local button = buttons[buttonIndex]
-        local itemIndex = buttonIndex + offset
-
-        if itemIndex <= #items then
-            local msg = items[itemIndex]
-            button.text:SetText(msg)
-            button:Show()
-        else
-            button:Hide()
+function GameBoardMixin:DebugWindowScrollBar_OnValueChanged()
+    if self.debugMessages then
+        local scrollPos = math.floor(self.debugWindow.scrollBar:GetValue())
+        if scrollPos == 0 then
+            scrollPos = 1
+        end
+        for i = 1, 19 do
+            if self.debugMessages[(i - 1) + scrollPos] then
+                self.debugListviewRows[i].text:SetText("")
+                self.debugListviewRows[i]:Hide()
+                self.debugListviewRows[i].text:SetText(self.debugMessages[(i - 1) + scrollPos])
+                self.debugListviewRows[i]:Show()
+            end
         end
     end
-    HybridScrollFrame_Update(gb.debugWindow.listview, (#items+2) * 30, gb.debugWindow.listview:GetHeight())
 end
 
 function GameBoardMixin:AddDebugMessage(msg)
     table.insert(self.debugMessages, msg)
-    debugWindow_Update()
+    --debugWindow_Update()
+    local pos = self.debugWindow.scrollBar:GetValue()
+    if self.debugMessages and next(self.debugMessages) then
+        local logCount = #self.debugMessages - 18
+        if logCount < 1 then
+            self.debugWindow.scrollBar:SetMinMaxValues(1, 2)
+            self.debugWindow.scrollBar:SetValue(2)
+            self.debugWindow.scrollBar:SetValue(1)
+            self.debugWindow.scrollBar:SetMinMaxValues(1, 1)
+        else
+            self.debugWindow.scrollBar:SetMinMaxValues(1, logCount)
+            self.debugWindow.scrollBar:SetValue(pos - 1)
+            self.debugWindow.scrollBar:SetValue(pos)
+        end
+    end
 end
 
 function GameBoardMixin:GetCardTableKey(drawnID, t)
@@ -163,12 +214,6 @@ function GameBoardMixin:FireEvent(eventName, eventData)
     BATTLEFIELD_COMMS:Transmit(event, "WHISPER", target, "NORMAL")
 end
 
-local function loadDeckToGameBoard(deck)
-    gameBoard:AddDebugMessage("loaded deck "..deck.name)
-    for _, card in ipairs(deck.cards) do
-        table.insert(gameBoard.deck, card)
-    end
-end
 
 function GameBoardMixin:OnShow()
     -- copy some dummy cards, make sure these exist in sv file!
@@ -193,14 +238,20 @@ end
 function GameBoardMixin:ResetGameBoard()
     self.cardPool:ReleaseAll()
     self.cardDrawnID = 1;
-    wipe(self.targetBattlefield.cards)
-    wipe(self.playerBattlefield.cards)
-    wipe(self.playerControls.theHand.cards)
-    wipe(self.deck)
+    self.targetBattlefield.cards = {}
+    self.playerBattlefield.cards = {}
+    self.playerControls.theHand.cards = {}
+    self.deck = {}
+
+    self.moveTimer:SetValue(0)
 end
 
 function GameBoardMixin:StartGame()
 
+    self.moveTimer:SetMinMaxValues(0,MAX_MOVE_TIME) -- 90s per move
+    self.moveTimer:SetValue(0)
+
+    self.moveTimerStartTime = GetTime()
 end
 
 
@@ -210,6 +261,8 @@ function GameBoardMixin:ExitGame()
 
 
     self:ResetGameBoard()
+
+    self.moveTimerStartTime = nil;
 
 end
 
@@ -347,6 +400,21 @@ function GameBoardMixin:PlayCardToBattlefield(card)
         end
         self:DeselectAllBattlefieldCards()
         self:RepositionPlayerHandCards()
+
+        if card.model.battlecry > 0 then
+            local targets = getTargetCards(hsl.db.battlecries[card.model.battlecry].target)
+            for _, targetCard in ipairs(targets) do
+                if hsl.db.battlecries[card.model.battlecry].effect == "DAMAGE" then
+                    targetCard.model.health = targetCard.model.health - card.model.power;
+                    targetCard:UpdateUI()
+                end
+                if hsl.db.battlecries[card.model.battlecry].effect == "HEAL" then
+                    targetCard.model.health = targetCard.model.health + card.model.power;
+                    targetCard:UpdateUI()
+                end
+            end
+        end
+
     end)
 
     local move = {

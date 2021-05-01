@@ -37,7 +37,7 @@
     </Frame>
 
 	<Frame name="HslDebugListviewItem" virtual="true">
-		<Size x="210" y="29"/>
+		<Size x="210" y="30"/>
 		<Layers>
 			<Layer level="OVERLAY">
 				<FontString parentKey="text" inherits="GameFontNormalSmall">
@@ -128,7 +128,7 @@
 				<Texture parentKey="Highlight" atlas="PetList-ButtonHighlight" useAtlasSize="false" setAllPoints="true"/>
 			</Layer>
 			<Layer level="OVERLAY">
-				<Texture parentKey="CostIcon" file="interface/icons/inv_elemental_mote_mana.blp" mask="Interface/ChatFrame/UI-ChatIcon-HotS" textureSubLevel="3">
+				<Texture parentKey="CostIcon" file="interface/icons/inv_elemental_mote_mana.blp" mask="Interface/ChatFrame/UI-ChatIcon-HotS">
 					<Size x="30" y="30"/>					
 					<Anchors>
 						<Anchor point="LEFT" x="3" y="0"/>
