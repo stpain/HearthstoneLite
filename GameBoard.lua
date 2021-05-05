@@ -73,7 +73,7 @@ local function gameBoard_OnUpdate()
     if next(gameBoard.targetBattlefield.cards) then
         for k, card in ipairs(gameBoard.targetBattlefield.cards) do
             if card:IsMouseOver() then
-                print('mouse in card', card.model.name)
+                --print('mouse in card', card.model.name)
             end
         end
     end
@@ -86,6 +86,56 @@ local function gameBoard_OnUpdate()
 
     end
 
+
+
+    -- remove any target cards that died
+    if next(gameBoard.targetBattlefield.cards) then
+        local cardsToRemove = 0;
+        for k, card in ipairs(gameBoard.targetBattlefield.cards) do
+            if card.model.health < 1 then
+                cardsToRemove = cardsToRemove + 1;
+            end
+        end
+        if cardsToRemove > 0 then
+            for i = 1, cardsToRemove do
+                local key;
+                for k, card in ipairs(gameBoard.targetBattlefield.cards) do
+                    if card.model.health < 1 then
+                        key = k;
+                        card:Hide()
+                        gameBoard.cardPool:Release(card)
+                    end
+                end
+                table.remove(gameBoard.targetBattlefield.cards, key)
+            end
+            gameBoard:ReturnCardsToBattlefieldPositions('targetBattlefield')
+        end
+    end
+
+    -- remove any player cards that died
+    if next(gameBoard.playerBattlefield.cards) then
+        local cardsToRemove = 0;
+        for k, card in ipairs(gameBoard.playerBattlefield.cards) do
+            if card.model.health < 1 then
+                cardsToRemove = cardsToRemove + 1;
+            end
+        end
+        if cardsToRemove > 0 then
+            for i = 1, cardsToRemove do
+                local key;
+                for k, card in ipairs(gameBoard.playerBattlefield.cards) do
+                    if card.model.health < 1 then
+                        key = k;
+                        card:Hide()
+                        gameBoard.cardPool:Release(card)
+                    end
+                end
+                table.remove(gameBoard.playerBattlefield.cards, key)
+            end
+            gameBoard:ReturnCardsToBattlefieldPositions('playerBattlefield')
+        end
+    end
+
 end
 
 ---returns targets based on the effet target string
@@ -94,7 +144,9 @@ end
 local function getTargetCards(ts)
     if gameBoard.targetBattlefield.cards and next(gameBoard.targetBattlefield.cards) then
         if ts == "RANDOM_TARGET" then
-            return random(#gameBoard.targetBattlefield.cards);
+            gameBoard:AddDebugMessage('get random target from '..#gameBoard.targetBattlefield.cards)
+            local rndIndex = random(#gameBoard.targetBattlefield.cards);
+            return {gameBoard.targetBattlefield.cards[rndIndex]}
         end
         if ts == "ALL_TARGETS" then
             return gameBoard.targetBattlefield.cards;
@@ -401,8 +453,9 @@ function GameBoardMixin:PlayCardToBattlefield(card)
         self:DeselectAllBattlefieldCards()
         self:RepositionPlayerHandCards()
 
-        if card.model.battlecry > 0 then
-            local targets = getTargetCards(hsl.db.battlecries[card.model.battlecry].target)
+        -- handle the battle effect if exists
+        if card.model.battlecry and card.model.battlecry > 0 then
+            local targets = getTargetCards(hsl.db.battlecries[card.model.battlecry].target) or {}
             for _, targetCard in ipairs(targets) do
                 if hsl.db.battlecries[card.model.battlecry].effect == "DAMAGE" then
                     targetCard.model.health = targetCard.model.health - card.model.power;
@@ -410,6 +463,11 @@ function GameBoardMixin:PlayCardToBattlefield(card)
                 end
                 if hsl.db.battlecries[card.model.battlecry].effect == "HEAL" then
                     targetCard.model.health = targetCard.model.health + card.model.power;
+                    targetCard:UpdateUI()
+                end
+                if hsl.db.battlecries[card.model.battlecry].effect == "BUFF" then
+                    targetCard.model.attack = targetCard.model.attack + hsl.db.battlecries[card.model.battlecry].values[1];
+                    targetCard.model.health = targetCard.model.health + hsl.db.battlecries[card.model.battlecry].values[2];
                     targetCard:UpdateUI()
                 end
             end
@@ -442,7 +500,7 @@ function GameBoardMixin:CardPlayedToBattlefield(event)
     card:SetParent(self.targetBattlefield)
     card:SetFrameLevel(numCards+20)
     card.showTooltipCard = true;
-    self.targetBattlefield.cards[numCards+1] = card; -- could we just use the drawnID here ???
+    self.targetBattlefield.cards[numCards+1] = card;
     self:ReturnCardsToBattlefieldPositions('targetBattlefield')
 end
 
@@ -452,6 +510,17 @@ end
 ---@param target table the frame the mouse is over that is to be attacked
 function GameBoardMixin:PlayBasicAttack(player, target)
     self:AddDebugMessage(string.format("Attack made! %s attacks %s", player.model.name, target.model.name))
+
+    -- TODO: should this happen here? do we send the normal target and let the opponent handle the taunt?
+    -- does a card have taunt? keep it simple, find the first card with taunt and make it the target - no damage carry over
+    for k, card in ipairs(self.targetBattlefield.cards) do
+        if tonumber(card.model.ability) == 1 then
+            print(target.model.name, card.model.name)
+            target = card;
+        end
+    end
+
+
     target.model.health = target.model.health - player.model.attack; -- update data table
     player.model.health = player.model.health - target.model.attack;
     target:UpdateUI() -- update our own UI
@@ -478,24 +547,14 @@ function GameBoardMixin:OnBasicAttack(event)
     local cardKey = self:GetCardTableKey(event.targetDrawnID, self.targetBattlefield.cards)
     local targetCard = self.targetBattlefield.cards[cardKey]
 
-    if event.target.health < 1 then
-        self:AddDebugMessage(string.format("%s has been killed!", event.target.name))
-        targetCard:Hide()
-        self.cardPool:Release(targetCard)
-        table.remove(self.targetBattlefield.cards, cardKey)
-
-        self:ReturnCardsToBattlefieldPositions('targetBattlefield')
-
-    else
-        self:AddDebugMessage(string.format("%s attacks %s for %s damage", event.player.name, event.target.name, event.player.attack))
-    end
-
     self:DeselectAllBattlefieldCards()
 end
 
 
 
+function GameBoardMixin:Refresh()
 
+end
 
 
 

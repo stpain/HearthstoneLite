@@ -861,8 +861,8 @@
                     <Frame name="playerBattlefield" parentKey="playerBattlefield" enableMouse="true"> <!-- is it wise to use same value for name and key? -->
                         <Size y="240"/>
                         <Anchors>
-                            <Anchor point="BOTTOMLEFT" x="0" y="0"/>
-                            <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+                            <Anchor point="BOTTOMLEFT" x="0" y="50"/>
+                            <Anchor point="BOTTOMRIGHT" x="0" y="50"/>
                         </Anchors>
                         <Layers>
                             <!-- <Layer level="HIGHLIGHT">
@@ -881,8 +881,8 @@
                     <Frame name="targetBattlefield" parentKey="targetBattlefield" enableMouse="true">
                         <Size y="220"/>
                         <Anchors>
-                            <Anchor point="TOPLEFT" x="0" y="-24"/>
-                            <Anchor point="TOPRIGHT" x="0" y="-24"/>
+                            <Anchor point="TOPLEFT" x="0" y="-64"/>
+                            <Anchor point="TOPRIGHT" x="0" y="-64"/>
                         </Anchors>
                         <Layers>
                             <!-- <Layer level="HIGHLIGHT">
@@ -894,14 +894,31 @@
                     <StatusBar parentKey="moveTimer" minValue="0" maxValue="90" defaultValue="0" orientation="HORIZONTAL" >
                         <Size y="20"/>
                         <Anchors>
-                            <Anchor point="LEFT" x="0" y="0"/>
-                            <Anchor point="RIGHT" x="0" y="0"/>
+                            <Anchor point="LEFT" x="10" y="0"/>
+                            <Anchor point="RIGHT" x="-70" y="0"/>
                         </Anchors>
                         <BarColor r="0.04" g="0.24" b="0.07"/>
                         <BarTexture file="Interface\TargetingFrame\UI-StatusBar"/>
                     </StatusBar>
 
+                    <Frame frameLevel="10">
+                        <Size y="58"/>
+                        <Anchors>
+                            <Anchor point="LEFT" x="-5" y="-1"/>
+                            <Anchor point="RIGHT" x="5" y="-1"/>
+                        </Anchors>
+                        <Layers>
+                            <Layer level="DIALOG">
+                                <Texture atlas="islands-queue-progressbar-frame" useAtlasSize="false" setAllPoints="true"/>
+                            </Layer>
+                        </Layers>
+                    </Frame>
+
                 </Frames>
+
+                <Layers>
+
+                </Layers>
 
                 <Scripts>
                     <OnShow method="OnShow"/>
@@ -945,10 +962,13 @@
                             </OnClick>
                         </Scripts>
                     </Button>
+
                 </Frames>
+
 
                 <Scripts>
                     <OnShow method="OnShow"/>
+                    <OnLoad method="OnLoad"/>
                 </Scripts>
             </Frame>
 

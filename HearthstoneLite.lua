@@ -69,36 +69,32 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
     -- generate some card values
     local _attack = generateRandom()
     local _health = generateRandom()
+    --if health and attack match then 66% chance to re-roll
+    if _attack == _health and (random(100) < 67) then
+        _attack = generateRandom()
+        _health = generateRandom()
+    end
     -- health cannot be 0
     if _health == 0 then
         _health = 1;
-    end
-
-    --if health and attack match then 50% chance to re-roll
-    if _attack == _health and (random(100) < 51) then
-        _attack = generateRandom()
-        _health = generateRandom()
-        -- health cannot be 0
-        if _health == 0 then
-            _health = 1;
-        end
     end
 
     --does card have an ability
     local _abilityID, _abilityPower = nil, nil;
     local _hasAbility = (random(10) < 6) and true or false;
     if _hasAbility then
-        _abilityID = random(1, #hsl.db.abilities[_class] - 1)
+        _abilityID = random(#hsl.db.abilities)
         _abilityPower = generateRandom()
+
+        -- bump up taunt ability card health value
+        if hsl.db.abilities[_abilityID].info == "Taunt" then
+            _health = _health + random(1, 3)
+        end
     else
         _abilityID = 0
         _abilityPower = 0
     end
 
-    -- bump up taunt ability card health value
-    if hsl.db.abilities[_class][_abilityID].info == "Taunt" then
-        _health = _health + random(2, 4)
-    end
 
     -- does card have battleCry or deathRattle
     local _hasBCDR = ((_abilityID == 0) and (random(10) < 4)) and true or false;
@@ -106,9 +102,9 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
     local _deathrattle = 0;
     if _hasBCDR then
         if random(10) < 6 then
-            _battlecry = random(#hsl.db.battlecries - 1);
+            _battlecry = random(#hsl.db.battlecries);
         else
-            _deathrattle = random(#hsl.db.deathrattles - 1);
+            _deathrattle = random(#hsl.db.deathrattles);
         end
         -- make sure bcdr has a power
         if _abilityPower == 0 then
@@ -147,7 +143,7 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
     -- 45%
     if rnd < 46 then
         --common 5 these get no ability or bcdr
-        loot.abilityID = 0;
+        loot.ability = 0;
         loot.power = 0;
         loot.battlecry = 0;
         loot.deathrattle = 0;
@@ -161,7 +157,7 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
     -- 35%
     if rnd > 45 and rnd < 81 then
         --uncommon 7 ability decided earlier
-        loot.abilityID = _abilityID;
+        loot.ability = _ability;
         loot.power = _abilityPower;
         loot.battlecry = _battlecry;
         loot.deathrattle = _deathrattle;
@@ -179,11 +175,11 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
         loot.rarity = 3;
         loot.power = random(2,6)
         if rnd7 == 3 then
-            loot.ability = random(1, #hsl.db.abilities[_class] - 1)
+            loot.ability = random(#hsl.db.abilities)
         elseif rnd7 == 2 then
-            loot.battlecry = random(1, #hsl.db.battlecries - 1);
+            loot.battlecry = random(#hsl.db.battlecries);
         else
-            loot.deathrattle = random(1, #hsl.db.deathrattles - 1);
+            loot.deathrattle = random(#hsl.db.deathrattles);
         end
 
         if loot.atlas == "NEUTRAL" then
@@ -198,11 +194,11 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
         loot.rarity = 4;
         loot.power = random(4,8)
         if rnd7 == 3 then
-            loot.ability = random(1, #hsl.db.abilities[_class] - 1)
+            loot.ability = random(#hsl.db.abilities)
         elseif rnd7 == 2 then
-            loot.battlecry = random(1, #hsl.db.battlecries - 1);
+            loot.battlecry = random(#hsl.db.battlecries);
         else
-            loot.deathrattle = random(1, #hsl.db.deathrattles - 1);
+            loot.deathrattle = random(#hsl.db.deathrattles);
         end
 
         if loot.atlas == "NEUTRAL" then
@@ -213,16 +209,17 @@ local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isE
     -- 1% and only on elite mobs
     if rnd > 90 and isElite then -- CHANGE THIS BACK TO A 1% CHANCE, 10% ONLY FOR TESTING
         --legendary
+        loot.cost = math.ceil((random(4) + random(4,8) + random(8,16)) / 3)
         loot.background = 13;
         loot.rarity = 5;
         loot.power = random(8,12)
         loot.health = random(7,10) -- override the health to a higher value
         if rnd7 == 3 then
-            loot.ability = random(1, #hsl.db.abilities[_class] - 1)
+            loot.ability = random(#hsl.db.abilities)
         elseif rnd7 == 2 then
-            loot.battlecry = random(1, #hsl.db.battlecries - 1);
+            loot.battlecry = random(#hsl.db.battlecries);
         else
-            loot.deathrattle = random(1, #hsl.db.deathrattles - 1);
+            loot.deathrattle = random(#hsl.db.deathrattles);
         end
 
         if loot.atlas == "NEUTRAL" then
@@ -560,6 +557,11 @@ local function resetUI()
     deckViewerPopoutListview_Update()
     HearthstoneLite.collection:HideCards()
     HearthstoneLite.collection.deck = nil;
+end
+
+
+function SettingsMixin:OnLoad()
+
 end
 
 function SettingsMixin:OnShow()

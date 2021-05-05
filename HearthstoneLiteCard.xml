@@ -18,44 +18,38 @@
 						<Anchor point="BOTTOMRIGHT" x="10" y="-5"/>
 					</Anchors>
 				</Texture>
-				<!-- <Texture>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="15" y="-15"/>
-						<Anchor point="BOTTOMRIGHT" x="-15" y="15"/>
-					</Anchors>
-					<Color r="0" g="0" b="0" a="0.6" />
-				</Texture> -->
 			</Layer>
-			<Layer level="BORDER">
-				<Texture parentKey="art" textureSubLevel="-1">
-					<Size x="130" y="90"/>
+			<Layer level="BACKGROUND" textureSubLevel="-1">
+				<Texture parentKey="art">
+					<Size x="102" y="102"/>
 					<Anchors>
-						<Anchor point="TOP" x="10" y="-10"/>
+						<Anchor point="TOP" x="2" y="-6"/>
 					</Anchors>
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
 			</Layer>
 			<Layer level="OVERLAY">
-				<FontString parentKey="cost" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="30" y="35"/>
+				<FontString parentKey="cost" inherits="NumberFont_Outline_Large" justifyH="CENTER" justifyV="CENTER">
+					<Size x="30" y="30"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" x="7" y="-10"/>
+						<Anchor point="TOPLEFT" x="6" y="-9"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="attack" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="30" y="35"/>
+				<FontString parentKey="attack" inherits="NumberFont_Outline_Large" justifyH="CENTER" justifyV="CENTER">
+					<Size x="60" y="30"/>
 					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="12" y="4"/>
+						<Anchor point="BOTTOMLEFT" x="-6" y="0"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="health" inherits="NumberFont_Outline_Large" text="10" justifyH="CENTER" justifyV="CENTER">
-					<Size x="30" y="35"/>
+				<FontString parentKey="health" inherits="NumberFont_Outline_Large" justifyH="CENTER" justifyV="CENTER">
+					<Size x="60" y="30"/>
+					<Color r="1" g="1" b="1"/>
 					<Anchors>
-						<Anchor point="BOTTOMRIGHT" x="2" y="2"/>
+						<Anchor point="BOTTOMRIGHT" x="16" y="0"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="name" inherits="NumberFont_Outline_Large" text="Flame Dragon">
+				<FontString parentKey="name" inherits="NumberFont_Outline_Large">
 					<Anchors>
 						<Anchor point="CENTER" x="4" y="-4"/>
 					</Anchors>
@@ -118,18 +112,7 @@
 		<Scripts>
 			<OnMouseDown method="OnMouseDown"/>
 			<OnMouseUp method="OnMouseUp"/>
-			<OnLoad>
-				<!-- self.attackArrow.atlas:SetRotation(3.14) -->
-				self.attackArrow.attackLine:SetStartPoint("TOP", 0, 0)
-				self.attackArrow.attackLine:SetEndPoint("BOTTOM", 0, 0)
-                self:RegisterForDrag("LeftButton")
-            </OnLoad>
-            <!-- <OnDragStart>
-                self:StartMoving()
-            </OnDragStart>
-            <OnDragStop>
-                self:StopMovingOrSizing()
-            </OnDragStop> -->
+			<OnLoad method="OnLoad"/>
 		</Scripts>
 	</Frame>
 

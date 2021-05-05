@@ -18,6 +18,15 @@
 -- ["warrior"] = {},
 -- ["deathknight"] = {},
 
+ --USE THESE FILE ID FOR CARD ART
+-- icons fileID 1396616-1396708
+-- icons fileID 1401832-1401894
+-- icons fileID 1416162-1416429
+
+-- these are just of interest
+-- icons fileID 1410933-1410995
+-- icons fileID 1411023-1411031
+
 local _, hsl = ...
 
 hsl.db = {}
@@ -32,30 +41,117 @@ hsl.db = {}
 local cardMeta = {
     ["Beast"] = {
         ["druid"] = {
-            {fileID = 522189, name = "Ironfur Stomper"},
-            {fileID = 522210, name = "Murloc Sprite"},
+            {fileID = 1396620, name = '',},
+            {fileID = 1396626, name = '',},
+            {fileID = 1396629, name = '',},
+            {fileID = 1396630, name = '',},
+            {fileID = 1396631, name = '',},
+            {fileID = 1396633, name = '',},
+            {fileID = 1396640, name = '',},
+            {fileID = 1401878, name = '',},
+            {fileID = 1401880, name = '',},
+            {fileID = 1416166, name = '',},
+            {fileID = 1416170, name = '',},
+            {fileID = 1416177, name = '',},
+            {fileID = 1416187, name = '',},
+            {fileID = 1416199, name = '',},
+            {fileID = 1416205, name = '',},
+            {fileID = 1416208, name = '',},
+            {fileID = 1416209, name = '',},
+            {fileID = 1416210, name = '',},
+            {fileID = 1416215, name = '',},
+            {fileID = 1416218, name = '',},
+            {fileID = 1416220, name = '',},
+            {fileID = 1416221, name = '',},
+            {fileID = 1416222, name = '',},
+            {fileID = 1416224, name = '',},
+            {fileID = 1416229, name = '',},
+            {fileID = 1416230, name = '',},
+            {fileID = 1416239, name = '',},
+            {fileID = 1416246, name = '',},
+            {fileID = 1416259, name = '',},
+            {fileID = 1416267, name = '',},
+            {fileID = 1416282, name = '',},
+            {fileID = 1416283, name = '',},
+            {fileID = 1416284, name = '',},
+            {fileID = 1416286, name = '',},
+            {fileID = 1416289, name = '',},
+            {fileID = 1416291, name = '',},
+            {fileID = 1416295, name = '',},
+            {fileID = 1416297, name = '',},
+            {fileID = 1416298, name = '',},
+            {fileID = 1416301, name = '',},
+            {fileID = 1416304, name = '',},
+            {fileID = 1416316, name = '',},
+            {fileID = 1416332, name = '',},
+            {fileID = 1416342, name = '',},
+            {fileID = 1416343, name = '',},
+            {fileID = 1416345, name = '',},
+            {fileID = 1416351, name = '',},
+            {fileID = 1416359, name = '',},
+            {fileID = 1416363, name = '',},
+            {fileID = 1416364, name = '',},
+            {fileID = 1416365, name = '',},
+            {fileID = 1416366, name = '',},
+            {fileID = 1416371, name = '',},
+            {fileID = 1416372, name = '',},
+            {fileID = 1416381, name = '',},
+            {fileID = 1416398, name = '',},
+            {fileID = 1416405, name = '',},
+            {fileID = 1416406, name = '',},
+            
         },
-        ["hunter"] = {
-            {fileID = 522210, name = "Murloc Hunter"},
-            {fileID = 522246, name = "Giant Crocolisk"},
-        },
+        ["hunter"] = {},
         ["mage"] = {},
         ["paladin"] = {},
         ["priest"] = {},
         ["rogue"] = {},
-        ["shaman"] = {
-            {fileID = 522246, name = "Giant Snapjaw"},
-        },
-        ["warlock"] = {
-            {fileID = 522207, name = "Chaos Beast"},
-            {fileID = 522207, name = "Fel Hound"},
-        },
+        ["shaman"] = {},
+        ["warlock"] = {},
         ["warrior"] = {},
         ["deathknight"] = {},
         ["neutral"] = {},
     },
     ["Demon"] = {
-        ["druid"] = {},
+        ["druid"] = {
+            {fileID = 1396634, name = '',},
+            {fileID = 1396669, name = '',},
+            {fileID = 1416164, name = '',},
+            {fileID = 1416165, name = '',},
+            {fileID = 1416174, name = '',},
+            {fileID = 1416175, name = '',},
+            {fileID = 1416179, name = '',},
+            {fileID = 1416198, name = '',},
+            {fileID = 1416211, name = '',},
+            {fileID = 1416243, name = '',},
+            {fileID = 1416244, name = '',},
+            {fileID = 1416253, name = '',},
+            {fileID = 1416262, name = '',},
+            {fileID = 1416272, name = '',},
+            {fileID = 1416274, name = '',},
+            {fileID = 1416275, name = '',},
+            {fileID = 1416276, name = '',},
+            {fileID = 1416277, name = '',},
+            {fileID = 1416292, name = '',},
+            {fileID = 1416299, name = '',},
+            {fileID = 1416303, name = '',},
+            {fileID = 1416310, name = '',},
+            {fileID = 1416318, name = '',},
+            {fileID = 1416324, name = '',},
+            {fileID = 1416329, name = '',},
+            {fileID = 1416352, name = '',},
+            {fileID = 1416354, name = '',},
+            {fileID = 1416384, name = '',},
+            {fileID = 1416393, name = '',},
+            {fileID = 1416394, name = '',},
+            {fileID = 1416395, name = '',},
+            {fileID = 1416396, name = '',},
+            {fileID = 1416397, name = '',},
+            {fileID = 1416399, name = '',},
+            {fileID = 1416400, name = '',},
+            {fileID = 1416401, name = '',},
+            {fileID = 1416403, name = '',},
+        },
         ["hunter"] = {},
         ["mage"] = {},
         ["paladin"] = {},
@@ -68,45 +164,102 @@ local cardMeta = {
         ["neutral"] = {},
     },
     ["Dragonkin"] = {
-        ["druid"] = {},
-        ["hunter"] = {},
-        ["mage"] = {
-            {fileID = 522271, name = "Frost Dragon"},
+        ["druid"] = {
+            {fileID = 1396639, name = '',},
+            {fileID = 1401835, name = '',},
+            {fileID = 1401889, name = '',},
+            {fileID = 1416206, name = '',},
+            {fileID = 1416207, name = '',},
+            {fileID = 1416245, name = '',},
+            {fileID = 1416314, name = '',},
+            {fileID = 1416321, name = '',},
+            {fileID = 1416322, name = '',},
+            {fileID = 1416323, name = '',},
+            {fileID = 1416333, name = '',},
+            {fileID = 1416361, name = '',},
+            {fileID = 1416377, name = '',},
+            {fileID = 1416378, name = '',},
+            {fileID = 1416380, name = '',},
         },
+        ["hunter"] = {},
+        ["mage"] = {},
         ["paladin"] = {},
         ["priest"] = {},
         ["rogue"] = {},
         ["shaman"] = {},
-        ["warlock"] = {
-            {fileID = 522276, name = "Void Drake"},
-        },
+        ["warlock"] = {},
         ["warrior"] = {},
         ["deathknight"] = {},
         ["neutral"] = {},
     },
     ["Elemental"] = {
-        ["druid"] = {},
+        ["druid"] = {
+            {fileID = 1396632, name = '',},
+            {fileID = 1396638, name = '',},
+            {fileID = 1396658, name = '',},
+            {fileID = 1396662, name = '',},
+            {fileID = 1396663, name = '',},
+            {fileID = 1396675, name = '',},
+            {fileID = 1396694, name = '',},
+            {fileID = 1401832, name = '',},
+            {fileID = 1401833, name = '',},
+            {fileID = 1401834, name = '',},
+            {fileID = 1401836, name = '',},
+            {fileID = 1401842, name = '',},
+            {fileID = 1401844, name = '',},
+            {fileID = 1401845, name = '',},
+            {fileID = 1401847, name = '',},
+            {fileID = 1401848, name = '',},
+            {fileID = 1401852, name = '',},
+            {fileID = 1401861, name = '',},
+            {fileID = 1401862, name = '',},
+            {fileID = 1401863, name = '',},
+            {fileID = 1401877, name = '',},
+            {fileID = 1416213, name = '',},
+            {fileID = 1416217, name = '',},
+            {fileID = 1416227, name = '',},
+            {fileID = 1416231, name = '',},
+            {fileID = 1416232, name = '',},
+            {fileID = 1416234, name = '',},
+            {fileID = 1416237, name = '',},
+            {fileID = 1416255, name = '',},
+            {fileID = 1416260, name = '',},
+            {fileID = 1416290, name = '',},
+            {fileID = 1416319, name = '',},
+            {fileID = 1416349, name = '',},
+            {fileID = 1416370, name = '',},
+            {fileID = 1416404, name = '',},
+        },
         ["hunter"] = {},
         ["mage"] = {},
-        ["paladin"] = {
-            {fileID = 522229, name = "Lights Guardian"},
-        },
-        ["priest"] = {
-            {fileID = 522215, name = "Shadow Worm"},
-        },
+        ["paladin"] = {},
+        ["priest"] = {},
         ["rogue"] = {},
-        ["shaman"] = {
-            {fileID = 522229, name = "Air Elemental"},
-        },
-        ["warlock"] = {
-            {fileID = 522215, name = "Void Worm"},
-        },
+        ["shaman"] = {},
+        ["warlock"] = {},
         ["warrior"] = {},
         ["deathknight"] = {},
         ["neutral"] = {},
     },
     ["Giant"] = {
-        ["druid"] = {},
+        ["druid"] = {
+            {fileID = 1396651, name = '',},
+            {fileID = 1396653, name = '',},
+            {fileID = 1416190, name = '',},
+            {fileID = 1416191, name = '',},
+            {fileID = 1416194, name = '',},
+            {fileID = 1416223, name = '',},
+            {fileID = 1416256, name = '',},
+            {fileID = 1416285, name = '',},
+            {fileID = 1416306, name = '',},
+            {fileID = 1416308, name = '',},
+            {fileID = 1416313, name = '',},
+            {fileID = 1416315, name = '',},
+            {fileID = 1416325, name = '',},
+            {fileID = 1416326, name = '',},
+            {fileID = 1416328, name = '',},
+            {fileID = 1416385, name = '',},
+        },
         ["hunter"] = {},
         ["mage"] = {},
         ["paladin"] = {},
@@ -120,82 +273,262 @@ local cardMeta = {
     },
     ["Humanoid"] = {
         ["druid"] = {
-            {fileID = 522190, name = "Feathermane Druid"},
-            {fileID = 522279, name = "Troll Mystic"},
-            {fileID = 522189, name = "Darkwood Mystic"},
-            {fileID = 522236, name = "Tuskbark Warrior"},
+            {fileID = 1396618, name = '',},
+            {fileID = 1396619, name = '',},
+            {fileID = 1396621, name = '',},
+            {fileID = 1396622, name = '',},
+            {fileID = 1396623, name = '',},
+            {fileID = 1396624, name = '',},
+            {fileID = 1396625, name = '',},
+            {fileID = 1396627, name = '',},
+            {fileID = 1396628, name = '',},
+            {fileID = 1396635, name = '',},
+            {fileID = 1396636, name = '',},
+            {fileID = 1396637, name = '',},
+            {fileID = 1396642, name = '',},
+            {fileID = 1396643, name = '',},
+            {fileID = 1396644, name = '',},
+            {fileID = 1396646, name = '',},
+            {fileID = 1396647, name = '',},
+            {fileID = 1396648, name = '',},
+            {fileID = 1396649, name = '',},
+            {fileID = 1396650, name = '',},
+            {fileID = 1396652, name = '',},
+            {fileID = 1396654, name = '',},
+            {fileID = 1396655, name = '',},
+            {fileID = 1396657, name = '',},
+            {fileID = 1396659, name = '',},
+            {fileID = 1396660, name = '',},
+            {fileID = 1396661, name = '',},
+            {fileID = 1396664, name = '',},
+            {fileID = 1396665, name = '',},
+            {fileID = 1396666, name = '',},
+            {fileID = 1396667, name = '',},
+            {fileID = 1396668, name = '',},
+            {fileID = 1396670, name = '',},
+            {fileID = 1396671, name = '',},
+            {fileID = 1396672, name = '',},
+            {fileID = 1396673, name = '',},
+            {fileID = 1396674, name = '',},
+            {fileID = 1396676, name = '',},
+            {fileID = 1396677, name = '',},
+            {fileID = 1396679, name = '',},
+            {fileID = 1396680, name = '',},
+            {fileID = 1396681, name = '',},
+            {fileID = 1396682, name = '',},
+            {fileID = 1396683, name = '',},
+            {fileID = 1396684, name = '',},
+            {fileID = 1396685, name = '',},
+            {fileID = 1396686, name = '',},
+            {fileID = 1396687, name = '',},
+            {fileID = 1396688, name = '',},
+            {fileID = 1396689, name = '',},
+            {fileID = 1396690, name = '',},
+            {fileID = 1396691, name = '',},
+            {fileID = 1396692, name = '',},
+            {fileID = 1396693, name = '',},
+            {fileID = 1396695, name = '',},
+            {fileID = 1396696, name = '',},
+            {fileID = 1396697, name = '',},
+            {fileID = 1396698, name = '',},
+            {fileID = 1396699, name = '',},
+            {fileID = 1396700, name = '',},
+            {fileID = 1396701, name = '',},
+            {fileID = 1396702, name = '',},
+            {fileID = 1396703, name = '',},
+            {fileID = 1396704, name = '',},
+            {fileID = 1396705, name = '',},
+            {fileID = 1396706, name = '',},
+            {fileID = 1396707, name = '',},
+            {fileID = 1396708, name = '',},
+            {fileID = 1401841, name = '',},
+            {fileID = 1401843, name = '',},
+            {fileID = 1401846, name = '',},
+            {fileID = 1401849, name = '',},
+            {fileID = 1401850, name = '',},
+            {fileID = 1401851, name = '',},
+            {fileID = 1401854, name = '',},
+            {fileID = 1401855, name = '',},
+            {fileID = 1401856, name = '',},
+            {fileID = 1401857, name = '',},
+            {fileID = 1401860, name = '',},
+            {fileID = 1401864, name = '',},
+            {fileID = 1401865, name = '',},
+            {fileID = 1401866, name = '',},
+            {fileID = 1401868, name = '',},
+            {fileID = 1401869, name = '',},
+            {fileID = 1401870, name = '',},
+            {fileID = 1401871, name = '',},
+            {fileID = 1401872, name = '',},
+            {fileID = 1401873, name = '',},
+            {fileID = 1401874, name = '',},
+            {fileID = 1401875, name = '',},
+            {fileID = 1401876, name = '',},
+            {fileID = 1401879, name = '',},
+            {fileID = 1401883, name = '',},
+            {fileID = 1401884, name = '',},
+            {fileID = 1401885, name = '',},
+            {fileID = 1401886, name = '',},
+            {fileID = 1401887, name = '',},
+            {fileID = 1401888, name = '',},
+            {fileID = 1401890, name = '',},
+            {fileID = 1401891, name = '',},
+            {fileID = 1401892, name = '',},
+            {fileID = 1401893, name = '',},
+            {fileID = 1401894, name = '',},
+            {fileID = 1416162, name = '',},
+            {fileID = 1416171, name = '',},
+            {fileID = 1416173, name = '',},
+            {fileID = 1416176, name = '',},
+            {fileID = 1416178, name = '',},
+            {fileID = 1416180, name = '',},
+            {fileID = 1416181, name = '',},
+            {fileID = 1416182, name = '',},
+            {fileID = 1416184, name = '',},
+            {fileID = 1416185, name = '',},
+            {fileID = 1416186, name = '',},
+            {fileID = 1416195, name = '',},
+            {fileID = 1416196, name = '',},
+            {fileID = 1416202, name = '',},
+            {fileID = 1416203, name = '',},
+            {fileID = 1416204, name = '',},
+            {fileID = 1416214, name = '',},
+            {fileID = 1416219, name = '',},
+            {fileID = 1416240, name = '',},
+            {fileID = 1416241, name = '',},
+            {fileID = 1416248, name = '',},
+            {fileID = 1416249, name = '',},
+            {fileID = 1416250, name = '',},
+            {fileID = 1416251, name = '',},
+            {fileID = 1416252, name = '',},
+            {fileID = 1416254, name = '',},
+            {fileID = 1416257, name = '',},
+            {fileID = 1416265, name = '',},
+            {fileID = 1416268, name = '',},
+            {fileID = 1416269, name = '',},
+            {fileID = 1416270, name = '',},
+            {fileID = 1416271, name = '',},
+            {fileID = 1416273, name = '',},
+            {fileID = 1416278, name = '',},
+            {fileID = 1416279, name = '',},
+            {fileID = 1416280, name = '',},
+            {fileID = 1416281, name = '',},
+            {fileID = 1416287, name = '',},
+            {fileID = 1416288, name = '',},
+            {fileID = 1416293, name = '',},
+            {fileID = 1416294, name = '',},
+            {fileID = 1416300, name = '',},
+            {fileID = 1416302, name = '',},
+            {fileID = 1416305, name = '',},
+            {fileID = 1416307, name = '',},
+            {fileID = 1416309, name = '',},
+            {fileID = 1416311, name = '',},
+            {fileID = 1416312, name = '',},
+            {fileID = 1416317, name = '',},
+            {fileID = 1416327, name = '',},
+            {fileID = 1416330, name = '',},
+            {fileID = 1416331, name = '',},
+            {fileID = 1416334, name = '',},
+            {fileID = 1416335, name = '',},
+            {fileID = 1416337, name = '',},
+            {fileID = 1416347, name = '',},
+            {fileID = 1416348, name = '',},
+            {fileID = 1416350, name = '',},
+            {fileID = 1416355, name = '',},
+            {fileID = 1416356, name = '',},
+            {fileID = 1416358, name = '',},
+            {fileID = 1416360, name = '',},
+            {fileID = 1416362, name = '',},
+            {fileID = 1416367, name = '',},
+            {fileID = 1416373, name = '',},
+            {fileID = 1416374, name = '',},
+            {fileID = 1416375, name = '',},
+            {fileID = 1416379, name = '',},
+            {fileID = 1416382, name = '',},
+            {fileID = 1416383, name = '',},
+            {fileID = 1416386, name = '',},
+            {fileID = 1416387, name = '',},
+            {fileID = 1416388, name = '',},
+            {fileID = 1416389, name = '',},
+            {fileID = 1416390, name = '',},
+            {fileID = 1416391, name = '',},
+            {fileID = 1416392, name = '',},
         },
         ["hunter"] = {},
-        ["mage"] = {
-            {fileID = 522216, name = "Arcanist"},
-            {fileID = 131323, name = "Elf Mage"},
-            {fileID = 131393, name = "Draenei Arcanist"},
-        },
+        ["mage"] = {},
         ["paladin"] = {},
-        ["priest"] = {
-            {fileID = 522206, name = "Archbishop"},
-            {fileID = 522216, name = "Shadow Priest"},
-        },
-        ["rogue"] = {
-            {fileID = 522278, name = "SI:7 Assassin"},
-        },
-        ["shaman"] = {
-            {fileID = 522280, name = "Troll Shaman"},
-        },
-        ["warlock"] = {
-            --{fileID = 131736, name = "Forgotten One"},
-        },
-        ["warrior"] = {
-            {fileID = 522263, name = "Troll Warrior"},
-        },
+        ["priest"] = {},
+        ["rogue"] = {},
+        ["shaman"] = {},
+        ["warlock"] = {},
+        ["warrior"] = {},
         ["deathknight"] = {},
         ["neutral"] = {},
     },
     ["Mechanical"] = {
-        ["druid"] = {},
+        ["druid"] = {
+            {fileID = 1396617, name = '',},
+            {fileID = 1396645, name = '',},
+            {fileID = 1416168, name = '',},
+        },
         ["hunter"] = {},
         ["mage"] = {},
-        ["paladin"] = {
-            {fileID = 1385731, name = "Flame Leviathan"},
-        },
+        ["paladin"] = {},
         ["priest"] = {},
         ["rogue"] = {},
         ["shaman"] = {},
-        ["warlock"] = {
-            {fileID = 1385754, name = "Choas Bot"},
-        },
+        ["warlock"] = {},
         ["warrior"] = {},
         ["deathknight"] = {},
         ["neutral"] = {},
     },
     ["Undead"] = {
         ["druid"] = {
-            {fileID = 522189, name = "Shadow Summoner"},
-            {fileID = 522190, name = "Talonbeak Fiend"},
+            {fileID = 1396616, name = '',},
+            {fileID = 1396641, name = '',},
+            {fileID = 1396656, name = '',},
+            {fileID = 1396678, name = '',},
+            {fileID = 1401853, name = '',},
+            {fileID = 1401858, name = '',},
+            {fileID = 1401859, name = '',},
+            {fileID = 1401881, name = '',},
+            {fileID = 1401882, name = '',},
+            {fileID = 1416163, name = '',},
+            {fileID = 1416167, name = '',},
+            {fileID = 1416169, name = '',},
+            {fileID = 1416172, name = '',},
+            {fileID = 1416183, name = '',},
+            {fileID = 1416188, name = '',},
+            {fileID = 1416189, name = '',},
+            {fileID = 1416192, name = '',},
+            {fileID = 1416193, name = '',},
+            {fileID = 1416197, name = '',},
+            {fileID = 1416200, name = '',},
+            {fileID = 1416235, name = '',},
+            {fileID = 1416236, name = '',},
+            {fileID = 1416242, name = '',},
+            {fileID = 1416258, name = '',},
+            {fileID = 1416261, name = '',},
+            {fileID = 1416263, name = '',},
+            {fileID = 1416264, name = '',},
+            {fileID = 1416266, name = '',},
+            {fileID = 1416296, name = '',},
+            {fileID = 1416336, name = '',},
+            {fileID = 1416340, name = '',},
+            {fileID = 1416346, name = '',},
+            {fileID = 1416353, name = '',},
+            {fileID = 1416376, name = '',},
         },
         ["hunter"] = {},
         ["mage"] = {},
         ["paladin"] = {},
-        ["priest"] = {
-            {fileID = 522189, name = "Darkwood Priest"},
-            {fileID = 522205, name = "Crypt Wizzard"},
-        },
-        ["rogue"] = {
-            {fileID = 522189, name = "Shadow Stalker"},
-        },
-        ["shaman"] = {
-            {fileID = 522246, name = "Spirit Crocolisk"},
-        },
-        ["warlock"] = {
-            {fileID = 522189, name = "Mystwood Summoner"},
-        },
-        ["warrior"] = {
-            {fileID = 522189, name = "Ironfur Warrior"},
-        },
+        ["priest"] = {},
+        ["rogue"] = {},
+        ["shaman"] = {},
+        ["warlock"] = {},
+        ["warrior"] = {},
         ["deathknight"] = {},
-        ["neutral"] = {
-            {fileID = 522189, name = "Random Bishop"},
-        },
+        ["neutral"] = {},
     },
 }
 
@@ -207,304 +540,12 @@ hsl.db.cardMeta = cardMeta;
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 -- abilities
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
-local abilities = {
-    neutral = {},
-    druid = {},
-    hunter = {},
-    mage = {},
-    paladin = {},
-    priest = {},
-    rogue = {},
-    shaman = {},
-    warlock = {},
-    warrior = {},
-    deathknight = {},
-}
+local abilities = {}
 
--- neutral
-abilities["neutral"][0] = {
-    info = "0",
-    func = function(sender, target)
-        print('no ability')
-    end,
-}
-abilities["neutral"][1] = {
-    info = "1",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["neutral"][2] = {
-    info = "2",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["neutral"][3] = {
-    info = "3",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-
--- druid
-abilities["druid"][0] = {
-    info = "",
-    func = function(sender, target)
-        print('no ability')
-    end,
-}
-abilities["druid"][1] = {
+abilities[1] = {
     info = "Taunt",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["druid"][2] = {
-    info = "Rejuvenation, target card heals for 1 health for 4 rounds",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["druid"][3] = {
-    info = "Whenever you cast a spell, draw a card",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-
--- hunter
-abilities["hunter"][0] = {
-    info = "",
-    func = function(sender, target)
-        print('no ability')
-    end,
-}
-abilities["hunter"][1] = {
-    info = "Frost trap, target card unable to atack for 1 round",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["hunter"][2] = {
-    info = "Turtle shell",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["hunter"][3] = {
-    info = "Whenever you cast a spell, draw a card",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-
--- mage
-abilities["mage"][0] = {
-    info = "",
-    func = function(sender, target)
-        print('no ability')
-    end,
-}
-abilities["mage"][1] = {
-    info = "Mana gem, restore 1 mana",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["mage"][2] = {
-    info = "Frost shield",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["mage"][3] = {
-    info = "Whenever you cast a spell, draw a card",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-
--- paladin
-abilities["paladin"][0] = {
-    info = "",
-    func = function(sender, target)
-        print('no ability')
-    end,
-}
-abilities["paladin"][1] = {
-    info = "Taunt",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["paladin"][2] = {
-    info = "Divine shield",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["paladin"][3] = {
-    info = "Whenever you cast a spell, draw a card",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-
--- priest
-abilities["priest"][0] = {
-    info = "",
-    func = function(sender, target)
-        print('no ability')
-    end,
-}
-abilities["priest"][1] = {
-    info = "Divine prayer, heal all allies for 2 health",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["priest"][2] = {
-    info = "Holy nova, deal 3 damage to target card",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["priest"][3] = {
-    info = "Whenever you cast a spell, draw a card",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-
--- rogue
-abilities["rogue"][0] = {
-    info = "",
-    func = function(sender, target)
-        print('no ability')
-    end,
-}
-abilities["rogue"][1] = {
-    info = "Sap, target card is unable to attack for 2 rounds",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["rogue"][2] = {
-    info = "Vanish, become un attackable for 1 round",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["rogue"][3] = {
-    info = "Whenever you cast a spell, draw a card",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-
--- shaman
-abilities["shaman"][0] = {
-    info = "",
-    func = function(sender, target)
-        print('no ability')
-    end,
-}
-abilities["shaman"][1] = {
-    info = "Earth totem, absorbs 5 damage",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["shaman"][2] = {
-    info = "Lightning shield, deals 1 damage to attackers",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["shaman"][3] = {
-    info = "Whenever you cast a spell, draw a card",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-
--- warlock
-abilities["warlock"][0] = {
-    info = "",
-    func = function(sender, target)
-        print('no ability')
-    end,
-}
-abilities["warlock"][1] = {
-    info = "Suffering, inflict 1 damage per round",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["warlock"][2] = {
-    info = "Demonic armor",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["warlock"][3] = {
-    info = "Whenever you cast a spell, draw a card",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-
--- warrior
-abilities["warrior"][0] = {
-    info = "",
-    func = function(sender, target)
-        print('no ability')
-    end,
-}
-abilities["warrior"][1] = {
-    info = "Taunt",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["warrior"][2] = {
-    info = "Rage",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["warrior"][3] = {
-    info = "Whenever you deal damage gain 1 health",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-
--- deathknight
-abilities["deathknight"][0] = {
-    info = "",
-    func = function(sender, target)
-        print('no ability')
-    end,
-}
-abilities["deathknight"][1] = {
-    info = "Taunt",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["deathknight"][2] = {
-    info = "Bone shield",
-    func = function(sender, target)
-        -- hmm ?
-    end,
-}
-abilities["deathknight"][3] = {
-    info = "Whenever a minion dies, summon a 1/1 ghoul",
-    func = function(sender, target)
-        -- hmm ?
-    end,
+    target = "SELF",
+    effect = "ABSORB",
 }
 
 
@@ -515,10 +556,6 @@ hsl.db.abilities = abilities;
 -- battlecry
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 local battlecries = {}
-battlecries[0] = {
-    info = "",
-    func = nil,
-}
 battlecries[1] = {
     info = "Attack all targets for %s damage.",
     target = "ALL_TARGETS",
@@ -535,9 +572,10 @@ battlecries[3] = {
     effect = "HEAL",
 }
 battlecries[4] = {
-    info = "Heal all minions for %s health.",
+    info = "Give all minions +1/+1.",
     target = "ALL_PLAYER_CARDS",
-    effect = "HEAL",
+    effect = "BUFF",
+    values = {1,1}, -- attack, health
 }
 
 
@@ -548,10 +586,6 @@ hsl.db.battlecries = battlecries;
 -- deathrattle
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 local deathrattles = {}
-deathrattles[0] = {
-    info = "",
-    func = nil,
-}
 deathrattles[1] = {
     info = "Attack all targets for %s damage.",
     target = "ALL_TARGETS",

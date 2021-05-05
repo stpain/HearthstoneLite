@@ -8,6 +8,11 @@ local L = hsl.locales;
 -- this is the texture atlas data for the cards
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
+local CARD_FONT_PATH = [[Interface\Addons\HearthstoneLite\Media\PollerOne-Regular.ttf]]
+local CARD_INFO_FONT_PATH = [[Interface\Addons\HearthstoneLite\Media\Rakkas-Regular.ttf]]
+
+local FONT_SIZE = 22;
+
 local CARD_TEMPLATE_PATH = [[Interface\Addons\HearthstoneLite\CardTemplates\]]
 local CARD_ATLAS = {}
 
@@ -162,17 +167,32 @@ local tooltipCard;
 HslCardMixin = {}
 
 function HslCardMixin:OnShow()
-
+    -- if not hsl.CARD_FONT then
+    --     self:SetFont(CARD_FONT_PATH)
+    -- else
+    --     self:SetFont(hsl.CARD_FONT)
+    -- end
 end
 
 -- should do this in xml?
 function HslCardMixin:OnLoad()
     -- quick font size hack
-    local fontName, _, fontFlags = self.cost:GetFont()
-    self.cost:SetFont(fontName, 28, fontFlags)
-    self.attack:SetFont(fontName, 28, fontFlags)
-    self.health:SetFont(fontName, 28, fontFlags)
-    self.name:SetFont(fontName, 10, fontFlags)
+    local _, _, fontFlags = self.cost:GetFont()
+    self.cost:SetFont(CARD_FONT_PATH, math.floor(FONT_SIZE * 1.25), fontFlags)
+    self.attack:SetFont(CARD_FONT_PATH, FONT_SIZE, fontFlags)
+    self.health:SetFont(CARD_FONT_PATH, FONT_SIZE, fontFlags)
+    self.name:SetFont(CARD_FONT_PATH, 9, fontFlags)
+
+    --self.info:SetFont(CARD_INFO_FONT_PATH, 9, fontFlags)
+end
+
+
+function HslCardMixin:SetFont(fontName)
+    local _, _, fontFlags = self.cost:GetFont()
+    self.cost:SetFont(fontName, FONT_SIZE, fontFlags)
+    self.attack:SetFont(fontName, FONT_SIZE, fontFlags)
+    self.health:SetFont(fontName, FONT_SIZE, fontFlags)
+    self.name:SetFont(fontName, 9, fontFlags)
 end
 
 
@@ -209,6 +229,9 @@ function HslCardMixin:LoadCard(model)
     end
 
     self.art:SetTexture(model.art)
+    -- self.art:SetTexture([[Interface\Addons\HearthstoneLite\Media\card-art-test]])
+    -- self.art:SetTexCoord(406/2048, 506/2048, 0/1024, 120/1024)
+
     self.cost:SetText(model.cost)
     self.attack:SetText(model.attack)
     self.health:SetText(model.health)
@@ -224,7 +247,7 @@ function HslCardMixin:LoadCard(model)
             self.info:SetText(L["deathrattle"]..string.format(hsl.db.deathrattles[model.deathrattle].info, model.power))
         end
         if model.ability and model.ability > 0 then
-            self.info:SetText(string.format(hsl.db.abilities[model.class][model.ability].info, model.power))
+            self.info:SetText(string.format(hsl.db.abilities[model.ability].info, model.power))
         end
     end
     C_Timer.After(0, infoDelay)
@@ -277,20 +300,29 @@ function HslCardMixin:OnMouseUp()
 
 end
 
-function HslCardMixin:OnMouseDown()
+function HslCardMixin:OnMouseDown(button)
     if not self.model then
         return;
     end
     --dev stuffs
     if IsAltKeyDown() then
-        print('data table for card:', self.model.name)
+        print('data model for card:', self.model.name)
         for k, v in pairs(self.model) do
-            print(string.format('    card data [%s] = %s', k, v))
+            print(string.format('    [%s] = %s', k, v))
         end
     end
 
-    self.selected = not self.selected;
-    self.cardSelected:SetShown(self.selected)
+    if button == "RightButton" then
+        tooltipCard:LoadCard(self.model)
+        tooltipCard:ClearAllPoints()
+        tooltipCard:SetPoint("RIGHT", self, "LEFT", 0, 0) -- this needs to be changable by the user
+        tooltipCard:Show()
+        tooltipCard:ScaleTo(self.tooltipScaleTo)
+        tooltipCard:SetFrameStrata("TOOLTIP")
+    end
+
+    -- self.selected = not self.selected;
+    -- self.cardSelected:SetShown(self.selected)
 
     --use parent name to determine action TODO: setup more templates ?
     local parent = self:GetParent():GetName();
@@ -365,17 +397,19 @@ end)
 HslBattlefieldCardMixin = {}
 HslBattlefieldCardMixin.tooltipScaleTo = 1.25
 
+function HslBattlefieldCardMixin:OnLoad()
+    -- quick font size hack
+    local _, _, fontFlags = self.cost:GetFont()
+    self.cost:SetFont(CARD_FONT_PATH, math.floor(FONT_SIZE * 1.25), fontFlags)
+    self.attack:SetFont(CARD_FONT_PATH, FONT_SIZE, fontFlags)
+    self.health:SetFont(CARD_FONT_PATH, FONT_SIZE, fontFlags)
+    self.name:SetFont(CARD_FONT_PATH, 9, fontFlags)
+
+    --self.info:SetFont(CARD_INFO_FONT_PATH, 9, fontFlags)
+end
 
 function HslBattlefieldCardMixin:OnEnter()
-    if self.showTooltipCard and IsShiftKeyDown() then
-        tooltipCard:LoadCard(self.model)
-        tooltipCard:ClearAllPoints()
-        tooltipCard:SetPoint("RIGHT", self, "LEFT", 0, 0) -- this needs to be changable by the user
-        tooltipCard:Show()
-        tooltipCard:ScaleTo(self.tooltipScaleTo)
-        tooltipCard:SetFrameStrata("TOOLTIP")
-    end
-    self.attackArrow:Show()
+    --self.attackArrow:Show()
 end
 
 function HslBattlefieldCardMixin:OnLeave()
@@ -383,7 +417,7 @@ function HslBattlefieldCardMixin:OnLeave()
     --self.attackArrow:Hide()
 end
 
-function HslBattlefieldCardMixin:OnMouseDown()
+function HslBattlefieldCardMixin:OnMouseDown(button)
     if not self.model then
         return;
     end
@@ -397,6 +431,15 @@ function HslBattlefieldCardMixin:OnMouseDown()
         if self.drawnID then
             print("drawnID = ", self.drawnID)
         end
+    end
+
+    if button == "RightButton" then
+        tooltipCard:LoadCard(self.model)
+        tooltipCard:ClearAllPoints()
+        tooltipCard:SetPoint("RIGHT", self, "LEFT", 0, 0) -- this needs to be changable by the user
+        tooltipCard:Show()
+        tooltipCard:ScaleTo(self.tooltipScaleTo)
+        tooltipCard:SetFrameStrata("TOOLTIP")
     end
 
     -- handle the card selection
@@ -468,12 +511,12 @@ function HslBattlefieldCardMixin:OnMouseUp()
     if gb.cursorHasCard == true then
 
         if gb.playerBattlefield:IsMouseOver() then
-            print("mouse is over player battlefield")
+            --print("mouse is over player battlefield")
             -- if not gb.playerBattlefield.cards then --this should be done elsewhere need to see why its an issue!
             --     gb.playerBattlefield.cards = {}
             -- end
             if #gb.playerBattlefield.cards > 6 then -- max num cards currently in battlefield
-                print("battlefield has max num cards")
+                --print("battlefield has max num cards")
                 gb:ReturnCardToHand(card)
             else
                 if self:GetParent() == gb.playerControls.theHand then -- if this card came from the hand then play it to battlefield
@@ -482,12 +525,12 @@ function HslBattlefieldCardMixin:OnMouseUp()
             end
 
         elseif gb.targetBattlefield:IsMouseOver() then
-            print("mouse in target battlefield")
+            --print("mouse in target battlefield")
             if self:GetParent() == gb.playerBattlefield then -- if this card came from the players battlefield then play move
                 -- this needs to go into gameboard.lua ?
                 for _, targetCard in ipairs(gb.targetBattlefield.cards) do
                     if targetCard:IsMouseOver() then
-                        print("mouse in card", targetCard.model.name)
+                        --print("mouse in card", targetCard.model.name)
                         gb:PlayBasicAttack(card, targetCard)
                     end
                 end
@@ -497,7 +540,7 @@ function HslBattlefieldCardMixin:OnMouseUp()
             end
 
         else
-            print("mouse not in battlefield")
+            --print("mouse not in battlefield")
             if self:GetParent() == gb.playerControls.theHand then
                 gb:ReturnCardToHand(card)
             end
