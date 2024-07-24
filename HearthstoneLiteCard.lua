@@ -9,7 +9,6 @@ local L = hsl.locales;
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
 local CARD_FONT_PATH = [[Interface\Addons\HearthstoneLite\Media\PollerOne-Regular.ttf]]
-local CARD_INFO_FONT_PATH = [[Interface\Addons\HearthstoneLite\Media\Rakkas-Regular.ttf]]
 
 local FONT_SIZE = 22;
 
@@ -161,17 +160,13 @@ CARD_ATLAS.WEAPON[5] = {
 
 
 
-local tooltipCard;
 
 --base card object
 HslCardMixin = {}
 
+
 function HslCardMixin:OnShow()
-    -- if not hsl.CARD_FONT then
-    --     self:SetFont(CARD_FONT_PATH)
-    -- else
-    --     self:SetFont(hsl.CARD_FONT)
-    -- end
+
 end
 
 -- should do this in xml?
@@ -181,20 +176,64 @@ function HslCardMixin:OnLoad()
     self.cost:SetFont(CARD_FONT_PATH, math.floor(FONT_SIZE * 1.25), fontFlags)
     self.attack:SetFont(CARD_FONT_PATH, FONT_SIZE, fontFlags)
     self.health:SetFont(CARD_FONT_PATH, FONT_SIZE, fontFlags)
-    self.name:SetFont(CARD_FONT_PATH, 9, fontFlags)
+    --self.name:SetFont(CARD_FONT_PATH, 9, fontFlags)
 
-    --self.info:SetFont(CARD_INFO_FONT_PATH, 9, fontFlags)
+    self:RegisterForDrag("LeftButton")
 end
 
-
-function HslCardMixin:SetFont(fontName)
-    local _, _, fontFlags = self.cost:GetFont()
-    self.cost:SetFont(fontName, FONT_SIZE, fontFlags)
-    self.attack:SetFont(fontName, FONT_SIZE, fontFlags)
-    self.health:SetFont(fontName, FONT_SIZE, fontFlags)
-    self.name:SetFont(fontName, 9, fontFlags)
+function HslCardMixin:SetOrigin(x, y, override)
+    if override then
+        x, y = self:GetCenter()
+    end
+    self.origin = {x = x, y = y}
 end
 
+function HslCardMixin:OnMouseDown()
+    if self.dragEnabled then
+        if not self.origin then
+            local x, y = self:GetCenter()
+            self:SetOrigin(x, y)
+        end
+        self:StartMoving()
+        self:SetFrameStrata("TOOLTIP")
+    end
+end
+
+function HslCardMixin:SetPositionResetFunc(func)
+    self.resetPositionFunc = func;
+end
+
+function HslCardMixin:SetDragEnabled()
+    self.dragEnabled = true;
+    self.resetPosition:SetScript("OnFinished", function()
+        self.resetPositionFunc()
+        self:SetFrameStrata("HIGH")
+        self:EnableMouse(true)
+    end)
+end
+
+function HslCardMixin:SetCardInfo(info)
+    self.art:SetTexture(info.art)
+    self.cost:SetText(info.cost)
+    self.attack:SetText(info.attack)
+    self.health:SetText(info.health)
+    self.name:SetText(info.name)
+    if info.battlecry and info.battlecry > 0 then
+        self.info:SetText(L.BATTLE_CRY..string.format(hsl.db.battlecries[info.battlecry].info, info.power))
+    end
+    if info.deathrattle and info.deathrattle > 0 then
+        self.info:SetText(L.DEATH_RATTLE..string.format(hsl.db.deathrattles[info.deathrattle].info, info.power))
+    end
+    if info.ability and info.ability > 0 then
+        self.info:SetText(string.format(hsl.db.abilities[info.ability].info, info.power))
+    end
+    for _, attribute in ipairs({"cost", "attack", "health"}) do
+        self[attribute]:Hide();
+        if info[attribute] then
+            self[attribute]:Show();
+        end
+    end
+end
 
 ---scale the card frame and adjust the fontstring font heights
 ---@param scale number the new scale to be used
@@ -214,71 +253,84 @@ function HslCardMixin:ScaleTo(scale, fontSize)
 end
 
 ---load card data model into a ui frame
----@param model table a table containing the card info
-function HslCardMixin:LoadCard(model)
-    if not model then
+---@param data table a table containing the card info
+function HslCardMixin:CreateFromData(data)
+    if not data then
         return
     end
 
+    self.onLoadAnim:Play()
+
     self.selected = false;
 
-    --self.defaults = model;
-    self.model = {}
-    for k, v in pairs(model) do
-        self.model[k] = v;
+    self.cardDbEntry = data;
+
+    --copy the card data, don't use the card data itself as these values will change during combat and we don't want to change the db entry
+    self.data = {}
+    for k, v in pairs(data) do
+        self.data[k] = v;
     end
 
-    self.art:SetTexture(model.art)
-    -- self.art:SetTexture([[Interface\Addons\HearthstoneLite\Media\card-art-test]])
-    -- self.art:SetTexCoord(406/2048, 506/2048, 0/1024, 120/1024)
-
-    self.cost:SetText(model.cost)
-    self.attack:SetText(model.attack)
-    self.health:SetText(model.health)
-    self.name:SetText(model.name)
     self.info:SetText("")
-
-    -- i had issues keeping the model text updated, using C_Timer to delay the update func by a frame
-    local function infoDelay()
-        if model.battlecry and model.battlecry > 0 then
-            self.info:SetText(L["battlecry"]..string.format(hsl.db.battlecries[model.battlecry].info, model.power))
-        end
-        if model.deathrattle and model.deathrattle > 0 then
-            self.info:SetText(L["deathrattle"]..string.format(hsl.db.deathrattles[model.deathrattle].info, model.power))
-        end
-        if model.ability and model.ability > 0 then
-            self.info:SetText(string.format(hsl.db.abilities[model.ability].info, model.power))
-        end
-    end
-    C_Timer.After(0, infoDelay)
-
-    if model.background > 4 then
-        self.name:SetPoint("CENTER", 4, -8)
-    else
-        self.name:SetPoint("CENTER", 4, -4)
-    end
-
-    for _, attribute in ipairs({"cost", "attack", "health"}) do
-        if self.model[attribute] then
-            self[attribute]:Show();
-        else
-            self[attribute]:Hide();
-        end
-    end
-
-    self.cardTemplate:SetTexture(CARD_TEMPLATE_PATH..model.backgroundPath)
+    self.cardTemplate:SetTexture(nil)
 
     -- card.atlas = the atlas table to use
     -- card.background = the card number from the file to use
+    self.cardTemplate:SetTexture(CARD_TEMPLATE_PATH..data.backgroundPath)
+
     self.cardTemplate:SetTexCoord(
-        CARD_ATLAS[model.atlas][model.background].left, 
-        CARD_ATLAS[model.atlas][model.background].right, 
-        CARD_ATLAS[model.atlas][model.background].top, 
-        CARD_ATLAS[model.atlas][model.background].bottom
+        CARD_ATLAS[data.atlas][data.background].left, 
+        CARD_ATLAS[data.atlas][data.background].right, 
+        CARD_ATLAS[data.atlas][data.background].top, 
+        CARD_ATLAS[data.atlas][data.background].bottom
     )
+
+    if data.background > 12 then
+        self.cardTemplate:ClearAllPoints()
+        self.cardTemplate:SetPoint("TOPLEFT", 0, 9)
+        self.cardTemplate:SetPoint("BOTTOMRIGHT", 0, 0)
+    else
+        self.cardTemplate:ClearAllPoints()
+        self.cardTemplate:SetAllPoints()
+    end
+
+    -- i had issues keeping the data text updated, using C_Timer to delay the update func by a frame
+    local function updateCard()
+        self.art:SetTexture(data.art)
+        self.cost:SetText(data.cost)
+        self.attack:SetText(data.attack)
+        self.health:SetText(data.health)
+        self.name:SetText(data.name)
+        -- if data.battlecry and data.battlecry > 0 then
+        --     self.info:SetText(L.BATTLE_CRY..string.format(hsl.db.battlecries[data.battlecry].info, data.power))
+        -- end
+        -- if data.deathrattle and data.deathrattle > 0 then
+        --     self.info:SetText(L.DEATH_RATTLE..string.format(hsl.db.deathrattles[data.deathrattle].info, data.power))
+        -- end
+        if data.ability and data.ability > 0 then
+            self.info:SetText(string.format(hsl.db.abilities[data.ability].info, data.power))
+        end
+        for _, attribute in ipairs({"cost", "attack", "health"}) do
+            self[attribute]:Hide();
+            if data[attribute] then
+                self[attribute]:Show();
+            end
+        end
+    end
+
+    -- if data.background > 4 then
+    --     self.name:ClearAllPoints()
+    --     self.name:SetPoint("CENTER", 4, -8)
+    -- else
+    --     self.name:ClearAllPoints()
+    --     self.name:SetPoint("CENTER", 4, -4)
+    -- end
+
+    C_Timer.After(0.1, updateCard)
 
     self:Show()
 end
+
 
 --- when the card is hidden we just remove the model data
 function HslCardMixin:OnHide()
@@ -292,63 +344,74 @@ function HslCardMixin:OnHide()
     self.selected = false;
     self.cardSelected:SetShown(self.selected)
 
-    self.model = nil;
+    self.data = nil;
     self.drawnID = nil;
 end
 
-function HslCardMixin:OnMouseUp()
 
+function HslCardMixin:OnMouseUp()
+    self:StopMovingOrSizing()
+    self:EnableMouse(false)
+    HearthstoneLite.CallbackRegistry:TriggerEvent(HearthstoneLite.Callbacks.Card_OnDragStop, self)
 end
 
-function HslCardMixin:OnMouseDown(button)
-    if not self.model then
+function HslCardMixin:SetLocation(location)
+    self.location = location
+end
+
+function HslCardMixin:GetLocation()
+    return self.location
+end
+
+function HslCardMixin:OnClick(button)
+    if not self.data then
         return;
     end
     --dev stuffs
-    if IsAltKeyDown() then
-        print('data model for card:', self.model.name)
-        for k, v in pairs(self.model) do
+    if IsAltKeyDown() and IsControlKeyDown() then
+        print('data model for card:', self.data.name)
+        for k, v in pairs(self.data) do
             print(string.format('    [%s] = %s', k, v))
         end
     end
 
     if button == "RightButton" then
-        tooltipCard:LoadCard(self.model)
-        tooltipCard:ClearAllPoints()
-        tooltipCard:SetPoint("RIGHT", self, "LEFT", 0, 0) -- this needs to be changable by the user
-        tooltipCard:Show()
-        tooltipCard:ScaleTo(self.tooltipScaleTo)
-        tooltipCard:SetFrameStrata("TOOLTIP")
+        hsl.tooltipCard:CreateFromData(self.data)
+        hsl.tooltipCard:ClearAllPoints()
+        hsl.tooltipCard:SetPoint("RIGHT", self, "LEFT", 0, 0) -- this needs to be changable by the user
+        hsl.tooltipCard:Show()
+        hsl.tooltipCard:ScaleTo(self.tooltipScaleTo)
+        hsl.tooltipCard:SetFrameStrata("TOOLTIP")
     end
 
     -- self.selected = not self.selected;
     -- self.cardSelected:SetShown(self.selected)
 
     --use parent name to determine action TODO: setup more templates ?
-    local parent = self:GetParent():GetName();
-    if parent then
-        if parent == "deckBuilderCardViewer" and IsControlKeyDown() then
-            HearthstoneLite.deckBuilder:AddCard(self.model)
-            return;
-        end
-    end
+    -- local parent = self:GetParent():GetName();
+    -- if parent then
+    --     if parent == "deckBuilderCardViewer" and IsControlKeyDown() then
+    --         HearthstoneLite.deckBuilder:AddCard(self.data)
+    --         return;
+    --     end
+    -- end
 
 end
 
 
 function HslCardMixin:OnEnter()
     if self.showTooltipCard then
-        tooltipCard:LoadCard(self.model)
-        tooltipCard:ClearAllPoints()
-        tooltipCard:SetPoint("RIGHT", self, "LEFT", 0, 0) -- this needs to be changable by the user
-        tooltipCard:Show()
-        tooltipCard:ScaleTo(self.tooltipScaleTo)
-        tooltipCard:SetFrameStrata("TOOLTIP")
+        hsl.tooltipCard:CreateFromData(self.data)
+        hsl.tooltipCard:ClearAllPoints()
+        hsl.tooltipCard:SetPoint("RIGHT", self, "LEFT", 0, 0) -- this needs to be changable by the user
+        hsl.tooltipCard:Show()
+        hsl.tooltipCard:ScaleTo(self.tooltipScaleTo)
+        hsl.tooltipCard:SetFrameStrata("TOOLTIP")
     end
 end
 
 function HslCardMixin:OnLeave()
-    tooltipCard:Hide()
+    --hsl.tooltipCard:Hide()
 end
 
 
@@ -356,40 +419,30 @@ end
 ---return a custom hyperlink for a card
 ---@return string hyperlink clickable link that can be shared with other hsl addon users
 function HslCardMixin:GetCardLink()
-    if not self.model then
-        return
+    if not self.data then
+        return ""
     end
     local link = string.format("|cFFFFFF00|Hgarrmission?hslite?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s|h%s|h|r", -- use ? as a sep because a card name may contain : (SI:7 for example)
-    tostring(self.model.art),
-    tostring(self.model.class),
-    tostring(self.model.name), 
-    tostring(self.model.id), 
-    tostring(self.model.health), 
-    tostring(self.model.attack),  
-    tostring(self.model.ability), 
-    tostring(self.model.power), 
-    tostring(self.model.battlecry), 
-    tostring(self.model.deathrattle), 
-    tostring(self.model.cost), 
-    tostring(self.model.backgroundPath), 
-    tostring(self.model.background), 
-    tostring(self.model.atlas), 
-    tostring(self.model.rarity), 
-    ITEM_QUALITY_COLORS[self.model.rarity].hex.."["..self.model.name.."]|r"
+    tostring(self.data.art),
+    tostring(self.data.class),
+    tostring(self.data.name), 
+    tostring(self.data.id), 
+    tostring(self.data.health), 
+    tostring(self.data.attack),  
+    tostring(self.data.ability), 
+    tostring(self.data.power), 
+    tostring(self.data.battlecry), 
+    tostring(self.data.deathrattle), 
+    tostring(self.data.cost), 
+    tostring(self.data.backgroundPath), 
+    tostring(self.data.background), 
+    tostring(self.data.atlas), 
+    tostring(self.data.rarity), 
+    ITEM_QUALITY_COLORS[self.data.rarity].hex.."["..self.data.name.."]|r"
     )
     return link;
 end
 
-tooltipCard = CreateFrame("FRAME", "HearthstoneLiteTooltipCard", UIParent, "HslCard")
-tooltipCard:SetPoint("CENTER", 0, 0)
-tooltipCard:SetFrameLevel(500)
-tooltipCard:Hide()
--- add a close button
-tooltipCard.close = CreateFrame("BUTTON", nil, tooltipCard, "UIPanelCloseButton")
-tooltipCard.close:SetPoint("TOPRIGHT", 4, 4)
-tooltipCard.close:SetScript("OnClick", function(self)
-    self:GetParent():Hide()
-end)
 
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 -- battlefield card
@@ -404,8 +457,6 @@ function HslBattlefieldCardMixin:OnLoad()
     self.attack:SetFont(CARD_FONT_PATH, FONT_SIZE, fontFlags)
     self.health:SetFont(CARD_FONT_PATH, FONT_SIZE, fontFlags)
     self.name:SetFont(CARD_FONT_PATH, 9, fontFlags)
-
-    --self.info:SetFont(CARD_INFO_FONT_PATH, 9, fontFlags)
 end
 
 function HslBattlefieldCardMixin:OnEnter()
@@ -413,18 +464,18 @@ function HslBattlefieldCardMixin:OnEnter()
 end
 
 function HslBattlefieldCardMixin:OnLeave()
-    tooltipCard:Hide()
+    hsl.tooltipCard:Hide()
     --self.attackArrow:Hide()
 end
 
 function HslBattlefieldCardMixin:OnMouseDown(button)
-    if not self.model then
+    if not self.data then
         return;
     end
     --dev stuffs
     if IsAltKeyDown() then
-        print('data table for card:', self.model.name)
-        for k, v in pairs(self.model) do
+        print('data table for card:', self.data.name)
+        for k, v in pairs(self.data) do
             print(string.format('    card data [%s] = %s', k, v))
         end
         print("card parent:",self:GetParent():GetName())
@@ -434,12 +485,12 @@ function HslBattlefieldCardMixin:OnMouseDown(button)
     end
 
     if button == "RightButton" then
-        tooltipCard:LoadCard(self.model)
-        tooltipCard:ClearAllPoints()
-        tooltipCard:SetPoint("RIGHT", self, "LEFT", 0, 0) -- this needs to be changable by the user
-        tooltipCard:Show()
-        tooltipCard:ScaleTo(self.tooltipScaleTo)
-        tooltipCard:SetFrameStrata("TOOLTIP")
+        hsl.tooltipCard:CreateFromData(self.data)
+        hsl.tooltipCard:ClearAllPoints()
+        hsl.tooltipCard:SetPoint("RIGHT", self, "LEFT", 0, 0) -- this needs to be changable by the user
+        hsl.tooltipCard:Show()
+        hsl.tooltipCard:ScaleTo(self.tooltipScaleTo)
+        hsl.tooltipCard:SetFrameStrata("TOOLTIP")
     end
 
     -- handle the card selection
@@ -455,10 +506,10 @@ function HslBattlefieldCardMixin:OnMouseDown(button)
     -- is this still going to be used?
     if self.selected then
         self:GetParent().selectedCard = self;
-        print(string.format("selected card %s", self.model.name))
+        print(string.format("selected card %s", self.data.name))
     else
         self:GetParent().selectedCard = nil;
-        print(string.format("deselected card %s", self.model.name))
+        print(string.format("deselected card %s", self.data.name))
     end
 
     local gb = HearthstoneLite.gameBoard;
@@ -496,9 +547,9 @@ end
 
 ---update the card UI, this will set the health, attack etc to the current model values
 function HslBattlefieldCardMixin:UpdateUI()
-    if self.model then
-        self.attack:SetText(self.model.attack)
-        self.health:SetText(self.model.health)
+    if self.data then
+        self.attack:SetText(self.data.attack)
+        self.health:SetText(self.data.health)
     end
 end
 

@@ -1,35 +1,38 @@
 ## Interface: 90002
 ## Author: stpain
-## Version: 0.0.1
+## Version: 0.1
 ## Title: |cff0070DEHearthstoneLite|r
 ## Notes: Get ta tha fire side!
-## SavedVariables: HSL
-
-## X-Curse-Project-ID: 474073
+## SavedVariables: HearthstoneLiteSavedVars
+## Dependencies: TbdWidgets
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
 Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 Libs\LibDbIcon-1.0\LibDbIcon-1.0.lua
-
+Libs\ChatThrottleLib.lua
 Libs\LibDeflate\LibDeflate.lua
 Libs\AceComm-3.0\AceComm-3.0.xml
 Libs\LibSerialize\lib.xml
-
-TextureViewer.lua
+Libs\LibDropDownExtension-1.0.lua
 
 Locales.lua
-Dialogs.lua
-
+Constants.lua
 db.lua
+Callbacks.lua
+Api.lua
 
-Templates.xml
-Templates.lua
+Comms.lua
 
-HearthstoneLiteCard.xml
+SavedVariables.lua
+
 HearthstoneLiteCard.lua
+HearthstoneLiteCard.xml
 
-GameBoard.lua
+Templates.lua
+Templates.xml
 
 HearthstoneLite.lua
 HearthstoneLite.xml
+
+#TextureViewer.lua

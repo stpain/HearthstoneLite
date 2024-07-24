@@ -11,7 +11,6 @@ viewer:EnableMouse(true)
 viewer:RegisterForDrag("LeftButton")
 viewer:SetScript("OnDragStart", viewer.StartMoving)
 viewer:SetScript("OnDragStop", viewer.StopMovingOrSizing)
-viewer:Hide()
 
 viewer.editbox = CreateFrame("EDITBOX", nil, viewer, "InputBoxTemplate")
 viewer.editbox:SetPoint("TOP", 0, 0)

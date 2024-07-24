@@ -381,7 +381,7 @@ function GameBoardMixin:DrawCard()
         -- pick random from deck
         local rndCardIndex = random(#self.deck)
         if self.deck[rndCardIndex] then
-            card:LoadCard(self.deck[rndCardIndex])
+            card:CreateFromData(self.deck[rndCardIndex])
             table.remove(self.deck, rndCardIndex)
         end
         self.playerControls.theHand.cards[numCards+1] = card;
@@ -390,7 +390,7 @@ function GameBoardMixin:DrawCard()
         local card = self.playerControls.theHand.cards[numCards+1];
         local rndCardIndex = random(#self.deck)
         if self.deck[rndCardIndex] then
-            card:LoadCard(self.deck[rndCardIndex])
+            card:CreateFromData(self.deck[rndCardIndex])
             table.remove(self.deck, rndCardIndex)
         end
     end
@@ -494,7 +494,7 @@ function GameBoardMixin:CardPlayedToBattlefield(event)
     local card = self.cardPool:Acquire()
     card.drawnID = event.drawnID+100; --testing this so we make target cards drawnID start at 100
     card:Hide()
-    card:LoadCard(event.model)
+    card:CreateFromData(event.model)
     card:Show()
     card:ScaleTo(0.75)
     card:SetParent(self.targetBattlefield)

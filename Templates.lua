@@ -112,7 +112,7 @@ function HslMenuPanelDeckListviewItemMixin:OnMouseDown()
 
                 -- this needs to be updated to the new universal deckBuilderMixin
                 HearthstoneLite.deckBuilder.cardViewer.showClass:SetBackground_Atlas(string.format("classicon-%s", classFile:lower()))
-                HearthstoneLite.deckBuilder:LoadCards(HSL.collection[classFile:lower()])
+                HearthstoneLite.deckBuilder:CreateFromDatas(HSL.collection[classFile:lower()])
             end
         end
     end
@@ -149,26 +149,25 @@ end
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 HslCardListviewItemMixin = {}
 
-function HslCardListviewItemMixin:SetCard(card)
+function HslCardListviewItemMixin:OnLoad()
+    NineSliceUtil.ApplyLayout(self, NineSliceLayouts.TooltipDefaultDarkLayout)
+end
+function HslCardListviewItemMixin:SetDataBinding(card)
     -- quick font size hack
-    local fontName, _, fontFlags = self.Name:GetFont()
-    self.Name:SetFont(fontName, 14, fontFlags)
-    local fontName, _, fontFlags = self.Cost:GetFont()
-
-    self.Cost:SetFont(fontName, 16, fontFlags)
     self.Cost:SetText(card.cost)
     self.Name:SetText(card.name)
     self.Icon:SetTexture(card.art)
+
+    self:SetScript("OnEnter", function ()
+        HearthstoneLiteTooltipCard:SetPoint("TOPRIGHT", self, "TOPLEFT")
+        HearthstoneLiteTooltipCard:CreateFromData(card)
+        HearthstoneLiteTooltipCard:Show()
+    end)
+    self:SetScript("OnLeave", function()
+        HearthstoneLiteTooltipCard:Hide()
+    end)
 end
 
-function HslCardListviewItemMixin:OnMouseDown()
-    local classID = HearthstoneLite.deckBuilder.deckViewer.classID;
-    local deckID = HearthstoneLite.deckBuilder.deckViewer.deckID;
-
-    if IsControlKeyDown() then
-        HearthstoneLite.deckBuilder:RemoveCard(self.model)
-    end
-end
 
 
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--

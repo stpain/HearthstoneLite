@@ -1,9 +1,10 @@
 
 
-<UI>
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
 
 	<!-- basic card template -->
-	<Frame name="HslCard" mixin="HslCardMixin" virtual="true" enableMouse="true">
+	<CheckButton name="HslCard" mixin="HslCardMixin" virtual="true" enableMouse="true" movable="true">
 		<Size x="150" y="210"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -30,28 +31,31 @@
 			<Layer level="ARTWORK">
 			</Layer>
 			<Layer level="OVERLAY">
-				<FontString parentKey="cost" inherits="NumberFont_Outline_Large" justifyH="CENTER" justifyV="CENTER">
+				<FontString parentKey="cost" inherits="NumberFont_Outline_Large" justifyH="CENTER" justifyV="MIDDLE">
 					<Size x="30" y="30"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" x="6" y="-9"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="attack" inherits="NumberFont_Outline_Large" justifyH="CENTER" justifyV="CENTER">
+				<FontString parentKey="attack" inherits="NumberFont_Outline_Large" justifyH="CENTER" justifyV="MIDDLE">
 					<Size x="60" y="30"/>
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="-6" y="0"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="health" inherits="NumberFont_Outline_Large" justifyH="CENTER" justifyV="CENTER">
+				<FontString parentKey="health" inherits="NumberFont_Outline_Large" justifyH="CENTER" justifyV="MIDDLE">
 					<Size x="60" y="30"/>
 					<Color r="1" g="1" b="1"/>
 					<Anchors>
 						<Anchor point="BOTTOMRIGHT" x="16" y="0"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="name" inherits="NumberFont_Outline_Large">
+				<FontString parentKey="name" inherits="GameFontNormalSmall">
+					<Shadow x="0" y="0"/>
+					<Size x="100" y="18"/>
+					<Color r="0.121" g="0.054" b="0.007"/>
 					<Anchors>
-						<Anchor point="CENTER" x="4" y="-4"/>
+						<Anchor point="CENTER" x="4" y="-6"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="info" inherits="GameFontNormalSmall">
@@ -64,7 +68,15 @@
 				</FontString>
 			</Layer>
 		</Layers>
-
+		<Animations>
+			<AnimationGroup parentKey="onLoadAnim" setToFinalAlpha="true">
+				<Alpha duration="0.05" fromAlpha="0" toAlpha="1" />
+				<Alpha childKey="art" duration="0.5" fromAlpha="0" toAlpha="1" />
+			</AnimationGroup>
+			<AnimationGroup parentKey="resetPosition">
+				<Translation parentKey="translate" smoothing="IN_OUT" duration="0.2" order="1" offsetX="0" offsetY="0"/>
+			</AnimationGroup>
+		</Animations>
 		<Scripts>
 			<OnEnter method="OnEnter"/>
 			<OnLeave method="OnLeave"/>
@@ -72,10 +84,12 @@
 			<OnLoad method="OnLoad"/>
 			<OnHide method="OnHide"/>
 			<OnMouseDown method="OnMouseDown"/>
+			<OnMouseUp method="OnMouseUp"/>
+			<OnClick method="OnClick"/>
 		</Scripts>
-	</Frame>
+	</CheckButton>
 
-	<Frame name="HslBattlefieldCard" mixin="HslBattlefieldCardMixin" inherits="HslCard" virtual="true" enableMouse="true">
+	<CheckButton name="HslBattlefieldCard" mixin="HslBattlefieldCardMixin" inherits="HslCard" virtual="true" enableMouse="true">
 		<Frames>
 			<Frame parentKey="attackArrow" hidden="true" movable="true" resizable="true">
 				<ResizeBounds>
@@ -114,6 +128,6 @@
 			<OnMouseUp method="OnMouseUp"/>
 			<OnLoad method="OnLoad"/>
 		</Scripts>
-	</Frame>
+	</CheckButton>
 
-</UI>
+</Ui>

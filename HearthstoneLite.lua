@@ -2,981 +2,942 @@
 --https://www.curseforge.com/api/projects/474073/package?token=45de603f-d93c-4c20-ac24-1afba7041926
 
 
-local addonName, hsl = ...
+local addonName, addon = ...
 
-local AceComm = LibStub:GetLibrary("AceComm-3.0")
-local LibDeflate = LibStub:GetLibrary("LibDeflate")
-local LibSerialize = LibStub:GetLibrary("LibSerialize")
+local DDE = LibStub("LibDropDownExtension-1.0", true)
 
-local L = hsl.locales
-local COMMS;
-local showHelptips = false;
-local helptips = {}
+local L = addon.locales;
+local SavedVars = addon.SavedVars;
+local Comms = addon.Comms;
 
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
--- local util functions
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
-
---- prints a message with addon name in []
-local function printInfoMessage(msg)
-    print("[|cff0070DDHearthstone Lite|r] "..msg)
-end
-
-
---- adjusts the font size of a fontObject while keeping fontName and fontFlags intact
----@param obj FontInstance the font object to adjust
----@param size integer the new font size
-local function fontSizeHack(obj, size)
-    local fontName, _, fontFlags = obj:GetFont()
-    obj:SetFont(fontName, size, fontFlags)
-end
-
-
---- hides all frames in main addon UI then shows the supplied frame
----@param frame frame the frame to be shown
-local function navigateTo(frame)
-    for k, frame in ipairs(HearthstoneLite.frames) do
-        frame:Hide()
-    end
-    HearthstoneLite[frame]:Show()
-
-    for k, frame in ipairs(helptips) do
-        frame:SetShown(showHelptips)
-    end
-end
-
-
----return a random number with a 20% chance for a bonus added
-local function generateRandom()
-    local r1, r2, r3, r4, r5 = random(4), random(4), random(4), random(4), random(14) -- max=28
-    -- 20% chance for a bonus
-    if (random(100) < 20) then
-        return math.floor((r1+r2+r3+r4+r5) / 5) + random(3)
-    else
-        return math.floor((r1+r2+r3+r4+r5) / 5)
-    end
-end
-
-
----generate a random creature card
----@param _class string class/set to use as card 
----@param _atlas string atlas to use for card
----@param _name name to use as card name
----@param returnLink boolean should return a card hyperlink
----@param isElite boolean roll for legendary card from elite mob
-local function generateCreatureCard(_class, _atlas, _name, _art, returnLink, isElite)
-
-    -- generate some card values
-    local _attack = generateRandom()
-    local _health = generateRandom()
-    --if health and attack match then 66% chance to re-roll
-    if _attack == _health and (random(100) < 67) then
-        _attack = generateRandom()
-        _health = generateRandom()
-    end
-    -- health cannot be 0
-    if _health == 0 then
-        _health = 1;
-    end
-
-    --does card have an ability
-    local _abilityID, _abilityPower = nil, nil;
-    local _hasAbility = (random(10) < 6) and true or false;
-    if _hasAbility then
-        _abilityID = random(#hsl.db.abilities)
-        _abilityPower = generateRandom()
-
-        -- bump up taunt ability card health value
-        if hsl.db.abilities[_abilityID].info == "Taunt" then
-            _health = _health + random(1, 3)
-        end
-    else
-        _abilityID = 0
-        _abilityPower = 0
-    end
-
-
-    -- does card have battleCry or deathRattle
-    local _hasBCDR = ((_abilityID == 0) and (random(10) < 4)) and true or false;
-    local _battlecry = 0;
-    local _deathrattle = 0;
-    if _hasBCDR then
-        if random(10) < 6 then
-            _battlecry = random(#hsl.db.battlecries);
-        else
-            _deathrattle = random(#hsl.db.deathrattles);
-        end
-        -- make sure bcdr has a power
-        if _abilityPower == 0 then
-            _abilityPower = random(3)
-        end
-    end
-
-    -- generate the cost
-    local _cost = ((_attack + _health) < 7) and math.floor((_attack + _health) / 3) or math.ceil((_attack + _health) / 3) + 1
-    if _abilityPower > 0 then
-        _cost = _cost + math.ceil((_abilityPower + 3) / 3)
-    end
-    -- cap cost at 9
-    if _cost > 9 then
-        _cost = 9
-    end
-    if _cost == 0 then
-        _cost = 1;
-    end
-
-    local loot = {
-        art = _art,
-        name = _name,
-        health = _health,
-        attack = _attack,
-        cost = _cost,
-        backgroundPath = _class,
-        background = 1,
-        atlas = _atlas,
-        rarity = 1,
-        class = _class,
-    };
-
-    local rnd7 = random(3) -- used to decide between ability/battlecry/deathrattle for cards rare and above
-    local rnd = random(100)
-    -- 45%
-    if rnd < 46 then
-        --common 5 these get no ability or bcdr
-        loot.ability = 0;
-        loot.power = 0;
-        loot.battlecry = 0;
-        loot.deathrattle = 0;
-        loot.background = 5;
-        loot.rarity = 1;
-        if loot.atlas == "NEUTRAL" then
-            loot.background = 1;
-            loot.backgroundPath = "neutral"
-        end  
-    end
-    -- 35%
-    if rnd > 45 and rnd < 81 then
-        --uncommon 7 ability decided earlier
-        loot.ability = _ability;
-        loot.power = _abilityPower;
-        loot.battlecry = _battlecry;
-        loot.deathrattle = _deathrattle;
-        loot.background = 7;
-        loot.rarity = 2
-        if loot.atlas == "NEUTRAL" then
-            loot.background = 1;
-            loot.backgroundPath = "neutral_common"
-        end  
-    end
-    -- 15%
-    if rnd > 80 and rnd < 96 then
-        --rare 9
-        loot.background = 9;
-        loot.rarity = 3;
-        loot.power = random(2,6)
-        if rnd7 == 3 then
-            loot.ability = random(#hsl.db.abilities)
-        elseif rnd7 == 2 then
-            loot.battlecry = random(#hsl.db.battlecries);
-        else
-            loot.deathrattle = random(#hsl.db.deathrattles);
-        end
-
-        if loot.atlas == "NEUTRAL" then
-            loot.background = 1;
-            loot.backgroundPath = "neutral_rare"
-        end     
-    end
-    -- 5%
-    if rnd > 95 then
-        --epic 11
-        loot.background = 11;
-        loot.rarity = 4;
-        loot.power = random(4,8)
-        if rnd7 == 3 then
-            loot.ability = random(#hsl.db.abilities)
-        elseif rnd7 == 2 then
-            loot.battlecry = random(#hsl.db.battlecries);
-        else
-            loot.deathrattle = random(#hsl.db.deathrattles);
-        end
-
-        if loot.atlas == "NEUTRAL" then
-            loot.background = 1;
-            loot.backgroundPath = "neutral_epic"
-        end 
-    end
-    -- 1% and only on elite mobs
-    if rnd > 90 and isElite then -- CHANGE THIS BACK TO A 1% CHANCE, 10% ONLY FOR TESTING
-        --legendary
-        loot.cost = math.ceil((random(4) + random(4,8) + random(8,16)) / 3)
-        loot.background = 13;
-        loot.rarity = 5;
-        loot.power = random(8,12)
-        loot.health = random(7,10) -- override the health to a higher value
-        if rnd7 == 3 then
-            loot.ability = random(#hsl.db.abilities)
-        elseif rnd7 == 2 then
-            loot.battlecry = random(#hsl.db.battlecries);
-        else
-            loot.deathrattle = random(#hsl.db.deathrattles);
-        end
-
-        if loot.atlas == "NEUTRAL" then
-            loot.background = 1;
-            loot.backgroundPath = "neutral_legendary"
-        end 
-    end
-
-    local link;
-
-    if not HSL.collection then
-        HSL.collection = {}
-    end
-    if not HSL.collection[_class] then
-        HSL.collection[_class] = {}
-    end
-    -- set a card id as the table key so we can fetch it super easy
-    loot.id = #HSL.collection[_class] + 1;
-
-    if _class == "rogue" then
-        print(loot.background)
-    end
-
-    link = string.format("|cFFFFFF00|Hgarrmission?hslite?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s?%s|h%s|h|r",
-        tostring(loot.art),
-        tostring(loot.class),
-        tostring(loot.id),
-        tostring(loot.name), 
-        tostring(loot.health), 
-        tostring(loot.attack),  
-        tostring(loot.ability), 
-        tostring(loot.power), 
-        tostring(loot.battlecry), 
-        tostring(loot.deathrattle), 
-        tostring(loot.cost), 
-        tostring(loot.backgroundPath), 
-        tostring(loot.background), 
-        tostring(loot.atlas), 
-        tostring(loot.rarity), 
-        ITEM_QUALITY_COLORS[loot.rarity].hex.."["..loot.name.."]|r"
-    )
-    print(string.format("|cff1D9800You receive hearthstone card:|r %s", link))
-
-    table.insert(HSL.collection[_class], loot)
-
-    -- return the card link
-    if returnLink == true and link then
-        return link
-    end
-
-end
-
-
----scan the looted guids and determine a drop chance
-local function lootOpened()
-
-    local sourceGUIDs = {}
-
-    for i = 1, GetNumLootItems() do
-		local sources = {GetLootSourceInfo(i)}
-		for j = 1, #sources, 2 do
-			sourceGUIDs[sources[j]] = false;
-		end
-	end
-
-    -- looting creatures gives creature type cards
-    -- looting chest etc gives a spell/weapon type card
-    for GUID, _ in pairs(sourceGUIDs) do
-        local hasDrop = random(1, 100)
-        if hasDrop > 10 then -- 10% chance of a card dropping
-            --return
-        end
-        --local creatureName = C_PlayerInfo.GetClass({guid = GUID})
-        if GUID:find("Creature") then
-            for i = 1, 100 do
-                -- determine class, name and art
-                local class, atlas, name, art;
-                local className, classFile, classID = GetClassInfo(random(12))
-                if classFile:lower() == "demonhunter" or classFile:lower() == "monk" then
-                    class = "neutral";
-                    atlas = "NEUTRAL";
-                else
-                    class = classFile:lower();
-                    atlas = "CREATURE";
-                end
-                local creatureType = UnitCreatureType("mouseover")
-                if not hsl.db.cardMeta[creatureType] then
-                    return
-                end
-                if not hsl.db.cardMeta[creatureType][class] then
-                    return
-                end
-                if not next(hsl.db.cardMeta[creatureType][class]) then
-                    return
-                end
-                local randomKey = random(#hsl.db.cardMeta[creatureType][class])
-                name = hsl.db.cardMeta[creatureType][class][randomKey].name
-                art = hsl.db.cardMeta[creatureType][class][randomKey].fileID
-                local isElite = UnitClassification("mouseover") == "elite" and true or false
-                generateCreatureCard(class, atlas, name, art, false, isElite)
-            end
-        elseif GUID:find("GameObject") then
-
-        end
-    end
-end
-
-
----deck view popout listview update function
----@param deck table the deck to view
-local function deckViewerPopoutListview_Update(deck)
-    if not deck then
-        return
-    end
-    if not HSL then
-        return
-    end
-    if not HSL.decks then
-        return
-    end
-
-    table.sort(deck, function(a, b)
-        return a.name < b.name;
-    end)
-
-    DeckBuilderMixin.deck = deck;
-
-    local buttons = HybridScrollFrame_GetButtons(HearthstoneLite.deckBuilder.deckViewer.listview);
-    local offset = HybridScrollFrame_GetOffset(HearthstoneLite.deckBuilder.deckViewer.listview);
-
-    for buttonIndex = 1, #buttons do
-        local button = buttons[buttonIndex]
-        button:Hide()
-    end
-
-    local items = deck;
-
-    for buttonIndex = 1, #buttons do
-        local button = buttons[buttonIndex]
-        local itemIndex = buttonIndex + offset
-
-        if itemIndex <= #items then
-            local item = items[itemIndex]
-            button:SetCard(item)
-            button:Show()
-
-            button.model = item;
-
-            button.callback = deckViewerPopoutListview_Update;
-        else
-            button.model = nil;
-            -- button:Hide()
-        end
-    end
-
-    HybridScrollFrame_Update(HearthstoneLite.deckBuilder.deckViewer.listview, #deck*35, #buttons*35)
-end
-
-
----menu panel listview update function
----@param classID integer the classID to be used when creating a new deck or loading decks
-local function deckViewerMenuPanelListview_Update(classID)
-    if not HSL then
-        return
-    end
-    if not HSL.decks then
-        return
-    end
-
-    local buttons = HybridScrollFrame_GetButtons(HearthstoneLite.deckBuilder.menuPanel.listview);
-    local offset = HybridScrollFrame_GetOffset(HearthstoneLite.deckBuilder.menuPanel.listview);
-
-    for buttonIndex = 1, #buttons do
-        local button = buttons[buttonIndex]
-        button:Hide()
-    end
-
-    if HSL.decks[classID] then
-
-        local items = HSL.decks[classID];
-
-        for buttonIndex = 1, #buttons do
-            local button = buttons[buttonIndex]
-            local itemIndex = buttonIndex + offset
-
-            if itemIndex <= #items then
-                local item = items[itemIndex]
-                button:SetText(item.name)
-                button:SetClassID(classID)
-                button:SetDeckID(item.id)
-                button:Show()
-
-                button.deleteDeck = deckViewerMenuPanelListview_Update; -- dirty hack, when the delete button is pressed we call this function via Getparent()
-
-                button.updateDeckViewer = deckViewerPopoutListview_Update
-            else
-                button:Hide()
-            end
-        end
-
-        HybridScrollFrame_Update(HearthstoneLite.deckBuilder.menuPanel.listview, #HSL.decks[classID] * 40, HearthstoneLite.deckBuilder.menuPanel.listview:GetHeight())
-
-    else
-        for buttonIndex = 1, #buttons do
-            local button = buttons[buttonIndex]
-            button:Hide()
-        end
-    end
-end
-
-
-
--- TODO: check this is setting up the new deckBuilderMixin system rather than the older menuPanel system
----this function is used to update the menu panel listview when a new class/hero is selected
----@param button table
-local function classButton_Clicked(button)
-    if button then
-        for i = 1, GetNumClasses() do
-            local className, classFile, classID = GetClassInfo(i)
-            if button.className == classFile then
-                HearthstoneLite.deckBuilder.menuPanel.listviewHeader.newDeck.classID = classID;
-                HearthstoneLite.deckBuilder.menuPanel.listviewHeader.newDeck.className = className;
-
-                -- the atlas name used has a capitalized name for class
-                local class = classFile:sub(1,1):upper()..classFile:sub(2):lower()
-                if class == "Deathknight" then
-                    class = "DeathKnight";
-                end
-
-                HearthstoneLite.deckBuilder:HideCards()
-
-                HearthstoneLite.deckBuilder.classFile = classFile;
-                HearthstoneLite.deckBuilder.classID = classID;
-
-                HearthstoneLite.deckBuilder.menuPanel.listviewHeader:SetIcon_Atlas(string.format("GarrMission_ClassIcon-%s", class))
-
-                deckViewerMenuPanelListview_Update(classID)
-            end
-        end
-    end
-end
-
-
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
--- main UI
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+local CHAT_CHANNEL_NAME = "HearthstoneLite";
+local CHAT_CHANNEL_PASSWORD = "";
 
 HearthstoneLiteMixin = {}
 
 function HearthstoneLiteMixin:OnLoad()
 
-end
+    self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    self:RegisterEvent("LOOT_OPENED")
+    self:RegisterEvent("CHAT_MSG_CHANNEL_NOTICE")
+    self:RegisterEvent("CHAT_MSG_CHANNEL_JOIN")
+    self:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE")
+    self:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 
-function HearthstoneLiteMixin:OnShow()
+    NineSliceUtil.ApplyLayout(self, NineSliceLayouts.GenericMetal)
+    NineSliceUtil.ApplyLayout(self.decks.deckInfo, HearthstoneLite.Constants.NineSliceLayouts.ListviewMetal)
+    NineSliceUtil.ApplyLayout(self.game.lobby, NineSliceLayouts.TooltipDefaultDarkLayout)
+    NineSliceUtil.ApplyLayout(self.game.playerControls, NineSliceLayouts.TooltipDefaultDarkLayout)
+    NineSliceUtil.ApplyLayout(self.game.board, NineSliceLayouts.TooltipDefaultDarkLayout)
 
-    -- set helptip text and add to helptips table
-    self.menuHelptip.Text:SetText(L["MenuHelptip"])
-    table.insert(helptips, self.menuHelptip)
-end
-
-function HearthstoneLiteMixin:ToggleHelpTips()
-    showHelptips = not showHelptips;
-    for k, frame in ipairs(helptips) do
-        frame:SetShown(showHelptips)
-    end
-end
-
-
-HearthstoneButtonMixin = {}
-
-function HearthstoneButtonMixin:OnMouseDown()
-    navigateTo("mainMenu")
-    self:AdjustPointsOffset(-1, -1)
-end
-
-function HearthstoneButtonMixin:OnMouseUp()
-    self:AdjustPointsOffset(1, 1)
-end
-
-function HearthstoneButtonMixin:OnEnter()
-    GameTooltip:SetOwner(self, 'ANCHOR_TOPRIGHT')
-    GameTooltip:AddLine(L["Menu"])
-    GameTooltip:Show()
-end
-
-function HearthstoneButtonMixin:OnLeave()
-    GameTooltip:Hide()
-end
-
-
-
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
--- mainMenu
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
-
-HearthstoneMainMenuMixin = {}
-
-function HearthstoneMainMenuMixin:OnShow()
-
-    fontSizeHack(self.deckBuilder.Text, 22)
-    self.deckBuilder.Text:SetPoint("TOP", 0, -10)
-    self.deckBuilder:SetText(L["DeckBuilder"])
-
-    fontSizeHack(self.settings.Text, 22)
-    self.settings.Text:SetPoint("TOP", 0, -10)
-    self.settings:SetText(L["Settings"])
-
-    fontSizeHack(self.collection.Text, 22)
-    self.collection.Text:SetPoint("TOP", 0, -10)
-    self.collection:SetText(L["Collection"])
-
-    fontSizeHack(self.gameBoard.Text, 22)
-    self.gameBoard.Text:SetPoint("TOP", 0, -10)
-    self.gameBoard:SetText(L["GameBoard"])
-
-
-    -- introstinger ?
-    --PlaySoundFile(1068313)
-
-end
-
-function HearthstoneMainMenuMixin:MenuButton_OnClick(frame)
-    navigateTo(frame)
-end
-
-
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
--- settings
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
-
-SettingsMixin = {}
-
-local function resetUI()
-    deckViewerMenuPanelListview_Update()
-    deckViewerPopoutListview_Update()
-    HearthstoneLite.collection:HideCards()
-    HearthstoneLite.collection.deck = nil;
-end
-
-
-function SettingsMixin:OnLoad()
-
-end
-
-function SettingsMixin:OnShow()
-    self.resetSavedVar.Text:SetText('Reset saved var')
-    self.resetSavedVar.Text:SetPoint("TOP", 0, -10)
-
-    self.runFirstLoad.Text:SetText("Run first load [dev]")
-end
-
-function SettingsMixin:ResetGlobalSettings()
-    StaticPopup_Show('ResetGlobalSettings', nil, nil, {callback = resetUI})
-end
-
-function SettingsMixin:RunFirstLoad()
-    HSL = nil;
-    HSL = {
-        decks = {},
-        collection = {},
-    };
-    local ct = {
-        "Beast",
-        "Humanoid",
-        "Elemental",
-        "Undead",
-        "Demon",
-        "Giant",
-        "Dragonkin",
-    }
-    for k, class in pairs({"druid", "hunter", "rogue", "shaman", "mage", "paladin", "priest", "warlock", "warrior", "deathknight"}) do
-        for i = 1, 50 do
-            local creatureType = ct[random(#ct)]
-            if hsl.db.cardMeta[creatureType][class] and next(hsl.db.cardMeta[creatureType][class]) then
-                local randomKey = random(#hsl.db.cardMeta[creatureType][class])
-                local isElite = (random(100) > 50) and true or false;
-                generateCreatureCard(class, "CREATURE", hsl.db.cardMeta[creatureType][class][randomKey].name, hsl.db.cardMeta[creatureType][class][randomKey].fileID, false, isElite)
+    DDE:RegisterEvent("OnShow OnHide", function(dropdown, event, options)
+        if dropdown.unit and dropdown.unit == "player" then
+            if event == "OnShow" then
+                options[1] = {
+                    text = addonName,
+                    func = function()
+                        self:Show()
+                    end,
+                }
+                return true
+            else
+                options[1] = nil
             end
         end
-    end
-    local class = "neutral";
-    for i = 1, 50 do
-        local creatureType = ct[random(#ct)]
-        if hsl.db.cardMeta[creatureType][class] and next(hsl.db.cardMeta[creatureType][class]) then
-            local randomKey = random(#hsl.db.cardMeta[creatureType][class])
-            local isElite = (random(100) > 85) and true or false;
-            generateCreatureCard(class, "NEUTRAL", hsl.db.cardMeta[creatureType][class][randomKey].name, hsl.db.cardMeta[creatureType][class][randomKey].fileID, false, isElite)
-        end
-    end
-end
+    end, 1)
 
 
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
--- collection
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+    self:RegisterForDrag("LeftButton")
+    PanelTemplates_SetNumTabs(self, #self.tabs);
+    PanelTemplates_SetTab(self, 1);
 
-HslCollectionMixin = {}
-HslCollectionMixin.page = 1;
-
-function HslCollectionMixin:OnShow()
-    if HSL.collecion then
-        return
-    end
-    self.page = 1;
-    local deck = {} -- we'll load all cards into 1 deck
-    for class, cards in pairs(HSL.collection) do
-        for _, card in ipairs(cards) do
-            table.insert(deck, card)
-        end
-    end
-    -- sort by set/class then by cost
-    table.sort(deck, function(a, b)
-        if a.backgroundPath == b.backgroundPath then -- backgroundPath=class
-            return a.cost > b.cost;
-        else
-            return a.backgroundPath < b.backgroundPath;
-        end
-    end)
-    if next(deck) then
-        self.deck = deck;
-        self.pageNumber:SetText(self.page..' / '..math.ceil(#self.deck / 10));
-
-        for i = 1, 10 do
-            self["card"..i]:Hide()
-        end
-
-        C_Timer.After(0, function()
-            for i = 1, 10 do
-                if self.deck[i] then
-                    self["card"..i]:LoadCard(self.deck[i])
-                end
-            end
+    for _, tab in ipairs(self.tabs) do
+        tab:SetScript("OnClick", function()
+            self:SetView(tab:GetID())
         end)
     end
+
+    self.tab1:SetText(L.GAME)
+    self.tab2:SetText(L.DECKS)
+    self.tab3:SetText(L.COLLECTION)
+    self.tab4:SetText(SETTINGS)
+
+    self:SetupDeckBuilder()
+    self:SetupNewDeckDialog()
+    self:SetupCollectionTab()
+    self:SetupSettings()
+    self:SetupGame()
+
+    HearthstoneLite.CallbackRegistry:RegisterCallback(HearthstoneLite.Callbacks.Deck_OnCreated, self.Deck_OnCreated, self)
+    HearthstoneLite.CallbackRegistry:RegisterCallback(HearthstoneLite.Callbacks.Deck_OnDeleted, self.Deck_OnDeleted, self)
+    HearthstoneLite.CallbackRegistry:RegisterCallback(HearthstoneLite.Callbacks.Card_OnDragStop, self.Card_OnDragStop, self)
+    HearthstoneLite.CallbackRegistry:RegisterCallback(HearthstoneLite.Callbacks.SavedVariables_OnReset, self.OnSavedVarsReset, self)
+    HearthstoneLite.CallbackRegistry:RegisterCallback(HearthstoneLite.Callbacks.Comms_OnPokeResponse, self.Comms_OnPokeResponse, self)
+
+
+    Comms:Init()
 end
 
-function HslCollectionMixin:OnLoad()
-    -- flip the next page arrow 180
-    self.nextPage.Background:SetRotation(3.14)
-    self.nextPage.Highlight:SetRotation(3.14)
+function HearthstoneLiteMixin:OnSavedVarsReset()
+    
+    self.decks.deckInfoText.numCards:SetText("No deck selected")
+    self.decks.deckHero.background:SetAtlas(nil)
+    self.decks.deckInfo.scrollView:SetDataProvider(CreateDataProvider({}))
+
+    for k, v in ipairs(self.decks.deckViewer.cards) do
+        v:Hide()
+    end
+    for k, v in ipairs(self.collection.cardBinderContainer.cards) do
+        v:Hide()
+    end
+
 end
 
-function HslCollectionMixin:HideCards()
-    for i = 1, 10 do
-        self["card"..i]:Hide()
+function HearthstoneLiteMixin:OnEvent(event, ...)
+    if self[event] then
+        self[event](self, ...)
+    else
+        DevTools_Dump({...})
     end
 end
 
-function HslCollectionMixin:PrevPage()
-    if not HSL.collection then
-        return;
-    end
-    if self.page == 1 then
-        return
-    end
-    if not self.deck then
-        return
-    end
-    self.page = self.page - 1;
-    self.pageNumber:SetText(self.page..' / '..math.ceil(#self.deck / 10));
 
-    local cardIndex = 1;
-    for i = ((10 * self.page) - 9), (10 * self.page) do
-        if self.deck[i] then
-            self["card"..cardIndex]:LoadCard(self.deck[i])
+--[[
+    using event names as functions
+]]
+function HearthstoneLiteMixin:PLAYER_ENTERING_WORLD(...)
+    SavedVars:Init()
+    self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+end
+
+function HearthstoneLiteMixin:LOOT_OPENED(...)
+    local card, link = HearthstoneLite.Api.OnLootOpened()
+    if card and link then
+        SavedVars:AddCardToCollection(card)
+        print(string.format("[%s] you found a card! %s", addonName, link))
+    end
+end
+
+function HearthstoneLiteMixin:CHAT_MSG_CHANNEL_NOTICE(...)
+    local msg, sender, _, channelDisplayName, _, _, _, channelID, channelName = ...;
+
+    if channelName == CHAT_CHANNEL_NAME then
+        if msg == "YOU_CHANGED" then
+            self:UpdateGameLobbyInfo(true, channelID)
         else
-            self["card"..cardIndex]:Hide()
+            self:UpdateGameLobbyInfo(false)
         end
-        cardIndex = cardIndex + 1;
+    end
+
+end
+
+
+function HearthstoneLiteMixin:NAME_PLATE_UNIT_ADDED(...)
+    local token = ...;
+    --token = "player"
+    if token and UnitIsPlayer(token) then
+        local name, realm = UnitFullName(token)
+        if not realm then
+            realm = GetNormalizedRealmName()
+        end
+        local playerName = string.format("%s-%s", name, realm)
+        Comms:RegisterNearbyPlayer(playerName)
     end
 end
 
-function HslCollectionMixin:NextPage()
-    if not HSL.collection then
-        return;
-    end
-    if not self.deck then
-        return
-    end
-    if self.page == math.ceil(#self.deck / 10) then
-        return
-    end
-    self.page = self.page + 1;
-    self.pageNumber:SetText(self.page..' / '..math.ceil(#self.deck / 10));
 
-    local cardIndex = 1;
-    for i = ((10 * self.page) - 9), (10 * self.page) do
-        if self.deck[i] then
-            self["card"..cardIndex]:LoadCard(self.deck[i])
+
+
+
+
+
+
+function HearthstoneLiteMixin:SetView(id)
+    for _, view in ipairs(self.views) do
+        view:Hide()
+    end
+    self.views[id]:Show()
+    PanelTemplates_SetTab(self, id);
+    --PlaySound(SOUNDKIT.TUTORIAL_POPUP)
+end
+
+function HearthstoneLiteMixin:Card_OnDragStop(card)
+   
+    if card:GetLocation() == "deckBuilder" then
+
+        local x, y = card:GetCenter()
+        local translateX = card.origin.x - x
+        local translateY = card.origin.y - y
+
+        card.resetPosition.translate:SetOffset(translateX, translateY)
+        card.resetPosition:Play()
+
+        if self.decks.deckInfo:IsMouseOver() then
+            if self.decks.deckViewer.selectedDeck then
+                table.insert(self.decks.deckViewer.selectedDeck.cards, card.cardDbEntry)
+                self:UpdateDeckBuilderDeckInfo()
+            end
+        end
+    end
+end
+
+function HearthstoneLiteMixin:SetupSettings()
+    
+    self.settings.resetSavedVars:SetScript("OnClick", function ()
+        SavedVars:Init(true)
+    end)
+end
+
+
+function HearthstoneLiteMixin:Deck_OnDeleted()
+    self:UpdateDeckBuilderDeckList()
+end
+
+function HearthstoneLiteMixin:Deck_OnCreated(classID, specID, deckName)
+    
+    local deck = {
+        id = time(),
+        cards = {},
+        name = deckName,
+        classID = classID,
+        specID = specID,
+    }
+
+    --add dummy cards for now
+    --deck.cards = addon.Settings.MakeDummyDeck()
+
+    SavedVars:NewDeck(deck)
+    self.newDeckPopup:Hide()
+
+    self:UpdateDeckBuilderDeckList()
+end
+
+function HearthstoneLiteMixin:OnDecksShow()
+    self:UpdateDeckBuilderDeckList()
+end
+
+function HearthstoneLiteMixin:OnDecksHide()
+    self.newDeckPopup:Hide()
+    --self.decks.deckInfo:Hide()
+    self.background:SetAtlas(HearthstoneLite.Constants.DefaultBackground)
+end
+
+function HearthstoneLiteMixin:UpdateDeckBuilderDeckList()
+
+    for k, v in ipairs(self.decks.deckViewer.cards) do
+        v:Hide()
+    end
+    
+    local decks = SavedVars:GetDeck()
+    local list = {}
+    for _, deck in ipairs(decks) do
+        local _, name = GetClassInfo(deck.classID)
+        table.insert(list, {
+            label = "|cffffffff"..deck.name,
+            fontObject = GameFontNormalHuge,
+            showMask = true,
+            atlas = string.format("classicon-%s", name:lower():gsub(" ", "")),
+            backgroundAtlas = HearthstoneLite.Api.GetHeroAtlas(deck.classID, deck.specID),
+            backgroundAlpha = 0.4,
+            highlightAtlas = "heartofazeroth-list-item-highlight",
+            init = function(f)
+                NineSliceUtil.ApplyLayout(f, HearthstoneLite.Constants.NineSliceLayouts.DeckListviewItem)
+                f.background:SetTexCoord(0,1, 0.3, 0.7)
+                f.background:ClearAllPoints()
+                f.background:SetPoint("TOPLEFT", 2, -2)
+                f.background:SetPoint("BOTTOMRIGHT", -2, 2)
+                f.ring:SetVertexColor(RAID_CLASS_COLORS[name]:GetRGBA())
+                f.ring:SetDrawLayer("OVERLAY", 6)
+                f.selected:SetAtlas("heartofazeroth-list-item-selected")
+            end,
+            onMouseDown = function()
+                self:LoadDeck(deck)
+            end,
+            rightButton = {
+                offsetY = -8,
+                size = {20,20},
+                atlas = "common-icon-redx",
+                onClick = function()
+                    SavedVars:DeleteDeck(deck)
+                    HearthstoneLite.CallbackRegistry:TriggerEvent(HearthstoneLite.Callbacks.Deck_OnDeleted)
+                end,
+            }
+        })
+    end
+    self.decks.decksListview.scrollView:SetDataProvider(CreateDataProvider(list))
+    --self.decks.deckInfo.scrollView:SetDataProvider(CreateDataProvider({}))
+    --self.decks.deckHero.background:SetAtlas(nil)
+end
+
+function HearthstoneLiteMixin:UpdateDeckBuilderDeckInfo()
+    if self.decks.deckViewer.selectedDeck then
+        table.sort(self.decks.deckViewer.selectedDeck.cards, function(a, b)
+            if a.cost == b.cost then
+                return a.rarity > b.rarity;
+            else
+                return a.cost < b.cost
+            end
+        end)
+    
+        self.decks.deckInfoText.numCards:SetText(string.format("Cards: %d",#self.decks.deckViewer.selectedDeck.cards))
+        self.decks.deckInfo.scrollView:SetDataProvider(CreateDataProvider(self.decks.deckViewer.selectedDeck.cards))
+    end
+end
+
+function HearthstoneLiteMixin:LoadDeck(deck)
+
+    for k, v in ipairs(self.decks.deckViewer.cards) do
+        v:Hide()
+    end
+
+    self.decks.deckViewer.selectedDeck = deck
+
+    table.sort(deck.cards, function(a, b)
+        if a.cost == b.cost then
+            return a.rarity > b.rarity;
         else
-            self["card"..cardIndex]:Hide()
+            return a.cost < b.cost
         end
-        cardIndex = cardIndex + 1;
+    end)
+
+    local classCards = SavedVars:GetCollection(self.decks.deckViewer.selectedDeck.classID)
+    self.decks.deckViewer.set = classCards
+    self.decks.deckViewer.header:SetText(L.CLASS_CARDS)
+    self:DeckBuilderOnPageChanged()
+    
+    --self.fadeBackground:Play()
+    --self.background:SetAtlas(HearthstoneLite.Api.GetBackgroundForHero(deck.classID, deck.specID))
+
+    self.decks.deckInfoText.numCards:SetText(string.format("Cards: %d",#deck.cards))
+    self.decks.deckHero.background:SetAtlas(HearthstoneLite.Api.GetHeroAtlas(deck.classID, deck.specID))
+    self.decks.deckInfo.scrollView:SetDataProvider(CreateDataProvider(deck.cards))
+    self.decks.deckInfo:Show()
+
+end
+
+function HearthstoneLiteMixin:ResetDeckBuilderCardPositions()
+    for i = 1, 5 do
+        local card = self.decks.deckViewer.cards[i]
+        card:ClearAllPoints()
+        card:SetPoint("TOPLEFT", ((i-1) * 150) + 30, -30)
+    end
+    for i = 6, 10 do
+        local card = self.decks.deckViewer.cards[i]
+        card:ClearAllPoints()
+        card:SetPoint("TOPLEFT", ((i-6) * 150) + 30, -260)
     end
 end
 
+function HearthstoneLiteMixin:DeckBuilderOnPageChanged()
 
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
--- deck builder
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
+    self.decks.deckViewer.numPages = math.ceil(#self.decks.deckViewer.set / 10)
 
-DeckBuilderMixin = {}
-DeckBuilderMixin.ClassID = nil;
-DeckBuilderMixin.ClassFile = nil;
+    self.decks.deckViewer.pageLabel:SetText(string.format("%s / %s", self.decks.deckViewer.page, self.decks.deckViewer.numPages))
 
-function DeckBuilderMixin:OnLoad()
+    for k, v in ipairs(self.decks.deckViewer.cards) do
+        v:Hide()
+    end
 
-    fontSizeHack(self.menuPanel.selectClass, 26)
-    self.menuPanel.selectClass:SetText(L["SelectHero"])
+    local from, to = (self.decks.deckViewer.page * 10) - 9, (self.decks.deckViewer.page * 10);
+    local i = 1;
+    for k = from, to do
+        if self.decks.deckViewer.set[k] then
+            self.decks.deckViewer.cards[i]:CreateFromData(self.decks.deckViewer.set[k])
+            self.decks.deckViewer.cards[i]:Show()
+        end
+        i = i + 1;
+    end
+
+    PlaySound(SOUNDKIT.IG_QUEST_LIST_OPEN)
+end
+
+function HearthstoneLiteMixin:SetupDeckBuilder()
+
+    self.decks:SetScript("OnShow", function()
+        self:OnDecksShow()
+    end)
+    self.decks:SetScript("OnHide", function()
+        self:OnDecksHide()
+    end)
+
+    self.decks.newDeck:SetScript("OnClick", function(b)
+        self.newDeckPopup.newDeckNameInput:SetText("")
+        self.newDeckPopup:Show()
+    end)
+
+    self.decks.deckViewer.page = 1;
+
+    self.decks.deckViewer.header:SetText(L.NEUTRAL_CARDS)
+
+    self.decks.deckViewer.cards = {}
+    local deckBuilderFramePool = CreateFramePool("CheckButton", self.decks.deckViewer, "HslCard")
+    for i = 1, 5 do
+        local card = deckBuilderFramePool:Acquire()
+        card:SetPoint("TOPLEFT", ((i-1) * 150), -30)
+        card:SetLocation("deckBuilder")
+        card:SetDragEnabled()
+        card:SetPositionResetFunc(function()
+            card:ClearAllPoints()
+            card:SetParent(self.decks.deckViewer)
+            card:SetPoint("TOPLEFT", self.decks.deckViewer, "TOPLEFT", ((i-1) * 150), -30)
+        end)
+        table.insert(self.decks.deckViewer.cards, card)
+    end
+    for i = 6, 10 do
+        local card = deckBuilderFramePool:Acquire()
+        card:SetPoint("TOPLEFT", ((i-6) * 150), -260)
+        card:SetLocation("deckBuilder")
+        card:SetDragEnabled()
+        card:SetPositionResetFunc(function()
+            card:ClearAllPoints()
+            card:SetParent(self.decks.deckViewer)
+            card:SetPoint("TOPLEFT", self.decks.deckViewer, "TOPLEFT", ((i-6) * 150), -260)
+        end)
+        table.insert(self.decks.deckViewer.cards, card)
+    end
+
+    self.decks.deckViewer.page = 1;
+    
+    self.decks.deckViewer.next:SetNormalTexture(130866)
+    self.decks.deckViewer.next:SetPushedTexture(130865)
+    self.decks.deckViewer.next:SetScript("OnClick", function()
+        self.decks.deckViewer.page = self.decks.deckViewer.page + 1;
+        if self.decks.deckViewer.page > self.decks.deckViewer.numPages then
+            self.decks.deckViewer.page = self.decks.deckViewer.numPages;
+        end
+        self:DeckBuilderOnPageChanged()
+    end)
+    self.decks.deckViewer.previous:SetNormalTexture(130869)
+    self.decks.deckViewer.previous:SetPushedTexture(130868)
+    self.decks.deckViewer.previous:SetScript("OnClick", function()
+        self.decks.deckViewer.page = self.decks.deckViewer.page - 1;
+        if self.decks.deckViewer.page < 1 then
+            self.decks.deckViewer.page = 1;
+        end
+        self:DeckBuilderOnPageChanged()
+    end)
+
+
+    self.decks.deckViewer.classCards:SetScript("OnClick", function ()
+        if self.decks.deckViewer.selectedDeck then
+            local classCards = SavedVars:GetCollection(self.decks.deckViewer.selectedDeck.classID)
+            self.decks.deckViewer.set = classCards
+            self:DeckBuilderOnPageChanged()
+        end
+        self.decks.deckViewer.header:SetText(L.CLASS_CARDS)
+    end)
+
+    self.decks.deckViewer.neutralCards:SetScript("OnClick", function ()
+        local cards = SavedVars:GetCollection(-1)
+        self.decks.deckViewer.set = cards
+        self:DeckBuilderOnPageChanged()
+        self.decks.deckViewer.header:SetText(L.NEUTRAL_CARDS)
+    end)
+
+end
+
+function HearthstoneLiteMixin:SetupNewDeckDialog()
+
+    self.newDeckPopup.cancel:SetScript("OnClick", function()
+        self.newDeckPopup:Hide()
+    end)
+
+    self.newDeckPopup.header:SetText(NORMAL_FONT_COLOR:WrapTextInColorCode("Select Class"))
+    
+    local newDeckClassPool = CreateFramePool("BUTTON", self.newDeckPopup.classSelectContainer, "TBDCircleButtonTemplate")
+    local lastButton;
+    for i = 1, 5 do
+        local className, fileName, classID = GetClassInfo(i)
+        if className then
+            local classButton = newDeckClassPool:Acquire()
+            classButton:SetSize(80, 80)
+            classButton.border:SetVertexColor(RAID_CLASS_COLORS[fileName]:GetRGBA())
+            classButton.classID = i;
+            classButton:Init({
+                atlas = string.format("classicon-%s", fileName:lower():gsub(" ", "")),
+                label = className,
+            })
+            if i == 1 then
+                classButton:SetPoint("TOPLEFT", 44, 0)
+            else
+                classButton:SetPoint("LEFT", lastButton, "RIGHT")
+            end
+            classButton:Show()
+            lastButton = classButton;
+        end
+    end
+    local lastButton = nil;
+    for i = 6, 10 do
+        local className, fileName, classID = GetClassInfo(i)
+        if className then
+            local classButton = newDeckClassPool:Acquire()
+            classButton:SetSize(80, 80)
+            classButton.border:SetVertexColor(RAID_CLASS_COLORS[fileName]:GetRGBA())
+            classButton.classID = i;
+            classButton:Init({
+                atlas = string.format("classicon-%s", fileName:lower():gsub(" ", "")),
+                label = className,
+            })
+            if i == 6 then
+                classButton:SetPoint("TOPLEFT", 44, -100)
+            else
+                classButton:SetPoint("LEFT", lastButton, "RIGHT")
+            end
+            classButton:Show()
+            lastButton = classButton;
+        end
+    end
+    local lastButton = nil;
+    for i = 11, 13 do
+        local className, fileName, classID = GetClassInfo(i)
+        if className then
+            local classButton = newDeckClassPool:Acquire()
+            classButton:SetSize(80, 80)
+            classButton.border:SetVertexColor(RAID_CLASS_COLORS[fileName]:GetRGBA())
+            classButton.classID = i;
+            classButton:Init({
+                atlas = string.format("classicon-%s", fileName:lower():gsub(" ", "")),
+                label = className,
+            })
+            if i == 11 then
+                classButton:SetPoint("TOPLEFT", 124, -200)
+            else
+                classButton:SetPoint("LEFT", lastButton, "RIGHT")
+            end
+            classButton:Show()
+            lastButton = classButton;
+        end
+    end
+
+    local function clearHeroButtons()
+        for _, button in ipairs(self.newDeckPopup.heroSelectContainer.heroSelectButtons) do
+            button.border:SetAtlas("spec-thumbnailborder-off")
+            button.isSelected = false;
+        end
+    end
+
+    local function setHeroButton(button)
+        clearHeroButtons()
+        button.border:SetAtlas("spec-thumbnailborder-on")
+        button.isSelected = true
+    end
+
+    self.newDeckPopup.back:SetScript("OnClick", function ()
+        self.newDeckPopup.slideRight:Play()
+        self.newDeckPopup.back:SetAlpha(0)
+    end)
+
+    self.newDeckPopup.next:GetNormalTexture():SetRotation(3.14)
+
+    self.newDeckPopup:SetScript("OnHide", function ()
+        self.newDeckPopup.classSelectContainer:ClearAllPoints()
+        self.newDeckPopup.classSelectContainer:SetPoint("TOP", 0, -70)
+        self.newDeckPopup.classSelectContainer:SetAlpha(1)
+        self.newDeckPopup.heroSelectContainer:ClearAllPoints()
+        self.newDeckPopup.heroSelectContainer:SetPoint("TOP", 495, -70)
+
+        clearHeroButtons()
+    end)
+
+    self.newDeckPopup.slideLeft:SetScript("OnFinished", function ()
+        self.newDeckPopup.classSelectContainer:ClearAllPoints()
+        self.newDeckPopup.classSelectContainer:SetPoint("TOP", -495, -70)
+        self.newDeckPopup.heroSelectContainer:ClearAllPoints()
+        self.newDeckPopup.heroSelectContainer:SetPoint("TOP", 0, -70)
+
+        self.newDeckPopup.back:SetAlpha(1)
+        clearHeroButtons()
+
+        self.newDeckPopup.header:SetText(NORMAL_FONT_COLOR:WrapTextInColorCode("Select Hero"))
+    end)
+    self.newDeckPopup.slideRight:SetScript("OnFinished", function ()
+        self.newDeckPopup.classSelectContainer:ClearAllPoints()
+        self.newDeckPopup.classSelectContainer:SetPoint("TOP", 0, -70)
+        self.newDeckPopup.heroSelectContainer:ClearAllPoints()
+        self.newDeckPopup.heroSelectContainer:SetPoint("TOP", 495, -70)
+
+        for classButton in newDeckClassPool:EnumerateActive() do
+            classButton.selected:Hide()
+            classButton.isSelected = false;
+        end
+        clearHeroButtons()
+
+        self.newDeckPopup.header:SetText(NORMAL_FONT_COLOR:WrapTextInColorCode("Select Class"))
+    end)
+
+    for _, button in ipairs(self.newDeckPopup.heroSelectContainer.heroSelectButtons) do
+        button:SetScript("OnClick", setHeroButton)
+    end
+
+    local function setClassButton(button)
+        for classButton in newDeckClassPool:EnumerateActive() do
+            classButton.selected:Hide()
+            classButton.isSelected = false;
+        end
+        button.selected:Show()
+        button.isSelected = true;
+        self.newDeckPopup.slideLeft:Play()
+
+        for _, button in ipairs(self.newDeckPopup.heroSelectContainer.heroSelectButtons) do
+            button:Hide()
+        end
+
+        local _, className = GetClassInfo(button.classID)
+        local numSpecs = GetNumSpecializationsForClassID(button.classID)
+        for i = 1, numSpecs do
+            local id, specName, description, icon, role, isRecommended, isAllowed = GetSpecializationInfoForClassID(button.classID, i)
+            --print(specName)
+            if self.newDeckPopup.heroSelectContainer["spec"..i] then
+                self.newDeckPopup.heroSelectContainer["spec"..i].background:SetAtlas(string.format("spec-thumbnail-%s-%s", className:gsub(" ", ""):lower(), specName:gsub(" ", ""):lower()))
+                self.newDeckPopup.heroSelectContainer["spec"..i]:Show()
+            end
+        end
+    end
+
+    for classButton in newDeckClassPool:EnumerateActive() do
+        classButton:SetScript("OnMouseDown", setClassButton)
+    end
+
+
+--    self.newDeckPopup.accept:SetEnabled(false)
+    self.newDeckPopup.accept:SetScript("OnClick", function()
+        local classSelected;
+        for classButton in newDeckClassPool:EnumerateActive() do
+            if classButton.isSelected then
+                classSelected = classButton.classID
+            end
+        end
+        local heroSelected;
+        for specID, button in ipairs(self.newDeckPopup.heroSelectContainer.heroSelectButtons) do
+            if button.isSelected then
+                heroSelected = specID;
+            end
+        end
+        local deckName = self.newDeckPopup.newDeckNameInput:GetText()
+        if classSelected and (#deckName > 0) and heroSelected then
+            HearthstoneLite.CallbackRegistry:TriggerEvent(HearthstoneLite.Callbacks.Deck_OnCreated, classSelected, heroSelected, deckName)
+        end
+    end)
+end
+
+
+
+
+
+
+
+
+
+
+
+function HearthstoneLiteMixin:CollectionBinderOnPageChanged()
+    
+    for k, v in ipairs(self.collection.cardBinderContainer.cards) do
+        v:Hide()
+    end
+
+    for i = 1, 12 do
+        local card = self.collection.cardBinderContainer.cards[i]
+        card:ClearAllPoints()
+        card:SetPoint("TOPLEFT")
+    end
+
+    if not self.collection.cardBinderContainer.set then
+        return
+    end
+
+    self.collection.cardBinderContainer.numPages = math.ceil(#self.collection.cardBinderContainer.set / 12)
+
+    self.collection.cardBinderContainer.pageLabel:SetText(string.format("%s / %s", self.collection.cardBinderContainer.page, self.collection.cardBinderContainer.numPages))
+
+    local from, to = (self.collection.cardBinderContainer.page * 12) - 11, (self.collection.cardBinderContainer.page * 12);
+    local i = 1;
+    for k = from, to do
+        if self.collection.cardBinderContainer.set[k] then
+            self.collection.cardBinderContainer.cards[i]:CreateFromData(self.collection.cardBinderContainer.set[k])
+            self.collection.cardBinderContainer.cards[i]:Show()
+        end
+        i = i + 1;
+    end
+
+    self.collection.cardBinderContainer.anim:Play()
+
+    PlaySound(SOUNDKIT.IG_QUEST_LIST_OPEN)
+end
+
+
+function HearthstoneLiteMixin:SetupCollectionTab()
+    
+    -- self.collection.cardBinderContainer.cards = {}
+    -- local collectionFramePool = CreateFramePool("FRAME", self.collection.cardBinderContainer, "HslCard")
+    -- for i = 1, 6 do
+    --     local card = collectionFramePool:Acquire()
+    --     card:SetPoint("TOPLEFT", ((i-1) * 150) + 40, -30)
+    --     table.insert(self.collection.cardBinderContainer.cards, card)
+    -- end
+    -- for i = 7, 12 do
+    --     local card = collectionFramePool:Acquire()
+    --     card:SetPoint("TOPLEFT", ((i-7) * 150) + 40, -260)
+    --     card:Hide()
+    --     table.insert(self.collection.cardBinderContainer.cards, card)
+    -- end
+
+    self.collection.cardBinderContainer.anim:SetScript("OnFinished", function()
+        for i = 1, 6 do
+            local card = self.collection.cardBinderContainer.cards[i]
+            card:ClearAllPoints()
+            card:SetPoint("TOPLEFT", ((i-1) * 150) + 40, -30)
+        end
+        for i = 7, 12 do
+            local card = self.collection.cardBinderContainer.cards[i]
+            card:ClearAllPoints()
+            card:SetPoint("TOPLEFT", ((i-7) * 150) + 40, -260)
+        end
+    end)
 
     for i = 1, GetNumClasses() do
-        local className, classFile, classID = GetClassInfo(i)
-        if self.menuPanel[classFile:lower()] then
-            self.menuPanel[classFile:lower()]:SetBackground_Atlas(string.format("classicon-%s", classFile:lower()))
-            self.menuPanel[classFile:lower()].func = function()
-                classButton_Clicked(self.menuPanel[classFile:lower()])
-            end
-        end
-    end
+        local name, className, classID = GetClassInfo(i)
+        self.collection.classFilterList.DataProvider:Insert({
+            label = name,
+            showMask = true,
+            atlas = string.format("classicon-%s", className:lower():gsub(" ", "")),
+            backgroundAtlas = "heartofazeroth-list-item",
+            highlightAtlas = "heartofazeroth-list-item-highlight",
+            init = function(f)
+                f.ring:SetVertexColor(RAID_CLASS_COLORS[className]:GetRGBA())
+                f.selected:SetAtlas("heartofazeroth-list-item-selected")
+            end,
+            onMouseUp = function(f, button)
+                local collection;
+                if button == "RightButton" then
+                    collection = SavedVars:GetCollection()
+                    f.selected:Hide()
+                else
+                    collection = SavedVars:GetCollection(classID)
+                end
 
-    self.menuPanel.listviewHeader:SetSize(240, 40)
-    self.menuPanel.listviewHeader:SetText(L["SelectDeck"], 20)
-
-    HybridScrollFrame_CreateButtons(self.menuPanel.listview, "HslDeckListviewItem", -10, 0, "TOP", "TOP", 0, -1, "TOP", "BOTTOM")
-    HybridScrollFrame_SetDoNotHideScrollBar(self.menuPanel.listview, true)
-
-    self.cardViewer.showClass:Resize(40,40)
-    self.cardViewer.showClass.func = function()
-        if self.classFile then
-            self:LoadCards(HSL.collection[self.classFile:lower()]);
-        end
-    end
-    self.cardViewer.showNeutral:Resize(40,40)
-    self.cardViewer.showNeutral:SetBackground_Atlas("GarrMission_ClassIcon-Warrior-Protection")
-    self.cardViewer.showNeutral.func = function()
-        self:LoadCards(HSL.collection.neutral);
-    end
-
-    self.cardViewer.page = 1;
-
-    -- flip the next page arrow 180
-    self.cardViewer.nextPage.Background:SetRotation(3.14)
-    self.cardViewer.nextPage.Highlight:SetRotation(3.14)
-
-    fontSizeHack(self.cardViewer.pageNumber, 32)
-
-    HybridScrollFrame_CreateButtons(self.deckViewer.listview, "HslCardListviewItem", -5, 0, "TOP", "TOP", 0, 0, "TOP", "BOTTOM")
-    HybridScrollFrame_SetDoNotHideScrollBar(self.deckViewer.listview, true)
-
-end
-
-function DeckBuilderMixin:OnShow()
-
-    -- deck open
-    --PlaySound(1068314)
-
-    self.selectHeroHelptip.Text:SetText(L["SelectHeroHelptip"])
-    self.selectHeroHelptip:Show()
-    table.insert(helptips, self.selectHeroHelptip)
-
-    self.cardViewer.deckEditingHelptip.Text:SetText(L["DeckEditingHelptip"])
-    self.cardViewer.deckEditingHelptip:Show()
-    table.insert(helptips, self.cardViewer.deckEditingHelptip)
-
-    self.deckViewer.deckEditingHelptip_Popout.Text:SetText(L["DeckEditingHelptipPopout"])
-    self.deckViewer.deckEditingHelptip_Popout:Show()
-    table.insert(helptips, self.deckViewer.deckEditingHelptip_Popout)
-
-    self.cardViewer.cardToggleHelptip.Text:SetText(L["ClassToggleHelptip"])
-    self.cardViewer.cardToggleHelptip:SetSize(200, 40)
-    self.cardViewer.cardToggleHelptip:Show()
-    table.insert(helptips, self.cardViewer.cardToggleHelptip)
-
-    deckViewerMenuPanelListview_Update(nil)
-
-    HearthstoneLite.deckBuilder:HideCards()
-
-    self.deckViewer:Hide()
-
-end
-
-function DeckBuilderMixin:GetClassInfo()
-    if self.classFile and self.classID then
-        return { classFile = self.classFile, classID = self.classID }
-    end
-end
-
-function DeckBuilderMixin:NextPage()
-    if not self.deck then
-        return;
-    end
-
-    if self.cardViewer.page == math.ceil(#self.deck / 8) then
-        return;
-    end
-    self.cardViewer.page = self.cardViewer.page + 1;
-    self.cardViewer.pageNumber:SetText(self.cardViewer.page..' / '..math.ceil(#self.deck / 8));
-
-    local cardIndex = 1;
-
-    for i = ((8 * self.cardViewer.page) - 7), (8 * self.cardViewer.page) do
-        if self.deck[i] then
-            self.cardViewer["card"..cardIndex]:LoadCard(self.deck[i])
-        else
-            self.cardViewer["card"..cardIndex]:Hide()
-        end
-        cardIndex = cardIndex + 1;
-    end
-end
-
-function DeckBuilderMixin:PrevPage()
-    if not self.deck then
-        return;
-    end
-    if self.cardViewer.page == 1 then
-        return
-    end
-    self.cardViewer.page = self.cardViewer.page - 1;
-    self.cardViewer.pageNumber:SetText(self.cardViewer.page..' / '..math.ceil(#self.deck / 8));
-
-    local cardIndex = 1;
-    for i = ((8 * self.cardViewer.page) - 7), (8 * self.cardViewer.page) do
-        if self.deck[i] then
-            self.cardViewer["card"..cardIndex]:LoadCard(self.deck[i])
-        else
-            self.cardViewer["card"..cardIndex]:Hide()
-        end
-        cardIndex = cardIndex + 1;
-    end
-end
-
-function DeckBuilderMixin:HideCards()
-    for i = 1, 8 do
-        if self.cardViewer["card"..i] then
-            self.cardViewer["card"..i]:Hide()
-        end
-    end
-end
-
-function DeckBuilderMixin:LoadCards(deck)
-
-    if not deck then
-        return
-    end
-    if deck then
-        self.deck = deck
-        self.cardViewer.page = 1;
-        self.cardViewer.pageNumber:SetText(self.cardViewer.page..' / '..math.ceil(#self.deck / 8));
-
-        for i = 1, 8 do
-            self.cardViewer["card"..i]:Hide()
-        end
-
-        for i = 1, 8 do
-            if self.deck[i] then
-                self.cardViewer["card"..i]:LoadCard(self.deck[i])
-            end
-        end
-    end
-
-    --deckViewerPopoutListview_Update(deck)
-end
-
-function DeckBuilderMixin:AddCard(card)
-    if not HSL then
-        return;
-    end
-    if not HSL.decks[self.classID] then
-        return;
-    end
-    if HSL.decks and card then
-        for _, deck in ipairs(HSL.decks[self.classID]) do
-            if deck.id == self.deckID then
-                -- card is the HSL.collection[class] item
-                -- update the saved var table and pass back into the hybrid scroll update func
-                table.insert(deck.cards, card)
-                deckViewerPopoutListview_Update(deck.cards)
-                return;
-            end
-        end
-    end
-end
-
-function DeckBuilderMixin:RemoveCard(card)
-    if not HSL then
-        return;
-    end
-    local cardIndex = nil;
-    if HSL.decks and card then
-        for _, deck in ipairs(HSL.decks[self.classID]) do
-            if deck.id == self.deckID then
-                for k, v in ipairs(deck.cards) do
-                    -- since we are in the correct deck we can use the card name as uniqueness
-                    -- if the card count is greater than 1 then we simple remove the card with
-                    -- highest key this means only 1 card is removed
-                    if v.name == card.name then
-                        cardIndex = k;
+                table.sort(collection, function (a, b)
+                    if a.rarity == b.rarity then
+                        return a.classID < b.classID
+                    else
+                        return a.rarity > b.rarity
                     end
-                end
-                if cardIndex then
-                    -- update the saved var table and pass back into the hybrid scroll update func
-                    table.remove(deck.cards, cardIndex)
-                    deckViewerPopoutListview_Update(deck.cards)
-                    return;
-                end
+                end)
+        
+                self.collection.cardBinderContainer.set = collection
+                self:CollectionBinderOnPageChanged()
             end
+        })
+    end
+
+    self.collection.cardBinderContainer.page = 1;
+    self.collection.cardBinderContainer.numPages = 1;
+
+    self.collection.cardBinderContainer.next:SetNormalTexture(130866)
+    self.collection.cardBinderContainer.next:SetPushedTexture(130865)
+    self.collection.cardBinderContainer.next:SetScript("OnClick", function()
+        self.collection.cardBinderContainer.page = self.collection.cardBinderContainer.page + 1;
+        if self.collection.cardBinderContainer.page > self.collection.cardBinderContainer.numPages then
+            self.collection.cardBinderContainer.page = self.collection.cardBinderContainer.numPages;
+        else
+            self:CollectionBinderOnPageChanged()
         end
-    end
+    end)
+    self.collection.cardBinderContainer.previous:SetNormalTexture(130869)
+    self.collection.cardBinderContainer.previous:SetPushedTexture(130868)
+    self.collection.cardBinderContainer.previous:SetScript("OnClick", function()
+        self.collection.cardBinderContainer.page = self.collection.cardBinderContainer.page - 1;
+        if self.collection.cardBinderContainer.page < 1 then
+            self.collection.cardBinderContainer.page = 1;
+        else
+            self:CollectionBinderOnPageChanged()
+        end
+    end)
+
+    self.collection:SetScript("OnShow", function()
+
+        for i = 1, 12 do
+            local card = self.collection.cardBinderContainer.cards[i]
+            card:ClearAllPoints()
+            card:SetPoint("TOPLEFT")
+        end
+    
+        local collection = SavedVars:GetCollection()
+
+        table.sort(collection, function (a, b)
+            if a.rarity == b.rarity then
+                return a.classID < b.classID
+            else
+                return a.rarity > b.rarity
+            end
+        end)
+
+        self.collection.cardBinderContainer.set = collection
+        self:CollectionBinderOnPageChanged()
+    end)
+
 end
 
 
--- TODO:
--- this is using an old system to hold the class ID
--- update this to just use the DeckBuilderMixin
-HslNewDeckMixin = {}
 
-function HslNewDeckMixin:OnMouseDown()
-    if self.classID > 0 then
-        StaticPopup_Show("HslNewDeck", self.className, nil, {ClassID = self.classID, Icon = self.classIcon, callback = deckViewerMenuPanelListview_Update})
+
+
+
+
+
+
+
+function HearthstoneLiteMixin:UpdateGameLobbyInfo(isConnected, channelID)
+    
+    if isConnected then
+        self.game.lobby.info:SetText(string.format("Connected [channel %d]", channelID))
+
+        ChatFrame_AddChannel(DEFAULT_CHAT_FRAME, CHAT_CHANNEL_NAME);
+
+        local channels = {GetChannelList()}
+        for i = 1, #channels, 3 do
+            local id, name, disabled = channels[i], channels[i+1], channels[i+2]
+            print(id, name, disabled)
+        end
+
+        --ListChannelByName(channelID)
+        local name, header, collapsed, channelNumber, count, active, category, voiceEnabled, voiceActive = GetChannelDisplayInfo(channelID)
+        print(name, channelNumber, count)
+
+        ChatFrame_RemoveChannel(DEFAULT_CHAT_FRAME, CHAT_CHANNEL_NAME)
+
+        for i = 1, 5 do
+            local name, owner, moderator, guid = C_ChatInfo.GetChannelRosterInfo(channelID, i)
+            --print(name, owner, moderator, guid)
+        end
+    else
+        self.game.lobby.info:SetText("Not connected")
     end
+
 end
 
 
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
--- init
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
-local function init()
-    local version = GetAddOnMetadata(addonName, "Version")
-    printInfoMessage("v"..version..L["WelcomeMessage"])
+function HearthstoneLiteMixin:SetupGame()
+    --JoinChannelByName(CHAT_CHANNEL_NAME, CHAT_CHANNEL_PASSWORD, nil, false);
+    --JoinTemporaryChannel(CHAT_CHANNEL_NAME, CHAT_CHANNEL_PASSWORD, nil, false);
+    --LeaveChannelByName(CHAT_CHANNEL_NAME)
 
-    hsl.gameBoard_init()
+    --by default you should not be joined
+    --LeaveChannelByName(CHAT_CHANNEL_NAME)
+
+    --HearthstoneLite.CallbackRegistry:TriggerEvent(HearthstoneLite.Callbacks.Comms_OnPokesEnabled, false)
+
+    self.game.matchMakerContainer.header:SetText(NORMAL_FONT_COLOR:WrapTextInColorCode("Create Match"))
+
+    self.game.board.playerContainer:SetHeight(self.game.board:GetHeight() * 0.6)
+    self.game.board.playerContainer.background:SetAtlas("talents-background-druid-balance")
+    self.game.board.targetContainer:SetHeight(self.game.board:GetHeight() * 0.4)
+    self.game.board.targetContainer.background:SetAtlas("_GarrMissionLocation-Gorgrond-Mid")
+
+
+    self.game.playerControls.createMatch:SetScript("OnClick", function ()
+        self.game.matchMakerContainer:Show()
+    end)
+
+    self.game.matchMakerContainer:SetScript("OnShow", function ()
+        local decks = SavedVars:GetDeck()
+        local list = {}
+        for _, deck in ipairs(decks) do
+            local _, name = GetClassInfo(deck.classID)
+            table.insert(list, {
+                label = "|cffffffff"..deck.name,
+                fontObject = GameFontNormalHuge,
+                showMask = true,
+                atlas = string.format("classicon-%s", name:lower():gsub(" ", "")),
+                backgroundAtlas = HearthstoneLite.Api.GetHeroAtlas(deck.classID, deck.specID),
+                backgroundAlpha = 0.4,
+                highlightAtlas = "heartofazeroth-list-item-highlight",
+                init = function(f)
+                    NineSliceUtil.ApplyLayout(f, HearthstoneLite.Constants.NineSliceLayouts.DeckListviewItem)
+                    f.background:SetTexCoord(0,1, 0.3, 0.7)
+                    f.background:ClearAllPoints()
+                    f.background:SetPoint("TOPLEFT", 2, -2)
+                    f.background:SetPoint("BOTTOMRIGHT", -2, 2)
+                    f.ring:SetVertexColor(RAID_CLASS_COLORS[name]:GetRGBA())
+                    f.ring:SetDrawLayer("OVERLAY", 6)
+                    f.selected:SetAtlas("heartofazeroth-list-item-selected")
+                end,
+                onMouseDown = function()
+                    self.game.matchMakerContainer.selectedDeck = deck;
+                end,
+            })
+        end
+        self.game.matchMakerContainer.selectDeck.scrollView:SetDataProvider(CreateDataProvider(list))
+        self.game.matchMakerContainer.selectedDeck = nil;
+        self.game.matchMakerContainer.opponentOptions:SetAlpha(1)
+    end)
+
+    self.game.matchMakerContainer:SetScript("OnHide", function ()
+        self.game.matchMakerContainer.selectDeck.scrollView:ForEachFrame(function(f, d)
+            f.selected:Hide()
+        end)
+        self.game.matchMakerContainer.matchCreationInfo:Hide()
+    end)
+
+    self.game.matchMakerContainer.opponentOptions.practice:SetScript("OnClick", function ()
+        if self.game.matchMakerContainer.selectedDeck then
+            self:CreatePracticeMatch(self.game.matchMakerContainer.selectedDeck)
+        end
+    end)
+
+    self.game.matchMakerContainer.matchCreationInfo:SetScript("OnShow", function ()
+        self.game.matchMakerContainer.matchCreationInfo.startCreationAnim:Play()
+    end)
+
+    self.game.matchMakerContainer.matchCreationInfo:SetScript("OnHide", function ()
+        self.game.matchMakerContainer.matchCreationInfo.startCreation:SetAlpha(0)
+        self.game.matchMakerContainer.matchCreationInfo.opponentFound:SetAlpha(0)
+        self.game.matchMakerContainer.matchCreationInfo.deckConfirmation:SetAlpha(0)
+    end)
+
+    self.game.matchMakerContainer.opponentOptions.fadeOut:SetScript("OnFinished", function ()
+        self.game.matchMakerContainer.matchCreationInfo:Show()
+    end)
+
+end
+
+function HearthstoneLiteMixin:CreatePracticeMatch(deck)
+    self.game.matchMakerContainer.opponentOptions.fadeOut:Play()
+
+    self.game.playerControls.deck = deck
+    
+    C_Timer.After(1.5, function ()
+        self.game.matchMakerContainer.matchCreationInfo.opponentFoundAnim:Play()
+    end)
+
+    C_Timer.After(3.0, function ()
+        self.game.matchMakerContainer.matchCreationInfo.deckConfirmationAnim:Play()
+    end)
+
+end
+
+function HearthstoneLiteMixin:Comms_OnPokeResponse(data)
+    self.game.lobby.membersList.DataProvider:Insert({
+        label = data.target,
+    })
 end
 
 
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
--- event frame
---+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
-local e = CreateFrame("FRAME")
-e:RegisterEvent("ADDON_LOADED")
-e:RegisterEvent("LOOT_OPENED")
-e:SetScript("OnEvent", function(self, event, ...)
-    if event == "ADDON_LOADED" and select(1, ...):lower() == "hearthstonelite" then
-        init()
-    end
-    if event == "LOOT_OPENED" then
-        lootOpened()
-    end
-end)
+
+
+
+
+
 
 
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 -- hyperlinks
 --+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--
 
-local hyperlinkCard = CreateFrame("FRAME", "HearthstoneLiteHyperlinkCardTip", UIParent, "HslCard")
+
+local hyperlinkCard = CreateFrame("CheckButton", "HearthstoneLiteHyperlinkCardTip", UIParent, "HslCard")
 hyperlinkCard:SetPoint("CENTER", 0, 0)
 hyperlinkCard:Hide()
 -- add a close button
@@ -988,20 +949,17 @@ end)
 
 
 local function parseCardHyperlink(link, showCard)
-    local linkType, addon, _art, _class, _id, _name, _health, _attack, _ability, _power, _battlecry, _deathrattle, _cost, _backgroundPath, _background, _atlas, _rarity = strsplit("?", link)
+    local linkType, addon, _art, _class, _id, _name, _health, _attack, _ability, _power, _cost, _backgroundPath, _background, _atlas, _rarity = strsplit("?", link)
     if _name and showCard then
         hyperlinkCard:Hide()
-        hyperlinkCard:LoadCard({
+        hyperlinkCard:CreateFromData({
             art = tonumber(_art),
             name = _name,
             class = _class,
-            id = tonumber(_id),
             health = tonumber(_health),
             attack = tonumber(_attack),
             ability = tonumber(_ability),
             power = tonumber(_power),
-            battlecry = tonumber(_battlecry),
-            deathrattle = tonumber(_deathrattle),
             cost = tonumber(_cost),
             backgroundPath = _backgroundPath,
             background = tonumber(_background),
